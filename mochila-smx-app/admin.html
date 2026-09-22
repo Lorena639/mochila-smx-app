@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Editar · Mochila SMX</title>
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="manifest" href="manifest-admin.webmanifest">
+  <link rel="icon" href="img/favicon.png">
+  <link rel="apple-touch-icon" href="img/icono-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+  <!-- PASO 1: iniciar sesión con tu token de GitHub -->
+  <main class="acceso" id="pasoLogin">
+    <div class="acceso-caja">
+      <img class="logo" src="img/logo-digitech.png" alt="Digitech">
+      <h1>Modo edición</h1>
+      <p>Solo tú puedes editar. Inicia sesión con tu token de GitHub.</p>
+      <form id="formLogin">
+        <div class="campo" id="campoRepo">
+          <label for="repo">Repositorio (usuario/repositorio)</label>
+          <input id="repo" placeholder="Lorena639/mochila-smx" autocomplete="off">
+        </div>
+        <div class="campo">
+          <label for="token">Token de GitHub</label>
+          <input id="token" type="password" required autocomplete="off" placeholder="github_pat_…">
+        </div>
+        <label class="check"><input type="checkbox" id="recordar"> Recordar en este ordenador</label>
+        <p class="error" id="errorLogin" role="alert"></p>
+        <button class="boton principal" type="submit" id="botonLogin">Iniciar sesión</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- PASO 2: contraseña de la web (o crearla la primera vez) -->
+  <main class="acceso" id="pasoPassword" hidden>
+    <div class="acceso-caja">
+      <img class="logo" src="img/logo-digitech.png" alt="Digitech">
+      <h1 id="tituloPassword">Contraseña de la web</h1>
+      <p id="textoPassword">La misma que le das a tu profe.</p>
+      <form id="formPassword">
+        <div class="campo">
+          <label for="pass1">Contraseña</label>
+          <input id="pass1" type="password" required autocomplete="current-password">
+        </div>
+        <div class="campo" id="campoPass2" hidden>
+          <label for="pass2">Repite la contraseña</label>
+          <input id="pass2" type="password" autocomplete="new-password">
+          <span class="ayuda">Mínimo 8 caracteres. Si la olvidas, no se pueden recuperar los datos.</span>
+        </div>
+        <p class="error" id="errorPassword" role="alert"></p>
+        <button class="boton principal" type="submit" id="botonPassword">Entrar</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- PASO 3: la web, con los botones de edición -->
+  <div id="app" hidden></div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
