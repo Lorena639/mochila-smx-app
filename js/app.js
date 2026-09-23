@@ -33,8 +33,16 @@ async function abrir(password) {
   throw e;
 }
 
+// Dispositivo vinculado (o con el token guardado): con la contraseña principal se entra como admin
+const puedeSerAdmin = () => { try { return Boolean(localStorage.getItem("mochila-vinculo") || localStorage.getItem("mochila-token")); } catch { return false; } };
+
 async function entrar(password) {
   const { grupo, secciones, claves, datos } = await abrir(password);
+  if (!grupo && puedeSerAdmin()) {
+    try { sessionStorage.setItem("mochila-pass-auto", password); } catch {}
+    location.href = "admin.html";
+    return;
+  }
   sesion.set(CLAVE_SESION, password);
   $("#pantallaAcceso").hidden = true;
   // Primera vez en este dispositivo: "crear cuenta" (solo nombre; el rol lo pone el grupo)

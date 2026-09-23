@@ -6,7 +6,7 @@
 //  - Datos (data/): siempre se piden nuevos; si no hay internet,
 //    se usa la última copia guardada (sigue cifrada).
 // =============================================================
-const VERSION = "mochila-v8";
+const VERSION = "mochila-v10";
 const ARCHIVOS = [
   "./", "index.html", "css/estilos.css", "css/app.css",
   "js/app.js", "js/nucleo.js", "js/comun.js", "js/vistas.js", "js/iconos.js",

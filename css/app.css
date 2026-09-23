@@ -358,7 +358,9 @@ textarea.codigo { font-family: var(--f-mono) !important; font-size: 13.5px; line
 .de-dia header { display: flex; gap: 8px; align-items: center; }
 .de-dia header b { flex: 1; }
 .de-dia p { margin: 6px 0 0; }
-.rejilla-ajustes { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+/* Ajustes: columnas tipo "masonry" (cada tarjeta se coloca debajo de la anterior, sin huecos) */
+.rejilla-ajustes { columns: 3 320px; column-gap: 18px; }
+.rejilla-ajustes > * { break-inside: avoid; display: block; width: 100%; margin: 0 0 18px !important; }
 
 /* 10. Editor de texto ------------------------------------------- */
 .modal { max-width: min(860px, calc(100% - 24px)); }
@@ -508,8 +510,8 @@ textarea.codigo { font-family: var(--f-mono) !important; font-size: 13.5px; line
 .tabla-herr.editable input { width: 100%; min-width: 70px; border: 1px solid var(--linea); border-radius: 8px; padding: 6px 8px; background: var(--superficie); color: var(--tinta); font: inherit; }
 .tabla-herr.chmod td, .tabla-herr.chmod th { text-align: center; }
 .tabla-herr.chmod td:first-child { text-align: left; }
-.casilla { width: 40px; height: 36px; border-radius: 8px; border: 1px solid var(--linea); background: var(--superficie-2); font-family: var(--f-mono); font-weight: 700; color: var(--suave); cursor: pointer; }
-.casilla.on { background: var(--acento); border-color: var(--acento); color: var(--acento-tinta); }
+.casilla-bit { width: 40px; height: 36px; border-radius: 8px; border: 1px solid var(--linea); background: var(--superficie-2); font-family: var(--f-mono); font-weight: 700; color: var(--suave); cursor: pointer; }
+.casilla-bit.on { background: var(--acento); border-color: var(--acento); color: var(--acento-tinta); }
 .copiable { position: relative; margin-top: 14px; }
 .copiable textarea, .copiable input { width: 100%; padding-right: 90px; }
 .copiable .boton { position: absolute; top: 8px; right: 8px; }
@@ -542,3 +544,5 @@ textarea.codigo { font-family: var(--f-mono) !important; font-size: 13.5px; line
 @media (max-width: 600px) { .pin { grid-template-columns: 30px 14px 1fr; } .pin .pin-uso { display: none; } .copiable .boton { position: static; margin-top: 6px; } .copiable textarea, .copiable input { padding-right: 12px; } }
 .mensaje.hilo .form-inline { align-self: stretch; display: flex; gap: 8px; }
 .mensaje.hilo .form-inline input[name=texto] { flex: 1; min-width: 0; }
+.qr-vincular { display: grid; place-items: center; background: #fff; border-radius: 14px; padding: 12px; margin: 14px auto; width: min(280px, 100%); aspect-ratio: 1; }
+.qr-vincular svg { width: 100%; height: 100%; }

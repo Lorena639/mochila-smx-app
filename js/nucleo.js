@@ -594,6 +594,7 @@ export function iniciar(raiz, ctx) {
     }
     if (acc === "perfil") return editar("config");
     if (acc === "password") return ctx.cambiarPassword?.();
+    if (acc === "vincular") return ctx.vincular?.();
     if (acc === "grupos") return ctx.abrirGrupos?.().then((cambiado) => { if (cambiado) pintar(true); });
     if (acc === "exportar") return exportar(ds.col, ds.id, ds.formato);
     if (ds.fichar) return ficharAhora(ds.fichar);

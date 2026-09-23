@@ -28,7 +28,7 @@ function htmlChmod(e) {
   const texto = (n) => [n & 4 && "leer", n & 2 && "escribir", n & 1 && "ejecutar"].filter(Boolean).join(", ") || "nada";
   return `<section class="panel"><div class="panel-titulo"><h2>${icono("candado")} Calculadora chmod</h2></div>
     <div class="tabla-scroll"><table class="tabla-herr chmod"><thead><tr><th></th>${permisos.map(([, l, v]) => `<th>${l} (${v})</th>`).join("")}<th>Número</th></tr></thead><tbody>
-      ${quien.map(([l, i]) => { const d = Number(r.octal[i]); return `<tr><td>${l}</td>${permisos.map(([p, , v]) => `<td><button type="button" class="casilla ${d & v ? "on" : ""}" data-accion="herr-chmod-bit" data-pos="${i}" data-valor="${v}" aria-pressed="${Boolean(d & v)}">${d & v ? p : "–"}</button></td>`).join("")}<td class="mono"><b>${d}</b></td></tr>`; }).join("")}
+      ${quien.map(([l, i]) => { const d = Number(r.octal[i]); return `<tr><td>${l}</td>${permisos.map(([p, , v]) => `<td><button type="button" class="casilla-bit ${d & v ? "on" : ""}" data-accion="herr-chmod-bit" data-pos="${i}" data-valor="${v}" aria-pressed="${Boolean(d & v)}">${d & v ? p : "–"}</button></td>`).join("")}<td class="mono"><b>${d}</b></td></tr>`; }).join("")}
     </tbody></table></div>
     <div class="rejilla-form">
       <div class="campo"><label for="chO">Número (octal)</label><input id="chO" class="mono" data-herr="chmod" value="${esc(t.chmod ?? r.octal)}" maxlength="4" inputmode="numeric"></div>

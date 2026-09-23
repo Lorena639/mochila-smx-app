@@ -70,7 +70,10 @@ export class GitHub {
   async leer(ruta) {
     try {
       const f = await this.peticion(`/repos/${this.usuario}/${this.repo}/contents/${ruta}?ref=${this.rama}`);
-      return { texto: deBase64(f.content), sha: f.sha };
+      let b64 = f.content || "";
+      // Archivos de más de 1 MB: GitHub no manda el contenido aquí, hay que pedir el "blob"
+      if (!b64 && f.size > 0) b64 = (await this.peticion(`/repos/${this.usuario}/${this.repo}/git/blobs/${f.sha}`)).content || "";
+      return { texto: deBase64(b64), sha: f.sha };
     } catch (e) {
       if (e.status === 404) return null;
       throw e;

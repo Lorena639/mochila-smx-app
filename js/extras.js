@@ -151,7 +151,9 @@ export function vistaAjustes(e) {
         <div class="fila-botones"><button class="boton" type="button" data-accion="copia-descargar">${icono("descargar")} Descargar copia</button>
           <label class="boton">${icono("subir")} Restaurar copia<input type="file" accept=".json,application/json" hidden data-restaurar></label></div></section>
       <section class="panel"><div class="panel-titulo"><h2>${icono("candado")} Seguridad</h2></div>
-        <div class="fila-botones"><button class="boton" type="button" data-accion="password">Cambiar contraseña principal</button>
+        <p class="texto-suave">Para entrar como admin desde el móvil solo con tu contraseña, vincúlalo una vez.</p>
+        <div class="fila-botones"><button class="boton principal" type="button" data-accion="vincular">Vincular un móvil</button>
+          <button class="boton" type="button" data-accion="password">Cambiar contraseña principal</button>
           <button class="boton" type="button" data-accion="salir">Cerrar sesión</button></div></section>
     </div>`;
 }

@@ -23,6 +23,8 @@ const $ = (s) => document.querySelector(s);
 const CLAVE_TOKEN = "mochila-token";
 const CLAVE_REPO = "mochila-repo";
 const CLAVE_COPIA = "mochila-copia"; // copia cifrada de cambios aún no subidos
+const CLAVE_VINCULO = "mochila-vinculo"; // token cifrado con tu contraseña (dispositivo vinculado)
+const CLAVE_AUTO = "mochila-pass-auto";  // contraseña que pasa la app al entrar como admin (solo esta pestaña)
 
 let gh = null;          // conexión con GitHub
 let sha = null;         // versión actual del archivo de datos en GitHub
@@ -37,6 +39,46 @@ const guardado = {
   borrar(k) { try { sessionStorage.removeItem(k); localStorage.removeItem(k); } catch {} },
 };
 const mostrarPaso = (id) => { for (const p of ["pasoLogin", "pasoPassword", "app"]) $("#" + p).hidden = p !== id; };
+
+// =============================================================
+//  DISPOSITIVO VINCULADO
+//  El token de GitHub viaja cifrado con tu contraseña principal
+//  (enlace o QR desde el PC). En este dispositivo basta la contraseña.
+// =============================================================
+const b64u = (s) => btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const deB64u = (s) => atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4));
+export function leerVinculo() { try { return JSON.parse(localStorage.getItem(CLAVE_VINCULO) || "null"); } catch { return null; } }
+let vinculoNuevo = false;
+{
+  const m = location.hash.match(/vincular=([\w-]+)/);
+  if (m) {
+    try {
+      const v = JSON.parse(deB64u(m[1]));
+      if (v?.c?.datos) { localStorage.setItem(CLAVE_VINCULO, JSON.stringify(v)); vinculoNuevo = true; }
+    } catch { /* enlace roto */ }
+    history.replaceState(null, "", location.pathname);
+  }
+}
+let modoVinculo = false;
+function prepararVinculo() {
+  modoVinculo = true;
+  primeraVez = false;
+  $("#tituloPassword").textContent = "Entrar como admin";
+  $("#textoPassword").textContent = vinculoNuevo
+    ? "Dispositivo vinculado. Escribe tu contraseña principal para terminar."
+    : "Este dispositivo está vinculado. Escribe tu contraseña principal.";
+  $("#campoPass2").hidden = true;
+  $("#pass2").required = false;
+  $("#botonPassword").textContent = "Entrar";
+  $("#olvidarDispositivo").hidden = false;
+  mostrarPaso("pasoPassword");
+  $("#pass1").focus();
+}
+$("#olvidarDispositivo")?.addEventListener("click", () => {
+  try { localStorage.removeItem(CLAVE_VINCULO); } catch {}
+  guardado.borrar(CLAVE_TOKEN);
+  location.reload();
+});
 
 // =============================================================
 //  PASO 1 — Login con el token
@@ -114,6 +156,26 @@ $("#formPassword").addEventListener("submit", async (e) => {
   }
   const boton = $("#botonPassword");
   boton.disabled = true; boton.textContent = "Abriendo…";
+  if (modoVinculo && !gh) {
+    const v = leerVinculo();
+    let token = null;
+    try { token = new TextDecoder().decode(await descifrarBytes(v.c, p1)); }
+    catch {
+      $("#errorPassword").textContent = "Contraseña incorrecta. Si la cambiaste, vuelve a vincular este dispositivo desde el PC.";
+      boton.disabled = false; boton.textContent = "Entrar";
+      return;
+    }
+    try {
+      await conectar(token, v.r);
+      guardado.set(CLAVE_TOKEN, token, false); // solo mientras esté abierta la pestaña
+    } catch (err) {
+      $("#errorPassword").textContent = err.status === 401
+        ? "El token del vínculo ya no vale (caducado o borrado). Vuelve a vincular desde el PC."
+        : err.message || "No se ha podido conectar con GitHub.";
+      boton.disabled = false; boton.textContent = "Entrar";
+      return;
+    }
+  }
   try {
     datos = completarDatos(await descifrar(archivoCifrado, p1));
     password = p1;
@@ -158,6 +220,7 @@ function arrancar() {
     alCambiar: marcarCambios,
     salir,
     cambiarPassword,
+    vincular,
     reemplazarDatos(nuevos) { datos = nuevos; marcarCambios(); },
     abrirGrupos: async () => {
       const nuevo = await abrirGrupos(datos, password);
@@ -328,6 +391,10 @@ function cambiarPassword() {
       }
       boton.textContent = "Guardando…";
       password = p1;
+      // Si este dispositivo está vinculado, el vínculo pasa a la contraseña nueva
+      if (leerVinculo()) {
+        try { localStorage.setItem(CLAVE_VINCULO, JSON.stringify({ r: `${gh.usuario}/${gh.repo}`, c: await cifrarBytes(new TextEncoder().encode(gh.token), p1) })); } catch {}
+      }
       sinGuardar = true;
       while (guardando) await new Promise((ok) => setTimeout(ok, 300));
       ultimoError = null;
@@ -348,10 +415,67 @@ function cambiarPassword() {
   dlg.showModal();
 }
 
+// =============================================================
+//  VINCULAR UN MÓVIL (desde el PC ya conectado)
+// =============================================================
+const QR_LIB = "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";
+let qrCargado = null;
+const cargarQR = () => (qrCargado ||= new Promise((ok, mal) => {
+  if (window.qrcode) return ok(window.qrcode);
+  const s = document.createElement("script");
+  s.src = QR_LIB;
+  s.onload = () => ok(window.qrcode);
+  s.onerror = () => mal(new Error("No se ha podido cargar el QR"));
+  document.head.appendChild(s);
+}));
+async function vincular() {
+  const cifrado = await cifrarBytes(new TextEncoder().encode(gh.token), password);
+  const enlace = `${location.origin}${location.pathname}#vincular=${b64u(JSON.stringify({ r: `${gh.usuario}/${gh.repo}`, c: cifrado }))}`;
+  const dlg = document.createElement("dialog");
+  dlg.className = "modal";
+  dlg.innerHTML = `<div class="modal-caja">
+    <header class="modal-cabecera"><h2>Vincular un móvil</h2></header>
+    <div class="modal-cuerpo">
+      <p>Escanea el código con la cámara del móvil (o mándate el enlace). Después, en ese móvil entras como <b>admin</b> solo con tu contraseña principal.</p>
+      <div class="qr-vincular" id="qrVincular"><small class="texto-suave">Generando código…</small></div>
+      <div class="copiable"><input id="enlaceVincular" class="mono" readonly value="${enlace}"><button type="button" class="boton peque" id="copiarVincular">Copiar enlace</button></div>
+      <p class="nota">El enlace lleva tu token <b>cifrado con tu contraseña</b>: sin ella no sirve. No lo publiques. Si pierdes el móvil, borra el token en GitHub y crea otro.</p>
+    </div>
+    <footer class="modal-pie"><button type="button" class="boton principal" data-cerrar>Hecho</button></footer></div>`;
+  document.body.appendChild(dlg);
+  const cerrar = () => { dlg.close(); dlg.remove(); };
+  dlg.querySelector("[data-cerrar]").addEventListener("click", cerrar);
+  dlg.addEventListener("cancel", cerrar);
+  dlg.querySelector("#copiarVincular").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(enlace); web.aviso("Enlace copiado"); } catch { dlg.querySelector("#enlaceVincular").select(); }
+  });
+  dlg.showModal();
+  try {
+    const qr = (await cargarQR())(0, "L");
+    qr.addData(enlace);
+    qr.make();
+    dlg.querySelector("#qrVincular").innerHTML = qr.createSvgTag({ cellSize: 4, margin: 4, scalable: true });
+  } catch {
+    dlg.querySelector("#qrVincular").innerHTML = `<small class="texto-suave">No se ha podido crear el QR: usa «Copiar enlace».</small>`;
+  }
+}
+
+// Entrar solo con la contraseña (viene de la app o de un dispositivo vinculado)
+function autoEntrar() {
+  let p = null;
+  try { p = sessionStorage.getItem(CLAVE_AUTO); sessionStorage.removeItem(CLAVE_AUTO); } catch {}
+  if (!p) return;
+  $("#pass1").value = p;
+  $("#formPassword").requestSubmit();
+}
+
 // ---------- Si ya iniciaste sesión, entra directo al paso 2 ----------
 const tokenGuardado = guardado.get(CLAVE_TOKEN);
 if (tokenGuardado) {
   $("#token").value = tokenGuardado;
-  conectar(tokenGuardado, guardado.get(CLAVE_REPO)).catch(() => mostrarPaso("pasoLogin"));
+  conectar(tokenGuardado, guardado.get(CLAVE_REPO)).then(autoEntrar).catch(() => (leerVinculo() ? prepararVinculo() : mostrarPaso("pasoLogin")));
+} else if (leerVinculo()) {
+  prepararVinculo();
+  autoEntrar();
 }
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
