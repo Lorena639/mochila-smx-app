@@ -75,7 +75,7 @@ function prepararVinculo() {
   $("#campoPass2").hidden = true;
   $("#pass2").required = false;
   $("#botonPassword").textContent = "Entrar";
-  $("#olvidarDispositivo").hidden = false;
+  if ($("#olvidarDispositivo")) $("#olvidarDispositivo").hidden = false;
   mostrarPaso("pasoPassword");
   $("#pass1").focus();
 }
@@ -182,15 +182,23 @@ $("#formPassword").addEventListener("submit", async (e) => {
       return;
     }
   }
+  let fase = "descifrar";
   try {
+    if (!archivoCifrado) throw new Error("No se han podido leer tus datos de GitHub (¿conexión o token?).");
     datos = completarDatos(await descifrar(archivoCifrado, p1));
+    fase = "abrir";
     password = p1;
     await recuperarCopia();
     const nuevas = await prepararClaves();
     arrancar();
     if (nuevas) marcarCambios();
-  } catch {
-    $("#errorPassword").textContent = "Contraseña incorrecta.";
+  } catch (err) {
+    console.error(err);
+    // Solo es "incorrecta" si de verdad no descifra; cualquier otro fallo se enseña tal cual
+    $("#errorPassword").textContent = err?.code === "mala_password"
+      ? "Contraseña incorrecta."
+      : fase === "descifrar" ? (err?.message || "No se han podido abrir los datos.")
+      : `La contraseña es correcta, pero algo ha fallado al abrir: ${err?.message || err}. Pulsa Ctrl+F5 y vuelve a probar.`;
   } finally {
     boton.disabled = false; boton.textContent = "Entrar";
   }
@@ -514,8 +522,7 @@ if (tokenGuardado) {
     vinculoActual = v;
     prepararVinculo();
     const b = $("#olvidarDispositivo");
-    b.textContent = "Entrar con token de GitHub";
-    b.dataset.remoto = "1";
+    if (b) { b.textContent = "Entrar con token de GitHub"; b.dataset.remoto = "1"; }
     $("#textoPassword").textContent = "Modo estudiante: escribe tu contraseña principal.";
     autoEntrar();
   });
