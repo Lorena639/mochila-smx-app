@@ -177,7 +177,7 @@ export function iniciar(raiz, ctx) {
       <nav class="lat-nav" aria-label="Secciones">${grupos.map((g) => `${g.g ? `<div class="lat-grupo">${g.g}</div>` : ""}${g.items.map((s) =>
         `<a href="#${s.id}" class="${activa === s.id ? "on" : ""}" ${activa === s.id ? 'aria-current="page"' : ""}>${icono(s.ic)}<span>${nombreSec(s)}</span></a>`).join("")}`).join("")}</nav>
       <button type="button" class="lat-pie" ${ctx.editor ? 'data-ir="ajustes"' : 'data-accion="quien"'} title="${ctx.editor ? "Ajustes" : "Cambiar de nombre"}">
-        ${V.avatarPersona(yo.nombre, yo.rol)}<span><b>${esc(ctx.editor ? c.nombre || "Lorena" : yo.nombre)}</b><small>${ctx.editor ? (e.comoGrupo ? `Viendo como ${grupoDe(e.comoGrupo).nombre}` : "Modo edición") : esc(yo.rol || "")}</small></span></button>`;
+        ${V.avatarPersona(yo.nombre, yo.rol)}<span><b>${esc(ctx.editor ? c.nombre || "Lorena" : yo.nombre)}</b><small>${ctx.editor ? (e.comoGrupo ? `Viendo como ${grupoDe(e.comoGrupo).nombre}` : "Modo estudiante") : esc(yo.rol || "")}</small></span></button>`;
     // Barra inferior del móvil: 4 secciones + "Más"
     const preferidas = ["inicio", "diario", veSeccion(seccion("materias")) ? "materias" : "formacion", veSeccion(seccion("calendario")) ? "calendario" : "comunidad"]
       .filter((id, i, a) => veSeccion(seccion(id)) && a.indexOf(id) === i);
@@ -595,6 +595,7 @@ export function iniciar(raiz, ctx) {
     if (acc === "perfil") return editar("config");
     if (acc === "password") return ctx.cambiarPassword?.();
     if (acc === "vincular") return ctx.vincular?.();
+    if (acc === "acceso-remoto") return ctx.accesoRemoto?.(b.dataset.on === "1");
     if (acc === "grupos") return ctx.abrirGrupos?.().then((cambiado) => { if (cambiado) pintar(true); });
     if (acc === "exportar") return exportar(ds.col, ds.id, ds.formato);
     if (ds.fichar) return ficharAhora(ds.fichar);
@@ -777,6 +778,7 @@ export function iniciar(raiz, ctx) {
       el.querySelector("span").textContent = texto;
     },
     aviso,
+    confirmar,
     recargarFichajes: cargarFichajes,
     set datos(d) { e.datos = d; pintar(true); },
   };

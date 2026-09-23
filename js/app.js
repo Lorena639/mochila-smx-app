@@ -38,7 +38,7 @@ const puedeSerAdmin = () => { try { return Boolean(localStorage.getItem("mochila
 
 async function entrar(password) {
   const { grupo, secciones, claves, datos } = await abrir(password);
-  if (!grupo && puedeSerAdmin()) {
+  if (!grupo && (puedeSerAdmin() || (await fetch(`data/acceso.enc.json?t=${Date.now()}`, { cache: "no-store" }).then((r) => r.ok).catch(() => false)))) {
     try { sessionStorage.setItem("mochila-pass-auto", password); } catch {}
     location.href = "admin.html";
     return;
@@ -52,7 +52,7 @@ async function entrar(password) {
   const acceso = claves.comentarios ? { clave: claves.comentarios } : password;
   comentarios.apuntarVisita(yo, acceso);
   $("#app").hidden = false;
-  iniciar($("#app"), {
+  const web = iniciar($("#app"), {
     datos,
     password,
     acceso,
@@ -64,6 +64,8 @@ async function entrar(password) {
     salir() { sesion.del(CLAVE_SESION); location.hash = ""; location.reload(); },
     cambiarQuien() { comentarios.olvidarQuienSoy(); location.reload(); },
   });
+  // Contraseña principal en un dispositivo sin vincular: se ve todo, pero no se puede editar
+  if (!grupo) setTimeout(() => web?.aviso?.("Estás viendo todo en modo lectura. Para el modo estudiante (editar), vincula este dispositivo desde Ajustes en el PC.", 8000), 800);
 }
 
 function pedirQuien(grupo) {

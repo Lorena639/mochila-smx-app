@@ -24,7 +24,8 @@ const CLAVE_TOKEN = "mochila-token";
 const CLAVE_REPO = "mochila-repo";
 const CLAVE_COPIA = "mochila-copia"; // copia cifrada de cambios aún no subidos
 const CLAVE_VINCULO = "mochila-vinculo"; // token cifrado con tu contraseña (dispositivo vinculado)
-const CLAVE_AUTO = "mochila-pass-auto";  // contraseña que pasa la app al entrar como admin (solo esta pestaña)
+const CLAVE_AUTO = "mochila-pass-auto";
+const RUTA_ACCESO = "data/acceso.enc.json"; // token cifrado con tu contraseña (entrar como Lorena en cualquier sitio)  // contraseña que pasa la app al entrar como admin (solo esta pestaña)
 
 let gh = null;          // conexión con GitHub
 let sha = null;         // versión actual del archivo de datos en GitHub
@@ -60,10 +61,14 @@ let vinculoNuevo = false;
   }
 }
 let modoVinculo = false;
+let vinculoActual = null;
+async function vinculoRemoto() {
+  try { const r = await fetch(`${RUTA_ACCESO}?t=${Date.now()}`, { cache: "no-store" }); return r.ok ? await r.json() : null; } catch { return null; }
+}
 function prepararVinculo() {
   modoVinculo = true;
   primeraVez = false;
-  $("#tituloPassword").textContent = "Entrar como admin";
+  $("#tituloPassword").textContent = "Entrar como Lorena";
   $("#textoPassword").textContent = vinculoNuevo
     ? "Dispositivo vinculado. Escribe tu contraseña principal para terminar."
     : "Este dispositivo está vinculado. Escribe tu contraseña principal.";
@@ -74,7 +79,8 @@ function prepararVinculo() {
   mostrarPaso("pasoPassword");
   $("#pass1").focus();
 }
-$("#olvidarDispositivo")?.addEventListener("click", () => {
+$("#olvidarDispositivo")?.addEventListener("click", (ev) => {
+  if (ev.currentTarget.dataset.remoto) { modoVinculo = false; vinculoActual = null; mostrarPaso("pasoLogin"); return; }
   try { localStorage.removeItem(CLAVE_VINCULO); } catch {}
   guardado.borrar(CLAVE_TOKEN);
   location.reload();
@@ -129,10 +135,10 @@ $("#formLogin").addEventListener("submit", async (e) => {
 let primeraVez = false;
 function prepararPassword(esNueva) {
   primeraVez = esNueva;
-  $("#tituloPassword").textContent = esNueva ? "Crea la contraseña de la web" : "Contraseña de la web";
+  $("#tituloPassword").textContent = esNueva ? "Crea tu contraseña principal" : "Entrar como Lorena";
   $("#textoPassword").textContent = esNueva
-    ? "Es la que darás a tu profe. Todo se guarda cifrado con ella."
-    : "La misma que le das a tu profe.";
+    ? "Es solo tuya (modo estudiante). Todo se guarda cifrado con ella. A profes y familia les das la de su grupo."
+    : "Modo estudiante: tu contraseña principal, solo tuya. Con ella añades y editas todo.";
   $("#campoPass2").hidden = !esNueva;
   $("#pass2").required = esNueva;
   $("#botonPassword").textContent = esNueva ? "Crear" : "Entrar";
@@ -157,7 +163,7 @@ $("#formPassword").addEventListener("submit", async (e) => {
   const boton = $("#botonPassword");
   boton.disabled = true; boton.textContent = "Abriendo…";
   if (modoVinculo && !gh) {
-    const v = leerVinculo();
+    const v = vinculoActual || leerVinculo();
     let token = null;
     try { token = new TextDecoder().decode(await descifrarBytes(v.c, p1)); }
     catch {
@@ -221,6 +227,7 @@ function arrancar() {
     salir,
     cambiarPassword,
     vincular,
+    accesoRemoto,
     reemplazarDatos(nuevos) { datos = nuevos; marcarCambios(); },
     abrirGrupos: async () => {
       const nuevo = await abrirGrupos(datos, password);
@@ -392,6 +399,7 @@ function cambiarPassword() {
       boton.textContent = "Guardando…";
       password = p1;
       // Si este dispositivo está vinculado, el vínculo pasa a la contraseña nueva
+      if (datos.config.accesoRemoto) { try { await escribirAcceso(p1); } catch { /* se puede reactivar luego */ } }
       if (leerVinculo()) {
         try { localStorage.setItem(CLAVE_VINCULO, JSON.stringify({ r: `${gh.usuario}/${gh.repo}`, c: await cifrarBytes(new TextEncoder().encode(gh.token), p1) })); } catch {}
       }
@@ -460,6 +468,28 @@ async function vincular() {
   }
 }
 
+// Entrar como Lorena en cualquier dispositivo: el token va cifrado con tu contraseña en el repo
+async function escribirAcceso(pass) {
+  const v = { r: `${gh.usuario}/${gh.repo}`, c: await cifrarBytes(new TextEncoder().encode(gh.token), pass) };
+  await gh.escribir(RUTA_ACCESO, JSON.stringify(v), await gh.sha(RUTA_ACCESO), "Acceso de Lorena");
+}
+async function accesoRemoto(activar) {
+  if (activar) {
+    if (password.length < 12) {
+      web.aviso("Para esto tu contraseña principal tiene que tener 12 caracteres o más. Cámbiala primero.", 7000);
+      return;
+    }
+    const ok = await web.confirmar("Cualquiera que sepa tu contraseña principal podrá entrar como tú y editar. Úsala solo tú y que sea larga. ¿Activar?");
+    if (!ok) return;
+    try { await escribirAcceso(password); datos.config.accesoRemoto = true; marcarCambios(); web.aviso("Activado. En cualquier dispositivo, tu contraseña principal abre el modo estudiante."); }
+    catch (err) { web.aviso(`No se ha podido activar: ${err.message}`, 6000); }
+  } else {
+    try { await gh.borrar(RUTA_ACCESO, "Quitar acceso de Lorena"); datos.config.accesoRemoto = false; marcarCambios(); web.aviso("Desactivado. Solo los dispositivos vinculados entran como tú."); }
+    catch (err) { web.aviso(`No se ha podido desactivar: ${err.message}`, 6000); }
+  }
+  web.pintar();
+}
+
 // Entrar solo con la contraseña (viene de la app o de un dispositivo vinculado)
 function autoEntrar() {
   let p = null;
@@ -477,5 +507,17 @@ if (tokenGuardado) {
 } else if (leerVinculo()) {
   prepararVinculo();
   autoEntrar();
+} else {
+  // ¿Está activado «entrar como Lorena en cualquier dispositivo»?
+  vinculoRemoto().then((v) => {
+    if (!v?.c?.datos) return;
+    vinculoActual = v;
+    prepararVinculo();
+    const b = $("#olvidarDispositivo");
+    b.textContent = "Entrar con token de GitHub";
+    b.dataset.remoto = "1";
+    $("#textoPassword").textContent = "Modo estudiante: escribe tu contraseña principal.";
+    autoEntrar();
+  });
 }
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

@@ -151,8 +151,14 @@ export function vistaAjustes(e) {
         <div class="fila-botones"><button class="boton" type="button" data-accion="copia-descargar">${icono("descargar")} Descargar copia</button>
           <label class="boton">${icono("subir")} Restaurar copia<input type="file" accept=".json,application/json" hidden data-restaurar></label></div></section>
       <section class="panel"><div class="panel-titulo"><h2>${icono("candado")} Seguridad</h2></div>
-        <p class="texto-suave">Para entrar como admin desde el móvil solo con tu contraseña, vincúlalo una vez.</p>
-        <div class="fila-botones"><button class="boton principal" type="button" data-accion="vincular">Vincular un móvil</button>
+        <p><b>Entrar como Lorena (modo estudiante) en cualquier dispositivo</b></p>
+        ${c.accesoRemoto
+          ? `<p><span class="chip ok">Activado</span> Tu contraseña principal abre el modo estudiante en cualquier móvil u ordenador.</p>
+             <div class="fila-botones"><button class="boton" type="button" data-accion="acceso-remoto" data-on="0">Desactivar</button></div>`
+          : `<p class="texto-suave">Con tu contraseña principal entrarás en modo estudiante desde cualquier sitio, sin vincular nada. Necesita una contraseña de 12 caracteres o más.</p>
+             <div class="fila-botones"><button class="boton principal" type="button" data-accion="acceso-remoto" data-on="1">Activar</button></div>`}
+        <p class="texto-suave" style="margin-top:14px">O, más seguro, vincula solo tus dispositivos:</p>
+        <div class="fila-botones"><button class="boton" type="button" data-accion="vincular">Vincular un móvil</button>
           <button class="boton" type="button" data-accion="password">Cambiar contraseña principal</button>
           <button class="boton" type="button" data-accion="salir">Cerrar sesión</button></div></section>
     </div>`;

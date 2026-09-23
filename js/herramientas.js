@@ -6,7 +6,8 @@
 //   · Y el resto: herr-redes, herr-sistemas, herr-seguridad,
 //     herr-hardware y biblioteca (programación)
 // =============================================================
-import { esc, normalizar } from "./comun.js";
+import { esc, normalizar, nuevoId, hoyIso } from "./comun.js";
+import { limpiar } from "./editor.js";
 import { icono } from "./iconos.js";
 import * as Redes from "./herr-redes.js";
 import * as Sis from "./herr-sistemas.js";
@@ -190,8 +191,32 @@ export function lista() {
 }
 const ICONO_GRUPO = { Redes: "red", Sistemas: "terminal", Seguridad: "candado", Hardware: "herramienta", Referencia: "materias" };
 
+// ---------- Lo que escribes en las herramientas se recuerda en este dispositivo (30 días) ----------
+const CLAVE_HERR = "mochila-herramientas";
+const NO_GUARDAR = new Set(["pwProbar", "pwGen", "hashRes", "hashCargando", "dnsError"]);
+function cargarEstado(e) {
+  if (e.herrCargado) return;
+  e.herrCargado = true;
+  try {
+    const g = JSON.parse(localStorage.getItem(CLAVE_HERR) || "null");
+    if (g && Date.now() - g.t < 30 * 86400 * 1000) e.herr = { ...g.v, ...(e.herr || {}) };
+  } catch { /* sin almacenamiento */ }
+}
+let temporizadorGuardar = null;
+function guardarEstado(e) {
+  clearTimeout(temporizadorGuardar);
+  temporizadorGuardar = setTimeout(() => {
+    try {
+      const v = Object.fromEntries(Object.entries(e.herr || {}).filter(([k]) => !NO_GUARDAR.has(k)));
+      localStorage.setItem(CLAVE_HERR, JSON.stringify({ t: Date.now(), v }));
+    } catch { /* lleno o bloqueado */ }
+  }, 400);
+}
+
 export function vistaHerramientas(e, pestana = "") {
+  cargarEstado(e);
   e.herr ||= {};
+  guardarEstado(e);
   const todas = lista();
   const h = todas.find((x) => x.id === pestana);
   if (!h) {
@@ -201,12 +226,67 @@ export function vistaHerramientas(e, pestana = "") {
         <div class="rejilla-herr">${todas.filter((x) => x.grupo === g).map((x) => `<a class="tarjeta-herr" href="#herramientas/${x.id}"><b>${esc(x.t)}</b><span>${esc(x.desc)}</span>${x.internet ? `<small class="chip">Necesita internet</small>` : ""}</a>`).join("")}</div>`).join("")}`;
   }
   const hermanas = todas.filter((x) => x.grupo === h.grupo);
-  return `<button type="button" class="volver" data-ir="herramientas">${icono("flecha-izq")} Herramientas</button>
+  return `<div class="herr-barra"><button type="button" class="volver" data-ir="herramientas">${icono("flecha-izq")} Herramientas</button>
+      ${e.editor ? `<button type="button" class="boton peque" data-accion="herr-guardar" data-t="${esc(h.t)}">${icono("materias")} Guardar en una materia</button>` : ""}</div>
     <div class="segmentos segmentos-scroll">${hermanas.map((x) => `<button type="button" class="segmento" aria-pressed="${x.id === h.id}" data-ir="herramientas/${x.id}">${esc(x.t)}</button>`).join("")}</div>
     ${h.html(e)}`;
 }
 
+// Copia lo que se ve en la herramienta (resultados, tablas, código) como apunte de una materia
+function capturarHerramienta() {
+  const vista = document.querySelector(".segmentos-scroll")?.parentElement;
+  const paneles = vista ? [...vista.querySelectorAll(":scope > section.panel")] : [];
+  const trozos = paneles.map((p) => {
+    const c = p.cloneNode(true);
+    c.querySelectorAll("input, textarea, select").forEach((el, i) => {
+      const orig = p.querySelectorAll("input, textarea, select")[i];
+      if (orig.type === "file" || orig.type === "search") { el.remove(); return; }
+      const valor = orig.type === "checkbox" ? (orig.checked ? "sí" : "no") : orig.tagName === "SELECT" ? orig.selectedOptions[0]?.textContent || "" : orig.value;
+      const nuevo = document.createElement(orig.tagName === "TEXTAREA" ? "pre" : "code");
+      nuevo.textContent = valor;
+      el.replaceWith(nuevo);
+    });
+    c.querySelectorAll("button, svg, .fila-botones:empty").forEach((x) => x.remove());
+    c.querySelectorAll("details").forEach((d) => { d.open = true; });
+    return c.innerHTML;
+  });
+  const html = limpiar(trozos.join("<hr>"));
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  return { html, texto: tmp.textContent.replace(/\n{3,}/g, "\n\n").trim() };
+}
+
 export const acciones = {
+  "herr-guardar"(b, api) {
+    const d = api.datos();
+    const materias = d.asignaturas || [];
+    if (!materias.length) return api.aviso("Primero crea alguna materia.");
+    const { html, texto } = capturarHerramienta();
+    const dlg = document.createElement("dialog");
+    dlg.className = "modal";
+    dlg.innerHTML = `<form class="modal-caja" method="dialog">
+      <header class="modal-cabecera"><h2>Guardar en una materia</h2></header>
+      <div class="modal-cuerpo rejilla-form">
+        <div class="campo ancho"><label for="hgT">Título del apunte</label><input id="hgT" required value="${esc(b.dataset.t)} · ${new Date().toLocaleDateString("es-ES")}"></div>
+        <div class="campo ancho"><label for="hgM">Materia</label><select id="hgM">${materias.map((a) => `<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join("")}</select></div>
+        <p class="nota ancho">Se guarda lo que ves ahora en la herramienta (datos, resultados y tablas) como un apunte. Luego puedes editarlo en Materias.</p>
+      </div>
+      <footer class="modal-pie"><button type="button" class="boton" data-cancelar>Cancelar</button><button type="submit" class="boton principal">Guardar</button></footer></form>`;
+    document.body.appendChild(dlg);
+    const cerrar = () => { dlg.close(); dlg.remove(); };
+    dlg.querySelector("[data-cancelar]").addEventListener("click", cerrar);
+    dlg.addEventListener("cancel", cerrar);
+    dlg.querySelector("form").addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const titulo = dlg.querySelector("#hgT").value.trim() || b.dataset.t;
+      const asignatura = dlg.querySelector("#hgM").value;
+      d.apuntes.push({ id: nuevoId(), titulo, asignatura, fecha: hoyIso(), texto, textoHtml: html, enlace: "", archivos: [] });
+      cerrar();
+      api.cambiar(false);
+      api.aviso(`Guardado en ${materias.find((a) => a.id === asignatura)?.nombre || "la materia"} → Apuntes`);
+    });
+    dlg.showModal();
+  },
   "herr-cat"(b, api) { const e = api.estado(); e.herr = { ...(e.herr || {}), cat: b.dataset.cat, buscar: "" }; api.pintar(); },
   ...Redes.acciones, ...Sis.acciones, ...Seg.acciones, ...Hw.acciones, ...Biblio.acciones,
 };
