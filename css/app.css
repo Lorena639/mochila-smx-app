@@ -478,3 +478,4 @@ textarea.codigo { font-family: var(--f-mono) !important; font-size: 13.5px; line
 .barra-acciones { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
 .barra-acciones .nota-pie { margin: 0; }
 .columna > *, .rejilla-inicio .columna > * { margin-top: 0 !important; }
+.temporizador-zona.solo-estadisticas { grid-template-columns: 1fr; }

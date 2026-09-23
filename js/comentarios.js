@@ -111,12 +111,13 @@ export async function apuntarVisita(yo, acceso) {
 // ---------- Fichajes (asistencia) ----------
 // Van en la misma tabla, con su propia clave: solo la tienen tú y los
 // grupos a los que dejes ver "Asistencia".
-export async function guardarFichaje(registro, claveFichajes) {
+// "creado" solo se pasa al añadir a mano un día pasado (queda marcado como "manual")
+export async function guardarFichaje(registro, claveFichajes, creado = null) {
   if (!activos()) throw new Error("Falta configurar Supabase.");
   const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios`, {
     method: "POST",
     headers: { ...cabeceras(), Prefer: "return=minimal" },
-    body: JSON.stringify({ post: POST_FICHAJES, datos: await cifrarFila({ ...registro, disp: dispositivo() }, { clave: claveFichajes }) }),
+    body: JSON.stringify({ post: POST_FICHAJES, datos: await cifrarFila({ ...registro, disp: dispositivo() }, { clave: claveFichajes }), ...(creado ? { creado } : {}) }),
   });
   if (!r.ok) throw new Error("No se ha podido guardar el fichaje. Revisa tu conexión.");
 }

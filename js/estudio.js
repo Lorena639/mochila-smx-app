@@ -46,25 +46,26 @@ function htmlTarjetas(e) {
   const hoy = pendientes(d, filtro);
   const lista = d.tarjetas.filter((t) => !filtro || t.asignatura === filtro);
   const porCaja = [1, 2, 3, 4, 5].map((c) => lista.filter((t) => (t.caja || 1) === c).length);
+  const ed = e.editor;
   return `<div class="kpis">
       <div class="panel kpi"><span class="kpi-num">${hoy.length}</span><span class="kpi-que">Para repasar hoy</span></div>
       <div class="panel kpi"><span class="kpi-num">${lista.length}</span><span class="kpi-que">Tarjetas</span></div>
       <div class="panel kpi"><span class="kpi-num">${porCaja[3] + porCaja[4]}</span><span class="kpi-que">Casi dominadas</span></div>
     </div>
     <div class="filtros"><select data-cambio="filtro-asig" aria-label="Materia">${opcionesAsig(d, filtro)}</select>
-      <button class="boton principal" type="button" data-accion="repaso-empezar" ${hoy.length ? "" : "disabled"}>${icono("play")} Repasar ${hoy.length ? `(${hoy.length})` : ""}</button></div>
-    <section class="panel"><div class="panel-titulo"><h2>${icono("mas")} Nueva tarjeta</h2></div>
+      ${ed ? `<button class="boton principal" type="button" data-accion="repaso-empezar" ${hoy.length ? "" : "disabled"}>${icono("play")} Repasar ${hoy.length ? `(${hoy.length})` : ""}</button>` : ""}</div>
+    ${ed ? `<section class="panel"><div class="panel-titulo"><h2>${icono("mas")} Nueva tarjeta</h2></div>
       <form class="rejilla-form" data-form="tarjeta-nueva">
         <div class="campo"><label for="tjAsig">Materia</label><select id="tjAsig" name="asignatura">${opcionesAsig(d, filtro, "General")}</select></div>
         <div class="campo ancho"><label for="tjP">Pregunta</label><input id="tjP" name="pregunta" required placeholder="p. ej. ¿Qué puerto usa DNS?"></div>
         <div class="campo ancho"><label for="tjR">Respuesta</label><textarea id="tjR" name="respuesta" required rows="2" placeholder="p. ej. 53 (UDP y TCP)"></textarea></div>
         <div class="fila-botones"><button class="boton principal" type="submit">Añadir tarjeta</button></div>
-      </form></section>
+      </form></section>` : ""}
     <section class="panel"><div class="panel-titulo"><h2>${icono("tarjetas")} Mis tarjetas</h2><small class="texto-suave">Las que aciertas tardan más en volver a salir</small></div>
       <div class="cajas">${porCaja.map((n, i) => `<div><b>${n}</b><small>Caja ${i + 1} · cada ${INTERVALOS[i]} ${INTERVALOS[i] === 1 ? "día" : "días"}</small></div>`).join("")}</div>
       ${lista.length ? `<ul class="lista-tarjetas">${lista.map((t) => `<li><span><b>${esc(t.pregunta)}</b><small>${esc(t.respuesta)}</small></span>
         <span class="chip">Caja ${t.caja || 1}</span>
-        <button class="boton icono peque" type="button" data-accion="tarjeta-quitar" data-id="${esc(t.id)}" aria-label="Borrar">${icono("borrar")}</button></li>`).join("")}</ul>`
+        ${ed ? `<button class="boton icono peque" type="button" data-accion="tarjeta-quitar" data-id="${esc(t.id)}" aria-label="Borrar">${icono("borrar")}</button>` : ""}</li>`).join("")}</ul>`
         : `<p class="texto-suave">Crea tarjetas con lo que tengas que memorizar: puertos, comandos, conceptos…</p>`}
     </section>`;
 }
@@ -118,7 +119,7 @@ function htmlTemporizador(e) {
   for (const s of semana) porAsig.set(s.asignatura, (porAsig.get(s.asignatura) || 0) + s.minutos);
   const maxAsig = Math.max(1, ...porAsig.values());
   const totalH = d.estudio.reduce((a, s) => a + s.minutos, 0) / 60;
-  return `<div class="temporizador-zona">
+  const reloj = !e.editor ? "" : `
     <section class="panel temporizador ${T.modo}">
       <div class="reloj"><svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="90" class="r-fondo"/>
         <circle cx="100" cy="100" r="90" class="r-valor" data-reloj-anillo stroke-dasharray="565.5" stroke-dashoffset="${565.5 * (quedan / total)}"/></svg>
@@ -134,8 +135,9 @@ function htmlTemporizador(e) {
           ${[[25, 5], [50, 10], [15, 3]].map(([a, b]) => `<option value="${a}-${b}" ${T.trabajo === a ? "selected" : ""}>${a} min + ${b} de descanso</option>`).join("")}</select></div>
       </div>
       ${"Notification" in window && Notification.permission === "default" ? `<button class="enlace-ver" type="button" data-accion="avisos-permiso">Avisarme con una notificación al terminar</button>` : ""}
-    </section>
-    <section class="panel"><div class="panel-titulo"><h2>${icono("grafico")} Últimos 7 días</h2><small class="texto-suave">${f1(totalH)} h en total</small></div>
+    </section>`;
+  return `<div class="temporizador-zona ${e.editor ? "" : "solo-estadisticas"}">${reloj}
+    <section class="panel"><div class="panel-titulo"><h2>${icono("grafico")} Horas de estudio · últimos 7 días</h2><small class="texto-suave">${f1(totalH)} h en total</small></div>
       <div class="barras-dias">${dias.map((f, i) => `<div><span class="bd-barra"><i style="height:${(minDia[i] / maxDia) * 100}%"></i></span>
         <small>${new Date(f + "T00:00:00").toLocaleDateString("es-ES", { weekday: "narrow" })}</small><b>${minDia[i] ? `${Math.round(minDia[i])}′` : ""}</b></div>`).join("")}</div>
       <h3 class="subt">Esta semana por materia</h3>
@@ -154,7 +156,7 @@ export const examenes = (d) => d.eventos.filter((ev) => ev.tipo === "Examen" && 
 function htmlExamenes(e) {
   const d = e.datos;
   const lista = examenes(d);
-  return `<div class="barra-acciones"><button class="boton principal" type="button" data-nuevo="eventos" data-preset="tipo=Examen">${icono("mas")} Añadir examen</button></div>
+  return `${e.editor ? `<div class="barra-acciones"><button class="boton principal" type="button" data-nuevo="eventos" data-preset="tipo=Examen">${icono("mas")} Añadir examen</button></div>` : ""}
     ${lista.length ? `<div class="lista-examenes">${lista.map((ev) => {
       const k = diasHasta(ev.fecha);
       const a = asig(d, ev.asignatura);
@@ -187,19 +189,20 @@ export function vistaExamen(e, id) {
     </header>
     <div class="rejilla-2">
       <section class="panel"><div class="panel-titulo"><h2>${icono("materias")} Qué entra</h2></div>
-        <textarea class="temas" data-cambio="examen-temas" data-id="${esc(id)}" rows="6" placeholder="Escribe los temas o RA que entran…">${esc(ev.temas || "")}</textarea>
+        ${e.editor ? `<textarea class="temas" data-cambio="examen-temas" data-id="${esc(id)}" rows="6" placeholder="Escribe los temas o RA que entran…">${esc(ev.temas || "")}</textarea>`
+          : `<p class="texto">${ev.temas ? esc(ev.temas).replace(/\n/g, "<br>") : `<span class="texto-suave">Sin temas apuntados.</span>`}</p>`}
         <h3 class="subt">Plan de repaso <small class="texto-suave">${hechos}/${check.length}</small></h3>
-        <ul class="checklist">${check.map((c, i) => `<li><label><input type="checkbox" data-cambio="examen-check" data-id="${esc(id)}" data-i="${i}" ${c.hecho ? "checked" : ""}> <span>${esc(c.texto)}</span></label>
-          <button class="boton icono peque" type="button" data-accion="examen-check-quitar" data-id="${esc(id)}" data-i="${i}" aria-label="Quitar">${icono("cerrar")}</button></li>`).join("")}</ul>
-        <form class="form-inline" data-form="examen-check"><input type="hidden" name="id" value="${esc(id)}"><input name="texto" required placeholder="p. ej. Repasar RA2: copias de seguridad"><button class="boton" type="submit">${icono("mas")}</button></form>
+        <ul class="checklist">${check.map((c, i) => `<li><label><input type="checkbox" data-cambio="examen-check" data-id="${esc(id)}" data-i="${i}" ${c.hecho ? "checked" : ""} ${e.editor ? "" : "disabled"}> <span>${esc(c.texto)}</span></label>
+          ${e.editor ? `<button class="boton icono peque" type="button" data-accion="examen-check-quitar" data-id="${esc(id)}" data-i="${i}" aria-label="Quitar">${icono("cerrar")}</button>` : ""}</li>`).join("")}</ul>
+        ${e.editor ? `<form class="form-inline" data-form="examen-check"><input type="hidden" name="id" value="${esc(id)}"><input name="texto" required placeholder="p. ej. Repasar RA2: copias de seguridad"><button class="boton" type="submit">${icono("mas")}</button></form>` : ""}
       </section>
       <div class="columna">
         ${necesito.length ? `<section class="panel"><div class="panel-titulo"><h2>${icono("bandera")} Lo que necesitas</h2></div>
           ${necesito.map(({ ra, r }) => `<p><b>${esc(ra.id)}</b>: para aprobar, <b>${r.necesito.para5 > 10 ? "más de 10" : f1(r.necesito.para5)}</b> en la prueba${r.necesito.para7 <= 10 ? ` · para un 7: <b>${f1(r.necesito.para7)}</b>` : ""}</p>`).join("")}</section>` : ""}
-        <section class="panel"><div class="panel-titulo"><h2>${icono("tarjetas")} Repaso</h2></div>
+        ${!e.editor ? "" : `<section class="panel"><div class="panel-titulo"><h2>${icono("tarjetas")} Repaso</h2></div>
           <p>${tarjetasAsig ? `Tienes <b>${tarjetasAsig}</b> tarjetas de esta materia para hoy.` : "No tienes tarjetas pendientes de esta materia."}</p>
           <div class="fila-botones"><button class="boton principal" type="button" data-accion="repaso-empezar" data-asig="${esc(ev.asignatura)}" ${tarjetasAsig ? "" : "disabled"}>Repasar tarjetas</button>
-            <button class="boton" type="button" data-accion="temp-materia" data-asig="${esc(ev.asignatura)}">${icono("reloj")} Estudiar 25 min</button></div></section>
+            <button class="boton" type="button" data-accion="temp-materia" data-asig="${esc(ev.asignatura)}">${icono("reloj")} Estudiar 25 min</button></div></section>`}
         ${apuntes.length ? `<section class="panel"><div class="panel-titulo"><h2>${icono("materias")} Apuntes</h2></div>
           <ul class="lista-simple">${apuntes.map((x) => `<li><button class="enlace-ver" type="button" data-ir="materia/${esc(ev.asignatura)}/apuntes">${esc(x.titulo)}</button></li>`).join("")}</ul></section>` : ""}
       </div>
@@ -212,8 +215,8 @@ export function vistaExamen(e, id) {
 export function vistaEstudio(e, pestana = "tarjetas") {
   const tab = (id, t, ic) => `<button type="button" class="segmento" aria-pressed="${pestana === id}" data-ir="estudio/${id}">${icono(ic)}${t}</button>`;
   const cuerpo = pestana === "temporizador" ? htmlTemporizador(e) : pestana === "examenes" ? htmlExamenes(e) : htmlTarjetas(e);
-  return `<header class="cabecera-seccion"><div><h1>Estudiar</h1><p>Tarjetas de repaso, temporizador y preparación de exámenes.</p></div></header>
-    <div class="segmentos">${tab("tarjetas", "Tarjetas", "tarjetas")}${tab("temporizador", "Temporizador", "reloj")}${tab("examenes", "Exámenes", "bandera")}
+  return `<header class="cabecera-seccion"><div><h1>Estudiar</h1><p>${e.editor ? "Tarjetas de repaso, temporizador y preparación de exámenes." : `Cómo estudia ${esc(e.datos.config.nombre || "Lorena")}: tarjetas, horas de estudio y exámenes.`}</p></div></header>
+    <div class="segmentos">${tab("tarjetas", "Tarjetas", "tarjetas")}${tab("temporizador", e.editor ? "Temporizador" : "Horas de estudio", "reloj")}${tab("examenes", "Exámenes", "bandera")}
       <button type="button" class="segmento" data-ir="python">${icono("terminal")}Python</button></div>
     ${cuerpo}`;
 }

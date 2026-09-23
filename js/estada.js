@@ -16,7 +16,9 @@ export function vistaEstada(e) {
   const objetivo = n(s.horasObjetivo);
   const pct = objetivo ? Math.min(100, (hechas / objetivo) * 100) : 0;
   const regs = [...s.registros].sort((a, b) => b.fecha.localeCompare(a.fecha));
-  const campo = (k, label, tipo = "text", ph = "") => `<div class="campo"><label for="es-${k}">${label}</label><input id="es-${k}" type="${tipo}" data-cambio="estada-campo" data-k="${k}" value="${esc(s[k] || "")}" placeholder="${esc(ph)}"></div>`;
+  const campo = (k, label, tipo = "text", ph = "") => e.editor
+    ? `<div class="campo"><label for="es-${k}">${label}</label><input id="es-${k}" type="${tipo}" data-cambio="estada-campo" data-k="${k}" value="${esc(s[k] || "")}" placeholder="${esc(ph)}"></div>`
+    : `<div class="campo"><label>${label}</label><b>${esc(s[k] || "—")}</b></div>`;
   return `<header class="cabecera-seccion"><div><h1>Estada a l'empresa</h1><p>Tu diario de prácticas: horas, tareas y datos de contacto.</p></div></header>
     <div class="kpis">
       <div class="panel kpi"><span class="kpi-num">${h(hechas)}<small> h</small></span><span class="kpi-que">hechas${objetivo ? ` de ${h(objetivo)} h` : ""}</span></div>
@@ -25,25 +27,25 @@ export function vistaEstada(e) {
     </div>
     ${objetivo ? `<div class="progreso"><i style="width:${pct}%"></i></div>` : ""}
     <div class="rejilla-2">
-      <section class="panel"><div class="panel-titulo"><h2>${icono("mas")} Registrar un día</h2></div>
+      ${!e.editor ? "" : `<section class="panel"><div class="panel-titulo"><h2>${icono("mas")} Registrar un día</h2></div>
         <form class="rejilla-form" data-form="estada-dia">
           <div class="campo"><label for="edF">Fecha</label><input id="edF" type="date" name="fecha" required value="${hoyIso()}"></div>
           <div class="campo"><label for="edH">Horas</label><input id="edH" name="horas" required inputmode="decimal" placeholder="p. ej. 6"></div>
           <div class="campo ancho"><label for="edT">Qué he hecho</label><textarea id="edT" name="tareas" rows="4" required placeholder="p. ej. Instalación de 5 equipos, configuración de impresoras en red…"></textarea></div>
           <div class="campo ancho"><label for="edA">Qué he aprendido (opcional)</label><input id="edA" name="aprendido"></div>
           <div class="fila-botones"><button class="boton principal" type="submit">Guardar día</button></div>
-        </form></section>
+        </form></section>`}
       <section class="panel"><div class="panel-titulo"><h2>${icono("maletin")} Datos de las prácticas</h2></div>
         <div class="rejilla-form">${campo("empresa", "Empresa")}${campo("direccion", "Dirección")}${campo("tutorEmpresa", "Tutor/a en la empresa")}${campo("tutorCentro", "Tutor/a del centro")}
           ${campo("horasObjetivo", "Horas necesarias", "text", "p. ej. 150")}${campo("horario", "Horario", "text", "p. ej. L-V 9:00-14:00")}${campo("inicio", "Inicio", "date")}${campo("fin", "Fin", "date")}</div>
       </section>
     </div>
     <section class="panel"><div class="panel-titulo"><h2>${icono("calendario")} Diario</h2>
-      ${regs.length ? `<button class="enlace-ver" type="button" data-accion="estada-exportar">${icono("descargar")} Descargar para la memoria</button>` : ""}</div>
+      ${regs.length && e.editor ? `<button class="enlace-ver" type="button" data-accion="estada-exportar">${icono("descargar")} Descargar para la memoria</button>` : ""}</div>
       ${regs.length ? `<div class="diario-estada">${regs.map((r) => `<article class="de-dia"><header><b>${new Date(r.fecha + "T00:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}</b>
-          <span class="chip">${h(n(r.horas))} h</span><button class="boton icono peque" type="button" data-accion="estada-quitar" data-id="${esc(r.id)}" aria-label="Quitar">${icono("cerrar")}</button></header>
+          <span class="chip">${h(n(r.horas))} h</span>${e.editor ? `<button class="boton icono peque" type="button" data-accion="estada-quitar" data-id="${esc(r.id)}" aria-label="Quitar">${icono("cerrar")}</button>` : ""}</header>
           <p>${esc(r.tareas).replace(/\n/g, "<br>")}</p>${r.aprendido ? `<p class="texto-suave">Aprendido: ${esc(r.aprendido)}</p>` : ""}</article>`).join("")}</div>`
-        : `<p class="texto-suave">Cuando empieces las prácticas, apunta aquí cada día. Te servirá para la memoria final.</p>`}
+        : `<p class="texto-suave">${e.editor ? "Cuando empieces las prácticas, apunta aquí cada día. Te servirá para la memoria final." : "Todavía no hay días registrados."}</p>`}
     </section>`;
 }
 

@@ -29,6 +29,9 @@ export const PARTES = [
   ["tablon", "Tablón de clase"],
   ["notas", "Notas"],
   ["asistencia", "Asistencia (fichajes)"],
+  ["estudio", "Estudiar (tarjetas, exámenes, Python)"],
+  ["estada", "Prácticas"],
+  ["herramientas", "Herramientas"],
 ];
 export const TODAS = PARTES.map(([id]) => id);
 
@@ -58,7 +61,7 @@ export function filtrarPara(d, id) {
     // Nombres y colores de las materias hacen falta en todas partes; la teoría solo si ve "Materias"
     asignaturas: d.asignaturas.map((a) => (ve("materias") ? { ...a, email: undefined } : { id: a.id, nombre: a.nombre, color: a.color })),
     horario: ve("calendario") || ve("asistencia") ? d.horario : [],
-    eventos: ve("calendario") ? vis(d.eventos) : ve("asistencia") ? d.eventos.filter((ev) => ev.sinClase || TIPOS_SIN_CLASE.includes(ev.tipo)) : [],
+    eventos: ve("calendario") ? vis(d.eventos) : d.eventos.filter((ev) => (ve("asistencia") && (ev.sinClase || TIPOS_SIN_CLASE.includes(ev.tipo))) || (ve("estudio") && ev.tipo === "Examen" && visiblePara(ev, id))),
     trabajos: ve("trabajos") ? vis(d.trabajos) : [],
     apuntes: ve("materias") ? vis(d.apuntes) : [],
     posts: ve("diario") ? vis(d.posts) : [],
@@ -69,6 +72,10 @@ export function filtrarPara(d, id) {
     notas: ve("notas") ? d.notas || {} : {},
     notasPrimero: ve("notas") ? d.notasPrimero || [] : [],
     foro: d.foro || { fijados: [], cerrados: [], ocultos: [] },
+    tarjetas: ve("estudio") ? d.tarjetas || [] : [],
+    estudio: ve("estudio") ? d.estudio || [] : [],
+    python: ve("estudio") ? d.python || null : null,
+    estada: ve("estada") ? d.estada || null : null,
   };
 }
 

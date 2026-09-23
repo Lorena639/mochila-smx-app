@@ -174,7 +174,7 @@ export function vistaAsistencia(e) {
   const tarjetaHoy = `<section class="panel asistencia-hoy-grande estado-${est.clase}">
       <small>Hoy · ${esc(mayus(new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })))}</small>
       <p class="asistencia-hoy">${chipEstado(est.clase)}<span>${esc(est.texto)}</span></p>
-      ${est.entrada ? `<small class="texto-suave">Fichado con GPS a ${textoDistancia(est.entrada.distancia || 0)} del instituto${est.entrada.metodo === "auto" ? " · automático" : ""}</small>` : ""}
+      ${est.entrada ? `<small class="texto-suave">${origen(est.entrada)}</small>` : ""}
       ${e.editor ? botonesFichar(e, est) : ""}
     </section>`;
 
@@ -211,7 +211,7 @@ export function vistaAsistencia(e) {
   const lista = `<section class="panel"><div class="panel-titulo"><h2>${icono("reloj")} Últimos fichajes</h2></div>
     ${ultimos.length ? `<ul class="lista-fichajes">${ultimos.map((f) => `<li><b>${f.accion === "salida" ? "Salida" : "Entrada"}</b>
       <span>${esc(new Date(f.creado).toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" }))} · ${horaDe(f)}</span>
-      <small>a ${textoDistancia(f.distancia || 0)}${f.metodo === "auto" ? " · automático" : ""}</small></li>`).join("")}</ul>`
+      <small>${origen(f)}</small></li>`).join("")}</ul>`
       : `<p class="texto-suave">${e.editor ? "Todavía no has fichado nunca. El primer fichaje empieza a contar." : "Todavía no hay fichajes."}</p>`}</section>`;
 
   return `${cab}<div class="asistencia-zona">${tarjetaHoy}${tarjetaResumen}</div>
@@ -228,10 +228,25 @@ export function enlaceFichaje(d, auto = "") {
   return `${base}#${p.toString()}`;
 }
 
+// De dónde viene un fichaje (se enseña también a la familia, para que sea transparente)
+const origen = (f) => f.metodo === "manual" ? "Añadido a mano (sin GPS)"
+  : `Con GPS a ${textoDistancia(f.distancia || 0)} del instituto${f.metodo === "auto" ? " · automático" : ""}`;
+
 function ajustes(e) {
   const i = e.datos.config.instituto || {};
   const listo = i.lat && i.lon;
+  const ayer = new Date(); ayer.setDate(ayer.getDate() - 1);
   return `<section class="panel ajustes-fichaje">
+    <div class="panel-titulo"><h2>${icono("reloj")} Añadir un día pasado</h2></div>
+    <p class="nota">Para los días en que fuiste a clase pero aún no fichabas (o se te olvidó). Se guarda como <b>«añadido a mano»</b>, y así lo verá también tu familia.</p>
+    <form class="rejilla-form" data-form="fichaje-manual">
+      <div class="campo"><label for="fmF">Día</label><input id="fmF" type="date" name="fecha" required max="${iso(ayer)}"></div>
+      <div class="campo"><label for="fmE">Entrada</label><input id="fmE" type="time" name="entrada" required value="08:00"></div>
+      <div class="campo"><label for="fmS">Salida (opcional)</label><input id="fmS" type="time" name="salida"></div>
+      <div class="fila-botones"><button class="boton principal" type="submit">${icono("mas")} Añadir</button></div>
+    </form>
+  </section>
+  <section class="panel ajustes-fichaje">
     <div class="panel-titulo"><h2>${icono("ajustes")} Ajustes del fichaje</h2></div>
     <form class="rejilla-form" data-form="instituto">
       <p class="nota ancho">Ubicación del instituto. Lo más fácil: <b>cuando estés en Digitech</b>, pulsa «Estoy en el instituto».
@@ -266,3 +281,24 @@ function ajustes(e) {
     <p class="nota">El enlace abre una página que comprueba el GPS y ficha. Si no estás cerca, no ficha.</p>` : ""}
   </section>`;
 }
+
+// ---------- Añadir a mano un día pasado ----------
+export const formularios = {
+  async "fichaje-manual"(form, api) {
+    const f = new FormData(form);
+    const fecha = f.get("fecha");
+    const clave = api.datos().config.claves?.fichajes;
+    if (!clave) return api.aviso("Espera a que ponga «Todo guardado» y vuelve a probar.");
+    if (fecha >= iso(new Date())) return api.aviso("Solo se pueden añadir días anteriores a hoy. Hoy ficha con el botón.");
+    const ya = (api.estado().fichajes || []).some((x) => x.accion === "entrada" && iso(new Date(x.creado)) === fecha);
+    if (ya && !(await api.confirmar("Ese día ya tiene una entrada. ¿Añadir otra igualmente?"))) return;
+    const hora = (h) => new Date(`${fecha}T${h}:00`).toISOString();
+    try {
+      await comentarios.guardarFichaje({ tipo: "fichaje", accion: "entrada", hora: hora(f.get("entrada")), metodo: "manual" }, clave, hora(f.get("entrada")));
+      if (f.get("salida")) await comentarios.guardarFichaje({ tipo: "fichaje", accion: "salida", hora: hora(f.get("salida")), metodo: "manual" }, clave, hora(f.get("salida")));
+      form.reset();
+      api.aviso("Día añadido");
+      await api.recargarFichajes();
+    } catch (err) { api.aviso(err.message); }
+  },
+};

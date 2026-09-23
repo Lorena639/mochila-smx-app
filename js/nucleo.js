@@ -32,11 +32,11 @@ const SECCIONES = [
   { id: "notas", t: "Notas", ic: "nota", parte: "notas", grupo: "Estudios" },
   { id: "trabajos", t: "Trabajos", ic: "trabajos", parte: "trabajos", grupo: "Estudios" },
   { id: "formacion", t: "Formación", ic: "formacion", parte: "formacion", grupo: "Estudios" },
-  { id: "estudio", t: "Estudiar", ic: "estudiar", editor: true, grupo: "Estudios" },
-  { id: "herramientas", t: "Herramientas", ic: "herramienta", editor: true, grupo: "Estudios" },
+  { id: "estudio", t: "Estudiar", ic: "estudiar", parte: "estudio", grupo: "Estudios" },
+  { id: "herramientas", t: "Herramientas", ic: "herramienta", parte: "herramientas", grupo: "Estudios" },
   { id: "calendario", t: "Calendario", ic: "calendario", parte: "calendario", grupo: "Agenda" },
   { id: "asistencia", t: "Asistencia", ic: "ubicacion", parte: "asistencia", grupo: "Agenda" },
-  { id: "estada", t: "Prácticas", ic: "maletin", editor: true, grupo: "Agenda" },
+  { id: "estada", t: "Prácticas", ic: "maletin", parte: "estada", grupo: "Agenda" },
   { id: "comunidad", t: "Foro", ic: "comentario", comunidad: true, grupo: "Comunidad" },
   { id: "buzon", t: "Buzón privado", ic: "buzon", comunidad: true, grupo: "Comunidad" },
   { id: "ajustes", t: "Ajustes", ic: "ajustes", editor: true, grupo: "Gestión" },
@@ -45,12 +45,13 @@ const SECCIONES = [
 const RUTA_SECCION = { materia: "materias", python: "estudio" };
 
 // Módulos que responden a data-accion, data-form y data-cambio
-const MODULOS = [Notas, Faltas, Comunidad, Estudio, Herr, Py, Estada, Extras];
+const MODULOS = [Notas, Faltas, Comunidad, Estudio, Herr, Py, Estada, Extras, A];
 const ACCIONES = Object.assign({}, ...MODULOS.map((m) => m.acciones || {}));
 const FORMULARIOS = Object.assign({}, ...MODULOS.map((m) => m.formularios || {}));
 const CAMBIOS = Object.assign({}, ...MODULOS.map((m) => m.cambios || {}));
 // Lo único que puede hacer un visitante (el resto es solo de edición)
-const PERMITIDO_VISITANTE = new Set(["foro-nuevo", "foro-tema", "foro-respuesta", "buzon-enviar", "herr-cat", "avisos-sistema", "avisos-cerrar", "avisos-permiso"]);
+const PERMITIDO_VISITANTE = new Set(["foro-nuevo", "foro-tema", "foro-respuesta", "buzon-enviar", "herr-cat", "avisos-sistema", "avisos-cerrar", "avisos-permiso",
+  "py-ejecutar", "py-ej", "py-libre"]); // ver y probar, sin guardar nada
 
 // ---------- Tema claro / oscuro ----------
 const CLAVE_TEMA = "mochila-tema";
@@ -411,6 +412,7 @@ export function iniciar(raiz, ctx) {
     yo: () => (ctx.editor ? { nombre: e.datos.config.nombre || "Lorena", rol: "Autora" } : e.quienSoy || { nombre: "Invitado", rol: "" }),
     claves: clavesComunidad,
     recargarComunidad: () => cargarComunidad(),
+    recargarFichajes: () => cargarFichajes(),
   };
 
   // ---------- Editar (solo en el panel) ----------

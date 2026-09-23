@@ -74,7 +74,7 @@ export async function ejecutar(codigo, entradas = "") {
 export function vistaPython(e) {
   const d = e.datos;
   const p = d.python;
-  if (!p) return `<div class="vacio">Preparando…</div>`;
+  if (!p) return `<div class="vacio">${e.editor ? "Preparando…" : "Todavía no hay plan de Python."}</div>`;
   const examen = d.eventos.find((x) => x.id === "of-pendents") || d.eventos.find((x) => x.asignatura === "python" && x.tipo === "Examen" && x.fecha >= hoyIso());
   const dias = examen ? diasHasta(examen.fecha) : null;
   const hechos = p.temario.filter((t) => t.hecho).length;
@@ -99,17 +99,17 @@ export function vistaPython(e) {
         <textarea class="codigo" id="pyCodigo" spellcheck="false" data-cambio="py-codigo" data-ej="${esc(ej?.id || "")}" rows="12">${esc(codigo)}</textarea>
         <details class="entradas-py"><summary>Datos para input() (uno por línea)</summary><textarea id="pyEntradas" rows="3" class="codigo"></textarea></details>
         <div class="fila-botones"><button class="boton principal" type="button" data-accion="py-ejecutar">${icono("play")} Ejecutar</button>
-          ${ej ? `<button class="boton" type="button" data-accion="py-hecho" data-id="${esc(ej.id)}">${ej.hecho ? "Marcar como pendiente" : "Marcar como hecho"}</button>` : ""}
+          ${ej && e.editor ? `<button class="boton" type="button" data-accion="py-hecho" data-id="${esc(ej.id)}">${ej.hecho ? "Marcar como pendiente" : "Marcar como hecho"}</button>` : ""}
           <small class="texto-suave">${pyodide ? "Python listo" : "La primera vez tarda unos segundos en cargar"}</small></div>
         <pre class="salida" id="pySalida">${esc(e.pySalida || "")}</pre>
       </section>
       <div class="columna">
         <section class="panel"><div class="panel-titulo"><h2>${icono("materias")} Temario</h2><small class="texto-suave">${quedan} por repasar</small></div>
-          <ul class="checklist">${p.temario.map((t) => `<li><label><input type="checkbox" data-cambio="py-tema" data-id="${esc(t.id)}" ${t.hecho ? "checked" : ""}> <span>${esc(t.texto)}</span></label></li>`).join("")}</ul></section>
+          <ul class="checklist">${p.temario.map((t) => `<li><label><input type="checkbox" data-cambio="py-tema" data-id="${esc(t.id)}" ${t.hecho ? "checked" : ""} ${e.editor ? "" : "disabled"}> <span>${esc(t.texto)}</span></label></li>`).join("")}</ul></section>
         <section class="panel"><div class="panel-titulo"><h2>${icono("tarjetas")} Ejercicios</h2></div>
           <ul class="lista-ejercicios">${p.ejercicios.map((x) => `<li><button type="button" class="enlace-ver ${e.pyEjercicio === x.id ? "activo" : ""}" data-accion="py-ej" data-id="${esc(x.id)}">${esc(x.titulo)}</button>
             ${x.hecho ? `<span class="chip ok">Hecho</span>` : ""}</li>`).join("")}</ul>
-          <form class="form-inline" data-form="py-ej-nuevo"><input name="titulo" required placeholder="Nuevo ejercicio"><button class="boton" type="submit">${icono("mas")}</button></form></section>
+          ${e.editor ? `<form class="form-inline" data-form="py-ej-nuevo"><input name="titulo" required placeholder="Nuevo ejercicio"><button class="boton" type="submit">${icono("mas")}</button></form>` : ""}</section>
       </div>
     </div>`;
 }
