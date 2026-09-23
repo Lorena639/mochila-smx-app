@@ -15,6 +15,7 @@ import * as archivos from "./archivos.js";
 import { GRUPOS, activos as gruposActivos, paqueteGrupo, archivosAntiguos, abrirGrupos } from "./grupos.js";
 import { ponerCalendarioOficial, ponerNotasIniciales } from "./curso.js";
 import { crearClavesComunidad } from "./comunidad.js";
+import * as Push from "./push.js";
 
 const rutaGrupo = (id) => `data/grupos/${id}.enc.json`;
 
@@ -194,6 +195,7 @@ function marcarCambios() {
   temporizador = setTimeout(guardar, 2000);
 }
 
+let ultimoError = null;
 async function guardar() {
   clearTimeout(temporizador);
   if (guardando) { otraVez = true; return; }
@@ -208,7 +210,10 @@ async function guardar() {
     await publicarGrupos();
     sinGuardar = false;
     web?.ponerEstado("", "Todo guardado");
+    // Recordatorios de exámenes, entregas y faltas para las notificaciones del móvil
+    if (datos.config.avisosListos && datos.config.claves?.avisos) Push.programar(datos.config.claves.avisos, datos).catch(() => {});
   } catch (err) {
+    ultimoError = err;
     web?.ponerEstado("error", err.status === 409 || err.status === 422 ? "Cambiado en otro sitio: recarga" : "Sin conexión: se subirá luego");
   } finally {
     guardando = false;
@@ -309,25 +314,34 @@ function cambiarPassword() {
     const boton = dlg.querySelector("button[type=submit]");
     boton.disabled = true;
     try {
-      // Solo hay que recifrar los archivos antiguos (los nuevos llevan su propia clave)
-      const refs = [...(datos.config.archivos || []), ...["trabajos", "apuntes", "posts", "formacion"].flatMap((c) => datos[c].flatMap((x) => x.archivos || []))]
+      // Los archivos antiguos (cifrados con la contraseña) pasan a llevar su propia clave:
+      // así no dependen nunca más de la contraseña. Se prueba la actual y la nueva
+      // (por si un intento anterior se quedó a medias). Si uno no se puede abrir, se salta.
+      const refs = [...(datos.config.archivos || []), ...["trabajos", "apuntes", "posts", "formacion"].flatMap((c) => (datos[c] || []).flatMap((x) => x.archivos || []))]
         .filter((r) => !r.clave);
       let hechos = 0;
+      const fallidos = [];
       for (const r of refs) {
-        boton.textContent = `Recifrando archivos ${++hechos}/${refs.length}…`;
-        const ruta = `data/archivos/${r.id}.enc.json`;
-        const f = await gh.leer(ruta);
-        if (!f) continue;
-        const bytes = await descifrarBytes(JSON.parse(f.texto), password);
-        await gh.escribir(ruta, JSON.stringify(await cifrarBytes(bytes, p1)), f.sha, "Cambiar contraseña");
+        boton.textContent = `Preparando archivos ${++hechos}/${refs.length}…`;
+        try { await archivos.migrar(gh, r, [password, p1]); }
+        catch (e) { if (e.code === "mala_password") fallidos.push(r.nombre); else throw e; }
       }
+      boton.textContent = "Guardando…";
       password = p1;
+      sinGuardar = true;
+      while (guardando) await new Promise((ok) => setTimeout(ok, 300));
+      ultimoError = null;
       await guardar();
+      if (sinGuardar) throw ultimoError || new Error("No se han podido subir los datos a GitHub.");
       cerrar();
-      web.aviso("Contraseña cambiada. Recarga la página para seguir.");
-      setTimeout(() => location.reload(), 2500);
-    } catch {
-      err.textContent = "No se ha podido terminar. Revisa tu conexión e inténtalo otra vez.";
+      web.aviso(fallidos.length ? `Contraseña cambiada. No se han podido abrir: ${fallidos.join(", ")}` : "Contraseña cambiada. Recarga la página para seguir.");
+      setTimeout(() => location.reload(), fallidos.length ? 6000 : 2500);
+    } catch (e) {
+      console.error(e);
+      const detalle = e?.status === 401 || e?.status === 403 ? "El token de GitHub no tiene permiso de escritura."
+        : e?.status === 409 || e?.status === 422 ? "Los datos han cambiado en otro sitio: recarga la página."
+        : e?.message || String(e);
+      err.textContent = `No se ha podido terminar: ${String(detalle).replace(/\.?$/, ".")} Pulsa Cambiar para reintentar.`;
       boton.disabled = false; boton.textContent = "Cambiar";
     }
   });

@@ -6,13 +6,13 @@
 //  - Datos (data/): siempre se piden nuevos; si no hay internet,
 //    se usa la última copia guardada (sigue cifrada).
 // =============================================================
-const VERSION = "mochila-v6";
+const VERSION = "mochila-v8";
 const ARCHIVOS = [
   "./", "index.html", "css/estilos.css", "css/app.css",
   "js/app.js", "js/nucleo.js", "js/comun.js", "js/vistas.js", "js/iconos.js",
   "js/archivos.js", "js/comentarios.js", "js/config.js", "js/grupos.js", "js/asistencia.js",
   "fichar.html", "js/fichar.js", "js/curso.js", "js/notas.js", "js/faltas.js", "js/comunidad.js", "js/estudio.js",
-  "js/herramientas.js", "js/python.js", "js/estada.js", "js/extras.js", "js/editor.js", "js/formularios.js",
+  "js/herramientas.js", "js/python.js", "js/estada.js", "js/extras.js", "js/editor.js", "js/formularios.js", "js/push.js", "js/herr-redes.js", "js/herr-sistemas.js", "js/herr-seguridad.js", "js/herr-hardware.js", "js/biblioteca.js",
   "manifest.webmanifest", "img/icono-192.png", "img/icono-512.png", "img/favicon.png",
   "img/logo-digitech.png", "img/logo-digitech-blanco.png",
 ];
@@ -50,4 +50,27 @@ self.addEventListener("fetch", (e) => {
       return r;
     }).catch(() => caches.match(e.request))
   );
+});
+
+// ---------- Notificaciones push (llegan aunque la app esté cerrada) ----------
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { texto: e.data?.text() }; }
+  e.waitUntil(self.registration.showNotification(d.titulo || "Mochila SMX", {
+    body: d.texto || "",
+    icon: "img/icono-192.png",
+    badge: "img/icono-192.png",
+    tag: d.tag || undefined,
+    data: { url: d.url || "./" },
+  }));
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const destino = new URL(e.notification.data?.url || "./", self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((ventanas) => {
+    const misma = ventanas.find((v) => v.url.split("#")[0] === destino.split("#")[0]);
+    if (misma) { misma.navigate(destino).catch(() => {}); return misma.focus(); }
+    return self.clients.openWindow(destino);
+  }));
 });

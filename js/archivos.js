@@ -22,11 +22,15 @@ export async function subir(gh, archivo) {
 
 // Archivos antiguos (cifrados con la contraseña): los pasa a clave propia
 // para que los grupos puedan abrirlos. Cambia ref.clave. Devuelve true si lo ha hecho.
+// Acepta una contraseña o una lista (prueba cada una).
 export async function migrar(gh, ref, password) {
   if (ref.clave) return false;
   const f = await gh.leer(ruta(ref.id));
   if (!f) return false;
-  const bytes = await descifrarBytes(JSON.parse(f.texto), password);
+  const cifrado = JSON.parse(f.texto);
+  let bytes = null;
+  for (const p of [].concat(password)) { try { bytes = await descifrarBytes(cifrado, p); break; } catch {} }
+  if (!bytes) { const e = new Error("Contraseña incorrecta"); e.code = "mala_password"; throw e; }
   const clave = claveAleatoria();
   await gh.escribir(ruta(ref.id), JSON.stringify(await cifrarConClave(bytes, clave)), f.sha, `Preparar archivo ${ref.nombre} para grupos`);
   ref.clave = clave;

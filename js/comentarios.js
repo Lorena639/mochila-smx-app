@@ -60,7 +60,7 @@ async function descifrarFila(f, acceso) {
 // Devuelve { porPost: { idPost: [ {id, tipo, nombre, rol, texto, disp, fecha} ] }, visitas: [...] }
 export async function cargar(acceso) {
   if (!activos()) return { porPost: {}, visitas: [] };
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios?select=id,post,datos,creado&post=not.in.(${POST_FICHAJES},_foro,_buzon)&order=creado.asc&limit=3000`, { headers: cabeceras() });
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios?select=id,post,datos,creado&post=not.in.(${POST_FICHAJES},_foro,_buzon,_buzon_r)&order=creado.asc&limit=3000`, { headers: cabeceras() });
   if (!r.ok) throw new Error("No se han podido cargar los comentarios.");
   const porPost = {};
   const visitas = [];
@@ -81,17 +81,17 @@ export async function cargar(acceso) {
 }
 
 // ---------- Escribir ----------
-async function guardarFila(post, obj, acceso) {
+async function guardarFila(post, obj, acceso, aviso = null) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios`, {
     method: "POST",
     headers: { ...cabeceras(), Prefer: "return=minimal" },
-    body: JSON.stringify({ post, datos: await cifrarFila({ ...obj, disp: dispositivo() }, acceso) }),
+    body: JSON.stringify({ post, datos: { ...(await cifrarFila({ ...obj, disp: dispositivo() }, acceso)), ...(aviso ? { aviso } : {}) } }),
   });
   if (!r.ok) throw new Error("No se ha podido guardar. Revisa tu conexión.");
 }
 
 export const enviar = (post, { nombre, rol, texto }, acceso) =>
-  guardarFila(post, { tipo: "comentario", nombre: nombre.slice(0, 60), rol: (rol || "").slice(0, 40), texto: texto.slice(0, 2000) }, acceso);
+  guardarFila(post, { tipo: "comentario", nombre: nombre.slice(0, 60), rol: (rol || "").slice(0, 40), texto: texto.slice(0, 2000) }, acceso, "comentario");
 
 export const darLike = (post, { nombre, rol }, acceso) =>
   guardarFila(post, { tipo: "like", nombre: nombre.slice(0, 60), rol: (rol || "").slice(0, 40) }, acceso);
@@ -117,7 +117,9 @@ export async function guardarFichaje(registro, claveFichajes, creado = null) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios`, {
     method: "POST",
     headers: { ...cabeceras(), Prefer: "return=minimal" },
-    body: JSON.stringify({ post: POST_FICHAJES, datos: await cifrarFila({ ...registro, disp: dispositivo() }, { clave: claveFichajes }), ...(creado ? { creado } : {}) }),
+    // "aviso" (sin cifrar) solo dice si es entrada o salida, para la notificación push.
+    // Los fichajes de días pasados no lo llevan: no avisan.
+    body: JSON.stringify({ post: POST_FICHAJES, datos: { ...(await cifrarFila({ ...registro, disp: dispositivo() }, { clave: claveFichajes })), ...(creado ? {} : { aviso: registro.accion }) }, ...(creado ? { creado } : {}) }),
   });
   if (!r.ok) throw new Error("No se ha podido guardar el fichaje. Revisa tu conexión.");
 }

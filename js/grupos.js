@@ -89,8 +89,11 @@ export function paqueteGrupo(d, id) {
     claves: {
       comentarios: d.config.claves?.comentarios,
       ...(partes.includes("asistencia") ? { fichajes: d.config.claves?.fichajes } : {}),
-      foro: { todos: d.config.claves?.foro?.todos, [id]: d.config.claves?.foro?.[id] },
+      // Foro: cada grupo solo tiene la clave de SU grupo (no ve lo de los demás)
+      foro: { [id]: d.config.claves?.foro?.[id] },
       buzonPublica: d.config.claves?.buzon?.publica,
+      // Notificaciones en el móvil: solo Familia
+      ...(id === "familia" && d.config.claves?.avisos ? { avisos: d.config.claves.avisos } : {}),
     },
   };
 }

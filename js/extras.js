@@ -7,6 +7,7 @@ import { clasesDeFecha, aMin, iso } from "./curso.js";
 import { calcularFaltas, propuestas } from "./faltas.js";
 import { pendientes } from "./estudio.js";
 import { descargar } from "./estada.js";
+import * as Push from "./push.js";
 
 // ---------- Centro de avisos ----------
 // Devuelve [{nivel: "mal"|"aviso"|"info", texto, ir}]
@@ -52,12 +53,16 @@ const CLAVE_VISTO = "mochila-foro-visto";
 const leerVisto = () => { try { return localStorage.getItem(CLAVE_VISTO) || "2000"; } catch { return "2000"; } };
 export const marcarForoVisto = () => { try { localStorage.setItem(CLAVE_VISTO, new Date().toISOString()); } catch {} };
 
-export function htmlPanelAvisos(avisos) {
+export function htmlPanelAvisos(avisos, pushVisitante = false) {
   return `<div class="panel-avisos" role="dialog" aria-label="Avisos">
     <div class="pa-cab"><b>Avisos</b><button type="button" class="boton icono peque" data-accion="avisos-cerrar" aria-label="Cerrar">${icono("cerrar")}</button></div>
     ${avisos.length ? avisos.map((a) => `<button type="button" class="aviso-item ${a.nivel}" data-ir="${esc(a.ir)}"><span class="punto"></span><span>${esc(a.texto)}</span></button>`).join("")
       : `<p class="texto-suave">Todo al día. No tienes avisos.</p>`}
     ${"Notification" in window && Notification.permission === "default" ? `<button type="button" class="enlace-ver" data-accion="avisos-sistema">Mostrar también como notificaciones del sistema</button>` : ""}
+    ${pushVisitante ? `<div class="pa-push"><b>Notificaciones en este móvil</b>
+      <p class="texto-suave">Fichajes, exámenes, entregas, faltas y mensajes nuevos, aunque la app esté cerrada.</p>
+      <div class="fila-botones"><button type="button" class="boton principal peque" data-accion="push-activar">Activar</button>
+        <button type="button" class="boton peque" data-accion="push-desactivar">Desactivar</button></div></div>` : ""}
   </div>`;
 }
 
@@ -140,6 +145,7 @@ export function vistaAjustes(e) {
         ${"Notification" in window ? (Notification.permission === "granted" ? `<p><span class="chip ok">Activadas</span> Al abrir la app te llegará una notificación con lo importante del día.</p>`
           : `<button class="boton" type="button" data-accion="avisos-sistema">Activar notificaciones del sistema</button>`) : `<p class="texto-suave">Este navegador no admite notificaciones.</p>`}
       </section>
+      ${htmlPush(c)}
       <section class="panel"><div class="panel-titulo"><h2>${icono("descargar")} Copia de seguridad</h2></div>
         <p class="texto-suave">Descarga todo tu contenido (sin los archivos adjuntos, que siguen en GitHub). Guárdala en un sitio seguro: va <b>sin cifrar</b>.</p>
         <div class="fila-botones"><button class="boton" type="button" data-accion="copia-descargar">${icono("descargar")} Descargar copia</button>
@@ -150,7 +156,69 @@ export function vistaAjustes(e) {
     </div>`;
 }
 
+// ---------- Notificaciones en el móvil (push) ----------
+function htmlPush(c) {
+  const clave = c.claves?.avisos;
+  setTimeout(async () => {
+    const el = document.getElementById("pushEstado");
+    if (el) el.innerHTML = (await Push.activo()) ? `<span class="chip ok">Activadas en este dispositivo</span>` : `<span class="chip">No activadas en este dispositivo</span>`;
+  }, 0);
+  if (!clave) return `<section class="panel"><div class="panel-titulo"><h2>${icono("campana")} Notificaciones en el móvil</h2></div>
+      <p class="texto-suave">Te llegan a ti y a Familia aunque la app esté cerrada: fichajes, exámenes, entregas, faltas, foro y buzón.</p>
+      <div class="fila-botones"><button class="boton principal" type="button" data-accion="push-preparar">Preparar notificaciones</button></div></section>`;
+  return `<section class="panel"><div class="panel-titulo"><h2>${icono("campana")} Notificaciones en el móvil</h2></div>
+      <p id="pushEstado"></p>
+      <div class="campo"><label for="pushClave">Clave de avisos (para Supabase)</label>
+        <div class="fila-botones"><input id="pushClave" readonly value="${esc(clave)}" style="flex:1;min-width:0;font-family:monospace">
+          <button class="boton" type="button" data-accion="push-copiar">Copiar</button></div></div>
+      <div class="fila-botones">
+        <button class="boton principal" type="button" data-accion="push-activar">Activar en este dispositivo</button>
+        <button class="boton" type="button" data-accion="push-probar">Enviar prueba</button>
+        <button class="boton" type="button" data-accion="push-desactivar">Desactivar aquí</button></div>
+      <p class="nota-pie">Familia las activa desde la campana de avisos. En iPhone, primero hay que añadir la app a la pantalla de inicio.</p></section>`;
+}
+
+const pushAcciones = {
+  "push-preparar"(b, api) {
+    const c = api.datos().config;
+    c.claves ||= {};
+    c.claves.avisos ||= Push.nuevaClave();
+    api.cambiar();
+    api.aviso("Clave creada. Cópiala y ponla en Supabase (AVISOS_CLAVE).");
+  },
+  async "push-copiar"(b, api) {
+    const v = document.getElementById("pushClave")?.value || "";
+    try { await navigator.clipboard.writeText(v); api.aviso("Clave copiada"); }
+    catch { document.getElementById("pushClave")?.select(); api.aviso("Selecciónala y cópiala con Ctrl+C"); }
+  },
+  async "push-activar"(b, api) {
+    const clave = Push.claveDe(api);
+    b.disabled = true;
+    try {
+      await Push.activar(clave, api.yo().nombre);
+      if (api.editor) { api.datos().config.avisosListos = true; api.cambiar(false); }
+      api.aviso("Notificaciones activadas en este dispositivo");
+    } catch (err) { api.aviso(err.message, 6000); }
+    b.disabled = false;
+    api.pintar();
+  },
+  async "push-desactivar"(b, api) {
+    try { await Push.desactivar(Push.claveDe(api)); api.aviso("Notificaciones desactivadas en este dispositivo"); }
+    catch (err) { api.aviso(err.message, 6000); }
+    api.pintar();
+  },
+  async "push-probar"(b, api) {
+    b.disabled = true;
+    try {
+      const r = await Push.probar(Push.claveDe(api));
+      api.aviso(r.enviados ? `Prueba enviada a ${r.enviados} ${r.enviados === 1 ? "dispositivo" : "dispositivos"}` : "No hay ningún dispositivo apuntado todavía", r.enviados ? undefined : 5000);
+    } catch (err) { api.aviso(err.message, 6000); }
+    b.disabled = false;
+  },
+};
+
 export const acciones = {
+  ...pushAcciones,
   "ics"(b, api) { exportarICS(api.datos()); api.aviso("Calendario descargado. Impórtalo en Google Calendar."); },
   "copia-descargar"(b, api) { descargarCopia(api.datos()); },
   async "avisos-sistema"(b, api) {

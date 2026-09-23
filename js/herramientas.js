@@ -3,9 +3,16 @@
 //   · Calculadora de subredes IPv4 (con los pasos explicados)
 //   · Conversor binario / decimal / hexadecimal
 //   · Chuletas: Linux, Windows, Cisco IOS y puertos
+//   · Y el resto: herr-redes, herr-sistemas, herr-seguridad,
+//     herr-hardware y biblioteca (programación)
 // =============================================================
 import { esc, normalizar } from "./comun.js";
 import { icono } from "./iconos.js";
+import * as Redes from "./herr-redes.js";
+import * as Sis from "./herr-sistemas.js";
+import * as Seg from "./herr-seguridad.js";
+import * as Hw from "./herr-hardware.js";
+import * as Biblio from "./biblioteca.js";
 
 // ---------- Subredes ----------
 const aNum = (ip) => ip.split(".").reduce((a, o) => (a << 8) + Number(o), 0) >>> 0;
@@ -169,14 +176,44 @@ function htmlChuletas(e) {
   </section>`;
 }
 
-export function vistaHerramientas(e, pestana = "subredes") {
-  const tab = (id, t) => `<button type="button" class="segmento" aria-pressed="${pestana === id}" data-ir="herramientas/${id}">${t}</button>`;
-  return `<header class="cabecera-seccion"><div><h1>Herramientas</h1><p>Para las prácticas de redes y sistemas. Funcionan sin internet.</p></div></header>
-    <div class="segmentos">${tab("subredes", "Subredes")}${tab("conversor", "Conversor")}${tab("chuletas", "Chuletas")}</div>
-    ${pestana === "conversor" ? htmlConversor(e) : pestana === "chuletas" ? htmlChuletas(e) : htmlSubred(e)}`;
+// ---------- Todas las herramientas ----------
+const BASE = [
+  { id: "subredes", t: "Subredes IPv4", grupo: "Redes", desc: "Red, broadcast, hosts, paso a paso", html: htmlSubred },
+  { id: "conversor", t: "Conversor de bases", grupo: "Referencia", desc: "Binario, decimal, hexadecimal", html: htmlConversor },
+  { id: "chuletas", t: "Chuletas de comandos", grupo: "Referencia", desc: "Linux, Windows, Cisco y puertos", html: htmlChuletas },
+  { id: "biblioteca", t: "Biblioteca de programación", grupo: "Referencia", desc: "HTML, CSS, JS, Python, Java, C, C++, SQL…", html: (e) => Biblio.vistaBiblioteca(e) },
+];
+export function lista() {
+  const orden = ["Redes", "Sistemas", "Seguridad", "Hardware", "Referencia"];
+  const todas = [...BASE, ...Redes.HERRAMIENTAS, ...Sis.HERRAMIENTAS, ...Seg.HERRAMIENTAS, ...Hw.HERRAMIENTAS];
+  return todas.sort((a, b) => orden.indexOf(a.grupo) - orden.indexOf(b.grupo));
+}
+const ICONO_GRUPO = { Redes: "red", Sistemas: "terminal", Seguridad: "candado", Hardware: "herramienta", Referencia: "materias" };
+
+export function vistaHerramientas(e, pestana = "") {
+  e.herr ||= {};
+  const todas = lista();
+  const h = todas.find((x) => x.id === pestana);
+  if (!h) {
+    const grupos = [...new Set(todas.map((x) => x.grupo))];
+    return `<header class="cabecera-seccion"><div><h1>Herramientas</h1><p>Para las prácticas de redes, sistemas y programación. Casi todas funcionan sin internet.</p></div></header>
+      ${grupos.map((g) => `<h2 class="subtitulo-seccion">${icono(ICONO_GRUPO[g] || "herramienta")} ${g}</h2>
+        <div class="rejilla-herr">${todas.filter((x) => x.grupo === g).map((x) => `<a class="tarjeta-herr" href="#herramientas/${x.id}"><b>${esc(x.t)}</b><span>${esc(x.desc)}</span>${x.internet ? `<small class="chip">Necesita internet</small>` : ""}</a>`).join("")}</div>`).join("")}`;
+  }
+  const hermanas = todas.filter((x) => x.grupo === h.grupo);
+  return `<button type="button" class="volver" data-ir="herramientas">${icono("flecha-izq")} Herramientas</button>
+    <div class="segmentos segmentos-scroll">${hermanas.map((x) => `<button type="button" class="segmento" aria-pressed="${x.id === h.id}" data-ir="herramientas/${x.id}">${esc(x.t)}</button>`).join("")}</div>
+    ${h.html(e)}`;
 }
 
 export const acciones = {
   "herr-cat"(b, api) { const e = api.estado(); e.herr = { ...(e.herr || {}), cat: b.dataset.cat, buscar: "" }; api.pintar(); },
+  ...Redes.acciones, ...Sis.acciones, ...Seg.acciones, ...Hw.acciones, ...Biblio.acciones,
 };
-// Los campos data-herr se guardan al escribir (lo gestiona el núcleo)
+export const formularios = { ...Redes.formularios };
+
+// Campos con nombre especial (tablas, config Cisco…). Devuelve true si lo ha guardado.
+export function alEscribir(t, k, v) {
+  return Sis.alEscribir(t, k, v) || Hw.alEscribir(t, k, v);
+}
+export const alArchivo = (input, api) => Seg.alArchivo(input, api);

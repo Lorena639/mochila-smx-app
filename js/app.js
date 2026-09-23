@@ -51,7 +51,7 @@ async function entrar(password) {
     secciones,
     grupo,
     claveFichajes: claves.fichajes || null,
-    clavesComunidad: grupo ? { foro: claves.foro || {}, buzonPublica: claves.buzonPublica } : undefined,
+    clavesComunidad: grupo ? { foro: claves.foro || {}, buzonPublica: claves.buzonPublica, avisos: claves.avisos || null } : undefined,
     editor: false,
     salir() { sesion.del(CLAVE_SESION); location.hash = ""; location.reload(); },
     cambiarQuien() { comentarios.olvidarQuienSoy(); location.reload(); },

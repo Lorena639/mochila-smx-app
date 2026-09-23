@@ -3,7 +3,7 @@
 //
 //  FORO: cada tema se cifra con la clave de su público:
 //    "todos" (lo leen todos los grupos) o "familia" / "profes" / "amigos".
-//    Cada grupo solo recibe su clave y la de "todos".
+//    Cada grupo solo recibe la clave de SU grupo: no ve los mensajes de los demás.
 //  BUZÓN: los mensajes se cifran con la CLAVE PÚBLICA de Lorena (RSA-OAEP).
 //    Solo el modo edición tiene la clave privada: nadie más puede leerlos.
 // =============================================================
@@ -41,7 +41,7 @@ export async function crearClavesComunidad(c) {
 export function clavesDe(ctx, datos) {
   if (ctx.clavesComunidad) return ctx.clavesComunidad; // visitante de un grupo
   const c = datos.config.claves || {};
-  return { foro: c.foro || {}, buzonPublica: c.buzon?.publica, buzonPrivada: ctx.editor ? c.buzon?.privada : null };
+  return { foro: c.foro || {}, buzonPublica: c.buzon?.publica, buzonPrivada: ctx.editor ? c.buzon?.privada : null, avisos: ctx.editor ? c.avisos || null : null };
 }
 
 // ---------- Foro: leer y escribir ----------
@@ -73,12 +73,48 @@ async function publicarForo(obj, publico, claves) {
 async function importarPublica(jwk) { return crypto.subtle.importKey("jwk", jwk, { name: "RSA-OAEP", hash: "SHA-256" }, false, ["encrypt"]); }
 async function importarPrivada(jwk) { return crypto.subtle.importKey("jwk", jwk, { name: "RSA-OAEP", hash: "SHA-256" }, false, ["decrypt"]); }
 
-export async function enviarBuzon(mensaje, jwkPublica) {
+// Cada conversación ("hilo") tiene un id y una clave aleatoria que viajan DENTRO
+// del mensaje cifrado. Quien escribe se los guarda en su dispositivo para poder
+// leer tus respuestas; nadie más puede leerlas.
+const CLAVE_MIOS = "mochila-buzon-mios";
+export function misHilos() { try { return JSON.parse(localStorage.getItem(CLAVE_MIOS) || "[]"); } catch { return []; } }
+function guardarMisHilos(l) { try { localStorage.setItem(CLAVE_MIOS, JSON.stringify(l.slice(-50))); } catch {} }
+
+export async function enviarBuzon(mensaje, jwkPublica, hiloPrevio = null) {
   if (!jwkPublica) throw new Error("El buzón aún no está preparado.");
+  const hilo = hiloPrevio || { id: nuevoId() + nuevoId(), clave: claveAleatoria() };
   const clave = claveAleatoria();
-  const cifrado = await cifrarConClave(enc.encode(JSON.stringify({ ...mensaje, disp: sb.dispositivo() })), clave);
+  const cifrado = await cifrarConClave(enc.encode(JSON.stringify({ ...mensaje, hilo: hilo.id, hiloClave: hilo.clave, disp: sb.dispositivo() })), clave);
   const k = await crypto.subtle.encrypt({ name: "RSA-OAEP" }, await importarPublica(jwkPublica), deB64(clave));
   await sb.insertarFila("_buzon", { v: "rsa", k: aB64(k), ...cifrado });
+  const mios = misHilos();
+  let h = mios.find((x) => x.id === hilo.id);
+  if (!h) { h = { id: hilo.id, clave: hilo.clave, mensajes: [] }; mios.push(h); }
+  h.mensajes.push({ texto: mensaje.texto, fecha: new Date().toISOString() });
+  guardarMisHilos(mios);
+}
+
+// Tu respuesta a un hilo (solo la lee quien te escribió)
+export async function responderBuzon(hilo, texto, nombre) {
+  const cifrado = await cifrarConClave(enc.encode(JSON.stringify({ texto, nombre })), hilo.clave);
+  await sb.insertarFila("_buzon_r", { h: hilo.id, ...cifrado });
+}
+
+// Respuestas de los hilos que conozco: Map idHilo → [{ id, texto, nombre, fecha }]
+export async function cargarRespuestasBuzon(hilos) {
+  const mapa = new Map();
+  if (!hilos.length) return mapa;
+  const porId = new Map(hilos.map((h) => [h.id, h.clave]));
+  for (const f of await sb.leerFilas("_buzon_r", 2000)) {
+    const clave = porId.get(f.datos?.h);
+    if (!clave) continue;
+    try {
+      const x = JSON.parse(dec.decode(await descifrarConClave(f.datos, clave)));
+      if (!mapa.has(f.datos.h)) mapa.set(f.datos.h, []);
+      mapa.get(f.datos.h).push({ id: f.id, fecha: f.creado, texto: x.texto, nombre: x.nombre });
+    } catch { /* ignorar */ }
+  }
+  return mapa;
 }
 
 export async function cargarBuzon(jwkPrivada) {
@@ -108,10 +144,11 @@ const iniciales = (n = "?") => n.trim().split(/\s+/).map((p) => p[0]).join("").s
 const colorAvatar = (rol = "") => /profe/i.test(rol) ? "v" : /famil/i.test(rol) ? "m" : /amig|compa/i.test(rol) ? "n" : "";
 export const avatar = (nombre, rol, peque = false) => `<span class="avatar ${peque ? "p" : ""} ${colorAvatar(rol)}">${esc(iniciales(nombre))}</span>`;
 const chipRol = (rol) => rol ? `<span class="chip ${/profe/i.test(rol) ? "acento" : ""}">${esc(rol)}</span>` : "";
-const chipPublico = (p) => p === "todos" ? "" : `<span class="chip aviso">${icono("candado")}Solo ${esc(grupoDe(p)?.nombre || p)}</span>`;
+const chipPublico = (p) => p === "todos" ? `<span class="chip">Todos (antiguo)</span>` : `<span class="chip aviso">${icono("candado")}Solo ${esc(grupoDe(p)?.nombre || p)}</span>`;
 
 function opcionesPublico(e, claves) {
-  const disponibles = ["todos", ...GRUPOS.map((g) => g.id)].filter((p) => claves.foro?.[p]);
+  // Cada grupo solo habla dentro de su grupo ("todos" ya no se usa para temas nuevos)
+  const disponibles = GRUPOS.map((g) => g.id).filter((p) => claves.foro?.[p]);
   return disponibles.map((p) => `<option value="${p}">${p === "todos" ? "Todos" : `Solo ${grupoDe(p).nombre}`}</option>`).join("");
 }
 
@@ -213,18 +250,50 @@ function htmlFormBuzon(e, claves) {
     </form>`;
 }
 
+const burbuja = (texto, fecha, mia, quien = "") => `<div class="msj-burbuja ${mia ? "mia" : ""}">
+    ${quien ? `<b>${esc(quien)}</b>` : ""}<div>${esc(texto).replace(/\n/g, "<br>")}</div><small>${hace(fecha)}</small></div>`;
+
 export function vistaBuzon(e, claves) {
+  const nombre = e.datos.config.nombre || "Lorena";
   if (!e.editor) {
-    return `<header class="cabecera-seccion"><div><h1>Escribir a ${esc(e.datos.config.nombre || "Lorena")}</h1><p>Feedback, consejos o lo que quieras decirle en privado.</p></div></header>
-      <section class="panel buzon grande">${htmlFormBuzon(e, claves)}</section>`;
+    const resp = e.respuestasBuzon || new Map();
+    const hilos = misHilos().slice().reverse();
+    return `<header class="cabecera-seccion"><div><h1>Escribir a ${esc(nombre)}</h1><p>Feedback, consejos o lo que quieras decirle en privado.</p></div></header>
+      <section class="panel buzon grande">${htmlFormBuzon(e, claves)}</section>
+      ${hilos.length ? `<h2 class="subtitulo-seccion">Tus mensajes</h2><div class="mensajes">${hilos.map((h) => {
+        const todo = [...h.mensajes.map((m) => ({ ...m, mia: true })), ...(resp.get(h.id) || []).map((r) => ({ ...r, mia: false }))].sort((a, b) => a.fecha.localeCompare(b.fecha));
+        return `<article class="panel mensaje hilo">${todo.map((m) => burbuja(m.texto, m.fecha, m.mia, m.mia ? "" : m.nombre || nombre)).join("")}
+          <form data-form="buzon-seguir" class="form-inline"><input type="hidden" name="hilo" value="${esc(h.id)}">
+            <input name="texto" required maxlength="4000" placeholder="Responder…" aria-label="Responder"><button class="boton" type="submit">Enviar</button></form></article>`;
+      }).join("")}</div>
+      <p class="nota-pie">Tus mensajes y las respuestas solo se ven en este dispositivo.</p>` : ""}`;
   }
   const lista = e.buzon;
-  return `<header class="cabecera-seccion"><div><h1>Buzón privado</h1><p>Solo tú puedes leer estos mensajes.</p></div></header>
-    ${!lista ? `<div class="vacio">Cargando…</div>` : !lista.length ? `<div class="vacio">Todavía no tienes mensajes.</div>`
-      : `<div class="mensajes">${lista.map((m) => `<article class="panel mensaje ${e.datos.buzonLeidos.includes(m.id) ? "" : "nuevo"}">
-          <header>${avatar(m.nombre, m.rol)}<div><b>${esc(m.nombre || "Anónimo")}</b> ${chipRol(m.rol)}<small class="texto-suave">${hace(m.fecha)}</small></div>
-            ${e.datos.buzonLeidos.includes(m.id) ? "" : `<button class="boton peque" type="button" data-accion="buzon-leido" data-id="${esc(m.id)}">Marcar como leído</button>`}</header>
-          <div class="texto">${esc(m.texto).replace(/\n/g, "<br>")}</div></article>`).join("")}</div>`}`;
+  if (!lista) return `<header class="cabecera-seccion"><div><h1>Buzón privado</h1></div></header><div class="vacio">Cargando…</div>`;
+  // Agrupar por conversación (los mensajes antiguos, sin hilo, van sueltos)
+  const grupos = new Map();
+  for (const m of lista.slice().reverse()) {
+    const k = m.hilo || "m-" + m.id;
+    if (!grupos.has(k)) grupos.set(k, []);
+    grupos.get(k).push(m);
+  }
+  const resp = e.respuestasBuzon || new Map();
+  const convers = [...grupos.entries()].map(([k, ms]) => ({ k, ms, ult: ms[ms.length - 1].fecha, hilo: ms[0].hilo }))
+    .sort((a, b) => b.ult.localeCompare(a.ult));
+  return `<header class="cabecera-seccion"><div><h1>Buzón privado</h1><p>Solo tú puedes leer estos mensajes. Tus respuestas solo las lee quien te escribió.</p></div></header>
+    ${!convers.length ? `<div class="vacio">Todavía no tienes mensajes.</div>`
+      : `<div class="mensajes">${convers.map(({ ms, hilo }) => {
+        const m0 = ms[0];
+        const noLeidos = ms.filter((m) => !e.datos.buzonLeidos.includes(m.id));
+        const todo = [...ms.map((m) => ({ ...m, mia: false })), ...(hilo ? resp.get(hilo) || [] : []).map((r) => ({ ...r, mia: true }))].sort((a, b) => a.fecha.localeCompare(b.fecha));
+        return `<article class="panel mensaje hilo ${noLeidos.length ? "nuevo" : ""}">
+          <header>${avatar(m0.nombre, m0.rol)}<div><b>${esc(m0.nombre || "Anónimo")}</b> ${chipRol(m0.rol)}</div>
+            ${noLeidos.length ? `<button class="boton peque" type="button" data-accion="buzon-leido" data-id="${esc(noLeidos.map((m) => m.id).join(","))}">Marcar como leído</button>` : ""}</header>
+          ${todo.map((m) => burbuja(m.texto, m.fecha, m.mia)).join("")}
+          ${hilo ? `<form data-form="buzon-responder" class="form-inline"><input type="hidden" name="hilo" value="${esc(hilo)}">
+            <input name="texto" required maxlength="4000" placeholder="Responder a ${esc(m0.nombre || "esta persona")}…" aria-label="Responder"><button class="boton principal" type="submit">Responder</button></form>`
+            : `<p class="nota-pie">Mensaje antiguo: no se puede responder desde aquí.</p>`}</article>`;
+      }).join("")}</div>`}`;
 }
 
 // ---------- Acciones ----------
@@ -236,7 +305,7 @@ export const acciones = {
     if (i >= 0) lista.splice(i, 1); else lista.push(b.dataset.id);
     api.cambiar();
   },
-  "buzon-leido"(b, api) { api.datos().buzonLeidos.push(b.dataset.id); api.cambiar(); },
+  "buzon-leido"(b, api) { const l = api.datos().buzonLeidos; for (const id of b.dataset.id.split(",")) if (!l.includes(id)) l.push(id); api.cambiar(); },
 };
 
 export const formularios = {
@@ -268,7 +337,33 @@ export const formularios = {
       await enviarBuzon({ nombre: yo.nombre, rol: yo.rol, texto: String(f.get("texto")).trim() }, api.claves().buzonPublica);
       form.reset();
       api.aviso("Mensaje enviado. Solo lo podrá leer Lorena.");
-      if (api.editor) api.recargarComunidad();
+      if (api.editor) api.recargarComunidad(); else api.pintar();
+    } catch (err) { api.aviso(err.message); }
+  },
+  // Visitante: seguir una conversación
+  async "buzon-seguir"(form, api) {
+    const f = new FormData(form);
+    const h = misHilos().find((x) => x.id === f.get("hilo"));
+    if (!h) return;
+    const yo = api.yo();
+    try {
+      await enviarBuzon({ nombre: yo.nombre, rol: yo.rol, texto: String(f.get("texto")).trim() }, api.claves().buzonPublica, h);
+      api.aviso("Mensaje enviado");
+      api.pintar();
+    } catch (err) { api.aviso(err.message); }
+  },
+  // Tú: responder a quien te escribió
+  async "buzon-responder"(form, api) {
+    const f = new FormData(form);
+    const m = (api.estado().buzon || []).find((x) => x.hilo === f.get("hilo") && x.hiloClave);
+    if (!m) return api.aviso("No se puede responder a este mensaje.");
+    try {
+      await responderBuzon({ id: m.hilo, clave: m.hiloClave }, String(f.get("texto")).trim(), api.yo().nombre);
+      const l = api.datos().buzonLeidos;
+      for (const x of api.estado().buzon) if (x.hilo === m.hilo && !l.includes(x.id)) l.push(x.id);
+      api.cambiar(false);
+      await api.recargarComunidad();
+      api.aviso("Respuesta enviada");
     } catch (err) { api.aviso(err.message); }
   },
 };

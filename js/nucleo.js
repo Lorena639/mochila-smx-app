@@ -50,7 +50,7 @@ const ACCIONES = Object.assign({}, ...MODULOS.map((m) => m.acciones || {}));
 const FORMULARIOS = Object.assign({}, ...MODULOS.map((m) => m.formularios || {}));
 const CAMBIOS = Object.assign({}, ...MODULOS.map((m) => m.cambios || {}));
 // Lo único que puede hacer un visitante (el resto es solo de edición)
-const PERMITIDO_VISITANTE = new Set(["foro-nuevo", "foro-tema", "foro-respuesta", "buzon-enviar", "herr-cat", "avisos-sistema", "avisos-cerrar", "avisos-permiso",
+const PERMITIDO_VISITANTE = new Set(["foro-nuevo", "foro-tema", "foro-respuesta", "buzon-enviar", "herr-cat", "avisos-sistema", "avisos-cerrar", "avisos-permiso", "push-activar", "push-desactivar", "buzon-seguir",
   "py-ejecutar", "py-ej", "py-libre"]); // ver y probar, sin guardar nada
 
 // ---------- Tema claro / oscuro ----------
@@ -94,7 +94,7 @@ export function iniciar(raiz, ctx) {
   const acceso = () => ctx.acceso || (e.datos.config.claves?.comentarios ? { clave: e.datos.config.claves.comentarios } : ctx.password);
   const claveFichajes = () => ctx.claveFichajes || (ctx.editor ? e.datos.config.claves?.fichajes : null);
   const clavesComunidad = () => {
-    if (e.comoGrupo) { const k = e.datos.config.claves?.foro || {}; return { foro: { todos: k.todos, [e.comoGrupo]: k[e.comoGrupo] }, buzonPublica: e.datos.config.claves?.buzon?.publica }; }
+    if (e.comoGrupo) { const k = e.datos.config.claves?.foro || {}; return { foro: { [e.comoGrupo]: k[e.comoGrupo] }, buzonPublica: e.datos.config.claves?.buzon?.publica }; }
     return Comunidad.clavesDe(ctx, e.datos);
   };
   const esEditor = () => ctx.editor && !e.comoGrupo;
@@ -222,7 +222,7 @@ export function iniciar(raiz, ctx) {
       case "formacion": html = V.vistaFormacion(v); break;
       case "estudio": html = a === "examen" ? Estudio.vistaExamen(v, b) : Estudio.vistaEstudio(v, a || "tarjetas"); break;
       case "python": html = Py.vistaPython(v); break;
-      case "herramientas": html = Herr.vistaHerramientas(v, a || "subredes"); break;
+      case "herramientas": html = Herr.vistaHerramientas(v, a || ""); break;
       case "calendario": html = V.vistaCalendario(v, a === "horario" ? "horario" : "mes"); break;
       case "asistencia": html = A.vistaAsistencia(v); break;
       case "estada": html = Estada.vistaEstada(v); break;
@@ -336,6 +336,7 @@ export function iniciar(raiz, ctx) {
       if (veParte("calendario")) buscar(d.eventos, (x) => `${x.titulo} ${x.tipo}`, () => "calendario", "Fecha", "calendario");
       if (veParte("formacion")) buscar(d.formacion, (x) => `${x.titulo} ${x.entidad || ""}`, () => "formacion", "Formación", "formacion");
       buscar(e.foro?.temas || [], (x) => `${x.titulo} ${x.texto}`, (x) => `comunidad/${x.id}`, "Foro", "comentario");
+      buscar(Herr.lista().map((x) => ({ ...x, titulo: x.t })), (x) => `${x.t} ${x.desc}`, (x) => `herramientas/${x.id}`, "Herramienta", "herramienta");
       if (esEditor()) buscar(Herr.CHULETAS ? Object.values(Herr.CHULETAS).flatMap((cc) => cc.items.map((it) => ({ titulo: `${it.cmd} — ${it.desc}` }))) : [], (x) => x.titulo, () => "herramientas/chuletas", "Chuleta", "terminal");
     }
     $("#paletaRes").innerHTML = `${respuesta ? `<div class="paleta-respuesta">${icono("chispa")}<div>${respuesta}</div></div>` : ""}
@@ -350,7 +351,7 @@ export function iniciar(raiz, ctx) {
     ins.hidden = !lista.length;
     ins.textContent = importantes > 9 ? "9+" : String(importantes);
     if (abrir !== undefined) e.avisosAbiertos = abrir;
-    $("#panelAvisos").innerHTML = e.avisosAbiertos ? Extras.htmlPanelAvisos(lista) : "";
+    $("#panelAvisos").innerHTML = e.avisosAbiertos ? Extras.htmlPanelAvisos(lista, !esEditor() && clavesComunidad()?.avisos) : "";
     return lista;
   }
 
@@ -567,7 +568,7 @@ export function iniciar(raiz, ctx) {
 
     // Acciones de los módulos
     if (acc && ACCIONES[acc]) {
-      if (!esEditor() && !PERMITIDO_VISITANTE.has(acc)) return;
+      if (!esEditor() && !PERMITIDO_VISITANTE.has(acc) && !acc.startsWith("herr-")) return;
       return ACCIONES[acc](b, api);
     }
 
@@ -662,7 +663,10 @@ export function iniciar(raiz, ctx) {
     const t = ev.target;
     if (t.matches("[data-buscar]") || t.matches("[data-herr]")) {
       if (t.matches("[data-buscar]")) e.filtros.texto = t.value;
-      else e.herr[t.dataset.herr] = t.value;
+      else {
+        const v = t.type === "checkbox" ? t.checked : t.value;
+        if (!Herr.alEscribir(e.herr, t.dataset.herr, v)) e.herr[t.dataset.herr] = v;
+      }
       const sel = t.id ? `#${CSS.escape(t.id)}` : "[data-buscar]";
       const pos = t.selectionStart;
       pintar(true);
@@ -672,7 +676,8 @@ export function iniciar(raiz, ctx) {
   });
   raiz.addEventListener("change", (ev) => {
     const t = ev.target;
-    if (t.matches("[data-herr]") && t.tagName === "SELECT") { e.herr[t.dataset.herr] = t.value; return pintar(true); }
+    if (t.matches("[data-herr]") && t.tagName === "SELECT") { if (!Herr.alEscribir(e.herr, t.dataset.herr, t.value)) e.herr[t.dataset.herr] = t.value; return pintar(true); }
+    if (t.matches("[data-herr-archivo]")) return Herr.alArchivo(t, api);
     if (t.matches("[data-restaurar]") && esEditor()) return restaurar(t);
     const k = t.dataset?.cambio;
     if (!k || !CAMBIOS[k]) return;
@@ -710,7 +715,7 @@ export function iniciar(raiz, ctx) {
     const k = form.dataset.form;
     if (k && FORMULARIOS[k]) {
       ev.preventDefault();
-      if (!esEditor() && !PERMITIDO_VISITANTE.has(k)) return;
+      if (!esEditor() && !PERMITIDO_VISITANTE.has(k) && !k.startsWith("herr-")) return;
       const boton = form.querySelector("button[type=submit]");
       if (boton) boton.disabled = true;
       try { await FORMULARIOS[k](form, api); } finally { if (boton) boton.disabled = false; }
@@ -750,6 +755,10 @@ export function iniciar(raiz, ctx) {
     if (!comentarios.activos()) return;
     try { e.foro = await Comunidad.cargarForo(clavesComunidad()); } catch { e.foro = { temas: [], respuestas: new Map() }; }
     if (ctx.editor) { try { e.buzon = await Comunidad.cargarBuzon(e.datos.config.claves?.buzon?.privada); } catch { e.buzon = []; } }
+    try {
+      const hilos = ctx.editor ? (e.buzon || []).filter((m) => m.hilo && m.hiloClave).map((m) => ({ id: m.hilo, clave: m.hiloClave })) : Comunidad.misHilos();
+      e.respuestasBuzon = await Comunidad.cargarRespuestasBuzon(hilos);
+    } catch { e.respuestasBuzon = new Map(); }
     if (["comunidad", "buzon"].includes(ruta[0])) pintar(true); else pintarAvisos();
   }
 
