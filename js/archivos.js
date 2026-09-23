@@ -3,19 +3,35 @@
 //  (trabajos, apuntes en PDF, certificados, fotos de los posts).
 //  Cada archivo se guarda CIFRADO en data/archivos/<id>.enc.json
 // =============================================================
-import { cifrarBytes, descifrarBytes, nuevoId } from "./comun.js";
+import { descifrarBytes, nuevoId, claveAleatoria, cifrarConClave, descifrarConClave } from "./comun.js";
 
 export const TAMANO_MAXIMO = 20 * 1024 * 1024; // 20 MB por archivo
 const ruta = (id) => `data/archivos/${id}.enc.json`;
 
 // Sube un archivo (solo en el panel). Devuelve la referencia que se guarda en los datos.
-export async function subir(gh, archivo, password) {
+// Cada archivo lleva su propia clave aleatoria (ref.clave), que viaja dentro de los datos cifrados.
+export async function subir(gh, archivo) {
   if (archivo.size > TAMANO_MAXIMO) throw new Error(`«${archivo.name}» pesa más de 20 MB.`);
   const id = nuevoId();
+  const clave = claveAleatoria();
   const bytes = new Uint8Array(await archivo.arrayBuffer());
-  const cifrado = await cifrarBytes(bytes, password);
+  const cifrado = await cifrarConClave(bytes, clave);
   await gh.escribir(ruta(id), JSON.stringify(cifrado), null, `Subir archivo ${archivo.name}`);
-  return { id, nombre: archivo.name, tipo: archivo.type || "application/octet-stream", tamano: archivo.size };
+  return { id, nombre: archivo.name, tipo: archivo.type || "application/octet-stream", tamano: archivo.size, clave };
+}
+
+// Archivos antiguos (cifrados con la contraseña): los pasa a clave propia
+// para que los grupos puedan abrirlos. Cambia ref.clave. Devuelve true si lo ha hecho.
+export async function migrar(gh, ref, password) {
+  if (ref.clave) return false;
+  const f = await gh.leer(ruta(ref.id));
+  if (!f) return false;
+  const bytes = await descifrarBytes(JSON.parse(f.texto), password);
+  const clave = claveAleatoria();
+  await gh.escribir(ruta(ref.id), JSON.stringify(await cifrarConClave(bytes, clave)), f.sha, `Preparar archivo ${ref.nombre} para grupos`);
+  ref.clave = clave;
+  cache.delete(ref.id);
+  return true;
 }
 
 export async function borrar(gh, ref) {
@@ -27,9 +43,10 @@ const cache = new Map();
 export async function urlDe(ref, password) {
   if (cache.has(ref.id)) return cache.get(ref.id);
   const promesa = (async () => {
-    const r = await fetch(`${ruta(ref.id)}?v=${ref.id}`);
+    const r = await fetch(`${ruta(ref.id)}?v=${ref.id}${ref.clave ? "-k" : ""}`);
     if (!r.ok) throw new Error("El archivo aún no está disponible. Prueba en un par de minutos.");
-    const bytes = await descifrarBytes(await r.json(), password);
+    const cifrado = await r.json();
+    const bytes = ref.clave ? await descifrarConClave(cifrado, ref.clave) : await descifrarBytes(cifrado, password);
     return URL.createObjectURL(new Blob([bytes], { type: ref.tipo }));
   })();
   cache.set(ref.id, promesa);

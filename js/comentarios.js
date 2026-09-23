@@ -10,6 +10,7 @@ import { descifrar, nuevoId } from "./comun.js";
 
 export const activos = () => Boolean(SUPABASE_URL && SUPABASE_CLAVE);
 export const POST_VISITAS = "_visitas";
+export const POST_FICHAJES = "_fichajes";
 
 // Sirve tanto la clave nueva ("publishable", sb_publishable_…) como la antigua ("anon", eyJ…)
 const cabeceras = () => ({
@@ -19,48 +20,54 @@ const cabeceras = () => ({
 });
 
 // ---------- Cifrado rápido ----------
-// Una sola clave para todos los comentarios (se calcula una vez),
-// así cargar 200 "me gusta" no tarda nada.
+// "acceso" puede ser la contraseña (texto) o { clave: "base64" }.
+// Con la contraseña se deriva siempre la misma clave (sal fija), así que
+// quien entra con un grupo recibe esa clave ya calculada y lee lo mismo.
+export const SAL_COMENTARIOS = "mochila-smx-comentarios-v2";
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 const aB64 = (b) => btoa(String.fromCharCode(...new Uint8Array(b)));
 const deB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
-let clave = null;
-let claveDe = null;
-async function claveComentarios(password) {
-  if (clave && claveDe === password) return clave;
-  const base = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
-  clave = await crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt: enc.encode("mochila-smx-comentarios-v2"), iterations: 310000, hash: "SHA-256" },
-    base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
-  claveDe = password;
-  return clave;
+const claves = new Map();
+function claveDe(acceso) {
+  const id = typeof acceso === "string" ? "p|" + acceso : "k|" + acceso.clave;
+  if (!claves.has(id)) {
+    claves.set(id, (async () => {
+      if (typeof acceso !== "string") return crypto.subtle.importKey("raw", deB64(acceso.clave), "AES-GCM", false, ["encrypt", "decrypt"]);
+      const base = await crypto.subtle.importKey("raw", enc.encode(acceso), "PBKDF2", false, ["deriveKey"]);
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt: enc.encode(SAL_COMENTARIOS), iterations: 310000, hash: "SHA-256" },
+        base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+    })());
+  }
+  return claves.get(id);
 }
-async function cifrarFila(obj, password) {
+async function cifrarFila(obj, acceso) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const datos = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await claveComentarios(password), enc.encode(JSON.stringify(obj)));
+  const datos = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await claveDe(acceso), enc.encode(JSON.stringify(obj)));
   return { v: 2, iv: aB64(iv), datos: aB64(datos) };
 }
-async function descifrarFila(f, password) {
+async function descifrarFila(f, acceso) {
   if (f.v === 2) {
-    const plano = await crypto.subtle.decrypt({ name: "AES-GCM", iv: deB64(f.iv) }, await claveComentarios(password), deB64(f.datos));
+    const plano = await crypto.subtle.decrypt({ name: "AES-GCM", iv: deB64(f.iv) }, await claveDe(acceso), deB64(f.datos));
     return JSON.parse(dec.decode(plano));
   }
-  return descifrar(f, password); // formato antiguo
+  if (typeof acceso !== "string") throw new Error("formato antiguo");
+  return descifrar(f, acceso); // formato antiguo
 }
 
 // ---------- Leer ----------
 // Devuelve { porPost: { idPost: [ {id, tipo, nombre, rol, texto, disp, fecha} ] }, visitas: [...] }
-export async function cargar(password) {
+export async function cargar(acceso) {
   if (!activos()) return { porPost: {}, visitas: [] };
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios?select=id,post,datos,creado&order=creado.asc&limit=2000`, { headers: cabeceras() });
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios?select=id,post,datos,creado&post=not.in.(${POST_FICHAJES},_foro,_buzon)&order=creado.asc&limit=3000`, { headers: cabeceras() });
   if (!r.ok) throw new Error("No se han podido cargar los comentarios.");
   const porPost = {};
   const visitas = [];
   const likesVistos = new Set();
   for (const f of await r.json()) {
     try {
-      const c = { id: f.id, fecha: f.creado, tipo: "comentario", ...(await descifrarFila(f.datos, password)) };
+      const c = { id: f.id, fecha: f.creado, tipo: "comentario", ...(await descifrarFila(f.datos, acceso)) };
       if (c.tipo === "visita") { visitas.push(c); continue; }
       if (c.tipo === "like") {
         const k = `${f.post}|${c.disp || c.nombre}`;
@@ -74,32 +81,78 @@ export async function cargar(password) {
 }
 
 // ---------- Escribir ----------
-async function guardarFila(post, obj, password) {
+async function guardarFila(post, obj, acceso) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios`, {
     method: "POST",
     headers: { ...cabeceras(), Prefer: "return=minimal" },
-    body: JSON.stringify({ post, datos: await cifrarFila({ ...obj, disp: dispositivo() }, password) }),
+    body: JSON.stringify({ post, datos: await cifrarFila({ ...obj, disp: dispositivo() }, acceso) }),
   });
   if (!r.ok) throw new Error("No se ha podido guardar. Revisa tu conexión.");
 }
 
-export const enviar = (post, { nombre, rol, texto }, password) =>
-  guardarFila(post, { tipo: "comentario", nombre: nombre.slice(0, 60), rol: (rol || "").slice(0, 40), texto: texto.slice(0, 2000) }, password);
+export const enviar = (post, { nombre, rol, texto }, acceso) =>
+  guardarFila(post, { tipo: "comentario", nombre: nombre.slice(0, 60), rol: (rol || "").slice(0, 40), texto: texto.slice(0, 2000) }, acceso);
 
-export const darLike = (post, { nombre, rol }, password) =>
-  guardarFila(post, { tipo: "like", nombre: nombre.slice(0, 60), rol: (rol || "").slice(0, 40) }, password);
+export const darLike = (post, { nombre, rol }, acceso) =>
+  guardarFila(post, { tipo: "like", nombre: nombre.slice(0, 60), rol: (rol || "").slice(0, 40) }, acceso);
 
 // Apunta una visita como mucho una vez al día por dispositivo
-export async function apuntarVisita(yo, password) {
+export async function apuntarVisita(yo, acceso) {
   if (!activos() || !yo) return;
   const hoy = new Date().toISOString().slice(0, 10);
   const clave = "mochila-ultima-visita";
   try { if (localStorage.getItem(clave) === hoy) return; } catch {}
   try {
-    await guardarFila(POST_VISITAS, { tipo: "visita", nombre: yo.nombre, rol: yo.rol || "" }, password);
+    await guardarFila(POST_VISITAS, { tipo: "visita", nombre: yo.nombre, rol: yo.rol || "" }, acceso);
     localStorage.setItem(clave, hoy);
   } catch {}
 }
+
+// ---------- Fichajes (asistencia) ----------
+// Van en la misma tabla, con su propia clave: solo la tienen tú y los
+// grupos a los que dejes ver "Asistencia".
+export async function guardarFichaje(registro, claveFichajes) {
+  if (!activos()) throw new Error("Falta configurar Supabase.");
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios`, {
+    method: "POST",
+    headers: { ...cabeceras(), Prefer: "return=minimal" },
+    body: JSON.stringify({ post: POST_FICHAJES, datos: await cifrarFila({ ...registro, disp: dispositivo() }, { clave: claveFichajes }) }),
+  });
+  if (!r.ok) throw new Error("No se ha podido guardar el fichaje. Revisa tu conexión.");
+}
+
+export async function cargarFichajes(claveFichajes) {
+  if (!activos() || !claveFichajes) return [];
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios?select=id,datos,creado&post=eq.${POST_FICHAJES}&order=creado.desc&limit=1000`, { headers: cabeceras() });
+  if (!r.ok) throw new Error("No se han podido cargar los fichajes.");
+  const lista = [];
+  for (const f of await r.json()) {
+    try {
+      const d = await descifrarFila(f.datos, { clave: claveFichajes });
+      if (d.tipo === "fichaje") lista.push({ id: f.id, creado: f.creado, ...d });
+    } catch { /* no es nuestro: se ignora */ }
+  }
+  return lista;
+}
+
+// ---------- Filas genéricas (foro, buzón…) ----------
+// "datos" ya va cifrado por quien llama
+export async function insertarFila(post, datos) {
+  if (!activos()) throw new Error("Falta configurar Supabase.");
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios`, {
+    method: "POST",
+    headers: { ...cabeceras(), Prefer: "return=minimal" },
+    body: JSON.stringify({ post, datos }),
+  });
+  if (!r.ok) throw new Error("No se ha podido enviar. Revisa tu conexión.");
+}
+export async function leerFilas(post, limite = 1000) {
+  if (!activos()) return [];
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios?select=id,datos,creado&post=eq.${encodeURIComponent(post)}&order=creado.asc&limit=${limite}`, { headers: cabeceras() });
+  if (!r.ok) throw new Error("No se ha podido cargar.");
+  return r.json();
+}
+export { dispositivo };
 
 // ---------- "Cuenta" del dispositivo ----------
 // Nombre y rol de quien usa este navegador (sin email, se queda guardado aquí)

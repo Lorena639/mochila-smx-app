@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Fichar · Mochila SMX</title>
+  <meta name="theme-color" content="#0A1120" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#F3F6FB" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="img/favicon.png">
+  <link rel="apple-touch-icon" href="img/icono-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="css/estilos.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script>try{var t=localStorage.getItem("mochila-tema");if(t==="claro"||t==="oscuro")document.documentElement.dataset.tema=t}catch(e){}</script>
+</head>
+<body>
+  <!-- Página de fichaje rápido: la abre la automatización del móvil al llegar al instituto.
+       La clave va en el enlace, detrás de "#", así que nunca se envía a ningún servidor. -->
+  <main class="acceso">
+    <div class="acceso-caja fichar-caja">
+      <img class="logo" src="img/logo-digitech.png" alt="Digitech">
+      <h1 id="titulo">Fichar</h1>
+      <p id="estado" class="fichar-estado" aria-live="polite">Preparando…</p>
+      <div class="fichar-botones" id="botones" hidden>
+        <button class="boton principal" type="button" data-accion="entrada">Fichar entrada</button>
+        <button class="boton" type="button" data-accion="salida">Fichar salida</button>
+      </div>
+      <p class="nota" id="pie"></p>
+    </div>
+  </main>
+  <script type="module" src="js/fichar.js"></script>
+</body>
+</html>

@@ -1,127 +1,112 @@
-# 🎒 Mochila SMX
+# Mochila SMX · App
 
-**Mi portfolio y organizador del ciclo de Sistemas Microinformáticos y Redes (2º SMX · Digitech Barcelona).**
+**Mi app del ciclo de Sistemas Microinformáticos y Redes (2º SMX · Digitech Barcelona).**
 
-Una app web instalable donde guardo mi día a día en clase, los apuntes de cada materia, mis trabajos, la formación extra (Cisco, certificaciones…) y mi calendario y horario. La pueden ver mis profes y mi familia con una contraseña, y todo el contenido va **cifrado**.
+Una app instalable (PC y móvil) para organizar el curso: día a día en fotos, apuntes, notas por RA, trabajos, asistencia, calendario oficial, herramientas de estudio y una comunidad para recibir consejos. Mi familia, mis profes y mis amigos entran cada uno con **su propia contraseña** y ven solo lo que yo decido. Todo va **cifrado**.
 
-🔗 **Ver la app:** https://lorena639.github.io/mochila-smx-app/
-✏️ **Modo edición (solo yo):** https://lorena639.github.io/mochila-smx-app/admin.html
+- App: https://lorena639.github.io/mochila-smx-app/
+- Modo edición (solo yo): https://lorena639.github.io/mochila-smx-app/admin.html
+
+> La web `mochila-smx` es un proyecto aparte y no cambia con esta app.
 
 ---
 
-## ✨ Qué tiene
+## Qué tiene
 
-| Sección | Qué hay |
+| Apartado | Qué hay |
 |---|---|
-| 🏠 **Inicio** | Resumen del día: mis clases de hoy, próximas entregas y exámenes, tablón con notas de clase, últimas publicaciones y trabajos. Fila de "historias" con cada materia. |
-| 📸 **Día a día** | Estilo Instagram: perfil con foto, destacados por etiqueta, cuadrícula de fotos o feed con carrusel, visor a pantalla completa, **me gusta** y **comentarios**. |
-| 📚 **Materias** | Una ficha por asignatura con **apuntes** (texto con formato + PDFs), **trabajos** de esa materia e **información** (teoría general y horas de clase). |
-| 🗂️ **Trabajos** | Todos mis trabajos con archivos adjuntos, filtrables por materia y estado. Al escribir el título, la app **propone sola** la materia y el tipo. |
-| 🎓 **Formación** | Cursos de Cisco NetAcad, certificaciones y titulaciones, con horas y certificado. |
-| 📅 **Calendario** | Vista mensual con entregas, exámenes y festivos + **horario semanal** a escala. |
+| **Inicio** | Panel del día: asistencia, nota media, clases de hoy, próximo día de clase, fechas, faltas por módulo y «Pregúntame». |
+| **Día a día** | Publicaciones con fotos (carrusel, visor, me gusta y comentarios), filtradas por etiqueta. |
+| **Materias** | Apuntes (editor tipo Word, exportar a Word/PDF, importar .docx), trabajos, información y **Notas y RA** de cada módulo. |
+| **Notas** | Calculadora con las normas del centro: RA, 40 % actividades + 60 % pruebas (las dos ≥ 5), Estada 10 %, nota del ciclo por horas. Dice **qué nota necesitas** para aprobar. |
+| **Trabajos** | Con archivos, editor de texto, exportar y la casilla **«¿Has usado IA?»**. |
+| **Formación** | Cisco, certificaciones, cursos. |
+| **Estudiar** | Tarjetas de repaso (repetición espaciada), temporizador de estudio con estadísticas y **modo examen**. |
+| **Plan Python** | Cuenta atrás al examen de pendientes (18-20/01), temario, ejercicios y **consola de Python** en el navegador. |
+| **Herramientas** | Calculadora de subredes con los pasos, conversor binario/hex y chuletas de Linux, Windows, Cisco IOS y puertos. |
+| **Calendario** | Calendario académico 2026-27 ya cargado (festivos, vacaciones, juntas, boletines, extraordinarias), trimestres y horario. Exporta a Google Calendar. |
+| **Asistencia** | Fichaje por GPS, faltas por módulo con el **15 % / 20 %** del NOFC, retrasos (3 = 1 falta), semáforo y email de justificación. |
+| **Prácticas** | Diario de la Estada a l'empresa: horas y tareas, descargable para la memoria. |
+| **Comunidad** | Foro (Consejos, Preguntas, Recursos, Sugerencias) y **buzón privado** que solo leo yo. |
+| **Ajustes** | Perfil, grupos, fechas del curso, avisos y copia de seguridad. |
 
-**Además:**
-- 📲 **Se instala como app** en PC y móvil (PWA) y funciona sin conexión.
-- 👤 **Cuentas sin email:** quien entra pone su nombre y si es profe, familia o compañero; su dispositivo lo recuerda.
-- 👀 **Quién ha entrado:** en modo edición veo las últimas visitas.
-- 💾 **Guardado automático** a los 2 segundos de cada cambio, con copia local si se va internet.
-- 🗜️ Las fotos se **comprimen solas** antes de subirse.
-- 🌙 **Modo oscuro** automático.
-
----
-
-## 🔒 Cómo funciona la seguridad
-
-El repositorio es público (GitHub Pages gratis lo necesita), pero **el contenido no se puede leer sin la contraseña**:
-
-- Los datos (`data/datos.enc.json`), los archivos (`data/archivos/`) y los comentarios se cifran en el navegador con **AES-256-GCM**, usando una clave derivada de la contraseña con **PBKDF2 (310.000 iteraciones, SHA-256)**.
-- La contraseña **no se guarda en ningún sitio**: ni en el código, ni en GitHub, ni en Supabase.
-- Para **editar** hace falta además un **token de GitHub** con permiso solo sobre este repositorio. Sin él nadie puede cambiar nada.
-- Los visitantes solo pueden **leer**, comentar y dar "me gusta".
-
-> ⚠️ El nombre que pone quien comenta no se verifica: es una "cuenta" de confianza, pensada para profes y familia.
+Además: modo claro/oscuro, buscador y asistente con **Ctrl + K**, campana de avisos, menú lateral en el PC y barra inferior en el móvil.
 
 ---
 
-## 🛠️ Tecnologías
+## Quién ve qué
 
-- **HTML, CSS y JavaScript** puros (módulos ES), sin frameworks ni compilación.
-- **Web Crypto API** para el cifrado.
-- **GitHub Pages** para publicar y la **API de GitHub** para guardar desde el navegador.
-- **Supabase** (REST) para comentarios, me gusta y visitas.
-- **Service Worker + Web App Manifest** para instalarla como app.
+En **Ajustes → Compartir por grupos**:
+
+| Grupo | Por defecto ve |
+|---|---|
+| Familia | Todo, incluidas notas y asistencia |
+| Profes | Día a día, materias, trabajos, formación, calendario y tablón |
+| Amigos | Día a día y formación |
+
+- Cada grupo tiene su contraseña; al entrar, la contraseña decide el grupo.
+- Se publica un archivo cifrado por grupo (`data/grupos/`) con **solo** lo que puede ver.
+- En cada publicación, trabajo, apunte o fecha, **«Visible para»** permite afinar.
+- **Ver como…** enseña la app exactamente como la ve cada grupo.
+- Estudiar, Herramientas, Prácticas, Python y Ajustes son solo míos.
+- Mi contraseña principal abre todo: no se la doy a nadie.
+
+## Asistencia
+
+1. En Digitech: **Asistencia → Ajustes del fichaje → Estoy en el instituto → Guardar ubicación**.
+2. Fichar entrada/salida desde Inicio o Asistencia (solo funciona a menos de 200 m).
+3. Opcional: fichaje automático con el **enlace de llegada** en Atajos (iPhone) o MacroDroid (Android).
+4. Si un día no ficho o llego tarde, la app lo propone en **«Revisa estos días»**; al confirmarlo cuenta en el porcentaje del módulo.
+
+Las horas de cada módulo salen del horario × el calendario oficial (142 días de clase). La asistencia oficial es la de los profes en Alexia; esto es mi control.
+
+## Avisos
+
+- **Campana**: exámenes y entregas de hoy y mañana, trámites que acaban, faltas al límite, días por revisar, mensajes del buzón y temas nuevos del foro.
+- **Notificaciones del sistema**: al abrir la app, un aviso con lo importante del día (se activan en Ajustes).
+- **Google Calendar**: Calendario → «Exportar a Google Calendar» (.ics). Exámenes y entregas llevan recordatorio la tarde anterior.
 
 ---
 
-## 📁 Estructura
+## Seguridad
+
+- Datos y copias por grupo cifrados en el navegador con **AES-256-GCM** (clave derivada con **PBKDF2**, 310.000 iteraciones).
+- Cada archivo subido lleva su propia clave aleatoria; cada grupo solo recibe las claves de lo que ve.
+- Foro: cada tema se cifra con la clave de su público (todos / familia / profes / amigos).
+- Buzón: cifrado con **clave pública (RSA-OAEP)**; solo el modo edición tiene la privada.
+- Fichajes: clave propia, solo para los grupos que ven Asistencia. No se guarda la posición, solo la distancia.
+- Para editar hace falta además el **token de GitHub**.
+- La **copia de seguridad** va sin cifrar e incluye las contraseñas de los grupos: guárdala en un sitio seguro.
+
+Límites conocidos: el nombre de quien comenta no se verifica; los comentarios de posts usan una clave común a todos los grupos; el GPS de un móvil se puede falsear.
+
+---
+
+## Estructura
 
 ```
 mochila-smx-app/
-├── index.html                   → Entrada para visitantes (contraseña + "¿quién eres?")
-├── admin.html                   → Entrada para editar (token de GitHub + contraseña)
-├── manifest.webmanifest         → App para visitantes
-├── manifest-admin.webmanifest   → App de edición (se abre en admin.html)
-├── sw.js                        → Service worker: app instalable y sin conexión
-├── css/
-│   └── estilos.css              → Todo el diseño (colores de Digitech)
+├── index.html · admin.html · fichar.html · sw.js · manifest*.webmanifest
+├── css/  estilos.css (base) · app.css (diseño de la app)
 ├── js/
-│   ├── config.js                → ⚙️ Datos de Supabase
-│   ├── app.js                   → Arranque para visitantes
-│   ├── admin.js                 → Arranque del modo edición + guardado automático
-│   ├── nucleo.js                → El "motor": menú, navegación, clics, visor de fotos
-│   ├── vistas.js                → Dibuja cada sección
-│   ├── formularios.js           → Ventanas de añadir / editar
-│   ├── archivos.js              → Subir, comprimir y descargar archivos cifrados
-│   ├── comentarios.js           → Comentarios, me gusta y visitas (Supabase)
-│   ├── github.js                → Lee y escribe en este repositorio
-│   ├── comun.js                 → Cifrado, fechas, formato de texto, clasificador
-│   └── iconos.js                → Iconos SVG
-├── data/
-│   ├── datos.enc.json           → Todo el contenido, CIFRADO
-│   └── archivos/                → Fotos, PDFs y trabajos, CIFRADOS
-└── img/                         → Logos e iconos de la app
+│   ├── app.js / admin.js      → entrada visitante / modo edición (guardado automático, grupos)
+│   ├── nucleo.js              → marco, menú, navegación, clics, buscador y avisos
+│   ├── vistas.js              → Inicio, Día a día, Materias, Trabajos, Formación, Calendario
+│   ├── formularios.js · editor.js → ventanas de edición y editor tipo Word
+│   ├── curso.js               → calendario 2026-27, horas por módulo y RA oficiales (IC10)
+│   ├── notas.js · faltas.js · asistencia.js · fichar.js
+│   ├── comunidad.js · grupos.js · comentarios.js
+│   ├── estudio.js · python.js · herramientas.js · estada.js · extras.js
+│   ├── archivos.js · github.js · comun.js · iconos.js
+│   └── config.js              → datos de Supabase (solo la clave publishable)
+├── data/                      → contenido CIFRADO (datos, grupos, archivos)
+└── img/
 ```
 
----
+## Configuración
 
-## 📖 Guía de uso (para mí)
-
-### Editar
-1. Abre **admin.html** (o la app instalada de edición).
-2. Pega el **token de GitHub** y marca *Recordar en este ordenador*.
-3. Escribe la **contraseña de la web**.
-4. Usa los botones **+ Añadir** y ✏️ de cada sección. Se guarda solo: arriba pone **Todo guardado**.
-
-### Escribir con formato (apuntes, posts, descripciones)
-```
-## Título de un apartado
-- punto de una lista
-**negrita**   *cursiva*   `comando`
-[texto del enlace](https://…)
-```
-Para un bloque de código, escríbelo entre dos líneas con tres acentos graves (```).
-
-### Compartir
-- Profes y familia: enlace **https://lorena639.github.io/mochila-smx-app/** + la contraseña (por separado).
-- **Nunca** compartir el token ni el enlace de `admin.html`.
-
-### Instalar como app
-- **PC (Edge/Chrome):** ··· → Aplicaciones → Instalar este sitio como aplicación.
-- **Android (Chrome):** ⋮ → Instalar aplicación (o *Crear acceso directo*).
-- **iPhone (Safari):** Compartir → Añadir a pantalla de inicio.
-
-### Actualizar el código
-Subir los archivos nuevos con **Add file → Upload files** (respetando las carpetas `css` y `js`) → **Commit changes**. En 1–2 minutos le llega a todo el mundo, sin reinstalar nada.
-
----
-
-## ⚙️ Configuración
-
-### Token de GitHub
-*Settings → Developer settings → Personal access tokens → Fine-grained tokens* → con acceso a **mochila-smx-app** y permiso **Contents: Read and write**.
-
-### Supabase (comentarios, me gusta y visitas)
-Tabla creada con:
+- **Token de GitHub:** fine-grained, solo `mochila-smx-app`, permiso *Contents: Read and write*.
+- **Supabase:** tabla `comentarios` (la misma para comentarios, fichajes, foro y buzón), con RLS de lectura e inserción para `anon`. La clave **publishable** va en `js/config.js`; la *secret* nunca.
 
 ```sql
 create table comentarios (
@@ -135,9 +120,11 @@ create policy "leer" on comentarios for select to anon using (true);
 create policy "escribir" on comentarios for insert to anon with check (true);
 ```
 
-La URL del proyecto y la clave **publishable** van en `js/config.js`. La clave publishable es pública por diseño; la **secret** nunca va en el código.
+## Actualizar
 
-> Esta app comparte proyecto de Supabase con `mochila-smx`, así que los comentarios de los posts que existen en las dos se ven en ambas.
+Subir los archivos con **Add file → Upload files** arrastrando las carpetas `css` y `js` y los archivos sueltos → **Commit changes**. Llega a todo el mundo en 1-2 minutos sin reinstalar.
+
+Fuentes: NOFC Digitech Barcelona (DOC001DIGBCN, 26/27), Calendari acadèmic Digitech 26/27 y currículum CFGM SMX IC10.
 
 ---
 

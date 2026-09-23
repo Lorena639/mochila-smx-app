@@ -136,24 +136,25 @@ svg.ico { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: non
 .estado-guardado.error i { background: var(--mal); }
 .estado-guardado.error { color: var(--mal); }
 
-@media (max-width: 1320px) {
+@media (max-width: 1440px) {
   .modo-editar .estado-guardado span { display: none; }
+  .modo-editar .marca-sub { display: none; }
 }
 @media (max-width: 1180px) {
   .marca-sub { display: none; }
   .cabecera-in { gap: 16px; }
   .nav-enlace { padding: 8px 9px; font-size: 14.5px; }
 }
-@media (max-width: 1020px) {
+@media (max-width: 1100px) {
   .hamburguesa { display: inline-flex; }
 }
-@media (max-width: 1120px) {
+@media (max-width: 1280px) {
   .modo-editar .hamburguesa { display: inline-flex; }
   .modo-editar .nav { position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 2px; background: var(--fondo); border-bottom: 1px solid var(--linea); padding: 10px 16px 16px; box-shadow: var(--sombra); display: none; }
   .modo-editar .nav.abierto { display: flex; }
   .modo-editar .nav-enlace { padding: 12px 14px; font-size: 16px; }
 }
-@media (max-width: 1020px) {
+@media (max-width: 1100px) {
   .nav {
     position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 2px;
     background: var(--fondo); border-bottom: 1px solid var(--linea); padding: 10px 16px 16px; box-shadow: var(--sombra); display: none;
@@ -616,3 +617,73 @@ button.bloque:hover { box-shadow: 0 0 0 2px var(--color); }
 .visita > span:last-child { display: flex; flex-direction: column; min-width: 0; }
 .visita b { font-size: 14px; }
 .visita small { font-size: 12px; color: var(--suave); }
+
+/* 14. Grupos y "Ver como" ------------------------------------ */
+.solo-para { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--aviso); background: var(--aviso-suave); border-radius: 999px; padding: 2px 9px; white-space: nowrap; margin-right: 6px; }
+.banda-vercomo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--acento-suave); color: var(--tinta); border: 1px solid var(--acento); border-radius: 14px; padding: 10px 14px; margin-bottom: 18px; font-size: 14px; }
+.banda-vercomo .ico { width: 18px; height: 18px; color: var(--acento); }
+.banda-vercomo span { flex: 1; min-width: 180px; }
+.casillas { display: flex; flex-wrap: wrap; gap: 8px; }
+.casilla { cursor: pointer; }
+.casilla input { position: absolute; opacity: 0; pointer-events: none; }
+.casilla span { display: inline-block; border: 1px solid var(--linea); border-radius: 999px; padding: 7px 13px; font-weight: 600; font-size: 13.5px; background: var(--superficie-2); color: var(--suave); }
+.casilla input:checked + span { border-color: var(--acento); background: var(--acento-suave); color: var(--acento); }
+.casilla input:checked + span::before { content: "✓ "; }
+.casilla input:focus-visible + span { outline: 2px solid var(--marca); outline-offset: 2px; }
+.grupo-caja { border: 1px solid var(--linea); border-radius: 14px; padding: 12px 14px 4px; margin: 0 0 14px; }
+.grupo-caja legend { display: flex; align-items: baseline; gap: 10px; padding: 0 6px; }
+.grupo-caja legend small { color: var(--suave); font-size: 12.5px; }
+.interruptor { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; cursor: pointer; }
+.interruptor input { width: 18px; height: 18px; accent-color: var(--acento); }
+
+/* 15. Asistencia ---------------------------------------------- */
+.asistencia-zona { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
+@media (max-width: 760px) { .asistencia-zona { grid-template-columns: minmax(0, 1fr); } }
+.asistencia-hoy { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 16px; margin: 6px 0; }
+.asistencia-hoy .grande { font-size: 30px; line-height: 1; }
+.asistencia-hoy-grande { border-left: 5px solid var(--linea); }
+.asistencia-hoy-grande.estado-ok, .asistencia-mini.estado-ok { border-left: 5px solid var(--ok); }
+.asistencia-hoy-grande.estado-tarde, .asistencia-mini.estado-tarde { border-left: 5px solid var(--aviso); }
+.asistencia-hoy-grande.estado-falta, .asistencia-mini.estado-falta { border-left: 5px solid var(--mal); }
+.asistencia-hoy-grande.estado-pendiente, .asistencia-mini.estado-pendiente { border-left: 5px solid var(--marca); }
+.fichar-botones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.fichar-botones .boton { flex: 1; min-width: 140px; justify-content: center; }
+.cifras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+.cifra { background: var(--superficie-2); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
+.cifra b { font-size: 28px; line-height: 1.1; }
+.cifra span { font-weight: 700; font-size: 14px; }
+.cifra small { color: var(--suave); font-size: 12.5px; }
+.asis-rejilla { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.asis-dia { min-height: 54px; border-radius: 10px; background: var(--superficie-2); padding: 6px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.asis-dia .num { font-family: var(--f-mono); font-size: 12.5px; }
+.asis-dia small { font-family: var(--f-mono); font-size: 11px; font-weight: 700; }
+.asis-dia.fuera { opacity: .35; }
+.asis-dia.hoy { outline: 2px solid var(--marca); outline-offset: -2px; }
+.asis-dia.estado-ok { background: var(--ok-suave); color: var(--ok); }
+.asis-dia.estado-tarde { background: var(--aviso-suave); color: var(--aviso); }
+.asis-dia.estado-falta { background: var(--mal-suave); color: var(--mal); }
+.asis-dia.estado-libre { background: transparent; color: var(--suave); }
+.leyenda { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 13px; color: var(--suave); }
+.leyenda span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; background: var(--superficie-2); vertical-align: -1px; }
+.leyenda .estado-ok::before { background: var(--ok); }
+.leyenda .estado-tarde::before { background: var(--aviso); }
+.leyenda .estado-falta::before { background: var(--mal); }
+.leyenda .estado-libre::before { background: var(--linea); }
+.lista-fichajes { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.lista-fichajes li { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--linea); }
+.lista-fichajes li:last-child { border-bottom: 0; }
+.lista-fichajes b { min-width: 64px; }
+.lista-fichajes small { color: var(--suave); margin-left: auto; }
+.ajustes-fichaje { margin-top: 16px; }
+.ajustes-fichaje hr { border: 0; border-top: 1px solid var(--linea); margin: 18px 0; }
+.ajustes-fichaje h3 { margin: 0 0 8px; }
+.fila-botones { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; grid-column: 1 / -1; }
+.instrucciones { margin-top: 12px; background: var(--superficie-2); border-radius: 12px; padding: 10px 14px; }
+.instrucciones summary { font-weight: 700; cursor: pointer; }
+.instrucciones ol { margin: 10px 0 4px; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
+.vista > .panel + .panel, .vista > .asistencia-zona + .panel { margin-top: 16px; }
+
+/* Página rápida de fichaje */
+.fichar-estado { font-size: 17px; font-weight: 700; min-height: 2.6em; }
+.fichar-estado.ok { color: var(--ok); }
+.fichar-estado.error { color: var(--mal); }

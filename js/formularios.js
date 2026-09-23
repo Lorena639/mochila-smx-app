@@ -5,10 +5,15 @@
 // =============================================================
 import {
   TIPOS, ESTADOS, TIPOS_EVENTO, TIPOS_FORMACION, ESTADOS_FORMACION, DIAS, COLORES,
-  esc, hoyIso, tamano, clasificar,
+  esc, hoyIso, tamano, clasificar, formato,
 } from "./comun.js";
+import { htmlEditor, activarEditor, limpiar, textoPlano } from "./editor.js";
 import { icono } from "./iconos.js";
 import { TAMANO_MAXIMO } from "./archivos.js";
+import { GRUPOS } from "./grupos.js";
+
+// Campo "Visible para" (Familia / Profes / Amigos). Todo marcado = lo ven todos.
+const VISIBLE = { k: "visible", label: "Visible para", tipo: "grupos", ancho: true, ayuda: "Desmarca un grupo para ocultárselo. Si no marcas ninguno, solo lo ves tú." };
 
 const asignaturasOpc = (d) => [["", "Sin materia"], ...d.asignaturas.map((a) => [a.id, a.nombre])];
 const lista = (arr) => arr.map((x) => [x, x]);
@@ -26,8 +31,11 @@ export const ESQUEMAS = {
       { k: "fecha", label: "Fecha de entrega", tipo: "date" },
       { k: "nota", label: "Nota", tipo: "text", ph: "p. ej. 8,5" },
       { k: "enlace", label: "Enlace (GitHub, Drive…)", tipo: "url", ancho: true },
-      { k: "descripcion", label: "Descripción", tipo: "textarea", ancho: true, ayuda: AYUDA_FORMATO },
+      { k: "descripcion", label: "Descripción o el propio trabajo", tipo: "rico", ancho: true },
+      { k: "usoIA", label: "¿Has usado IA?", tipo: "select", opciones: [["", "Sin indicar"], ["no", "No"], ["apoyo", "Sí, como apoyo (explicaciones, repaso)"], ["parte", "Sí, en parte del trabajo"]] },
+      { k: "usoIADetalle", label: "Cómo la has usado", tipo: "text", ph: "p. ej. Para entender el DNS inverso" },
       { k: "archivos", label: "Archivos del trabajo", tipo: "archivos", ancho: true },
+      VISIBLE,
     ],
   },
   apuntes: {
@@ -36,9 +44,10 @@ export const ESQUEMAS = {
       { k: "titulo", label: "Título", tipo: "text", req: true, ancho: true, ph: "p. ej. Tema 2 – Servidor DNS" },
       { k: "asignatura", label: "Materia", tipo: "select", opciones: asignaturasOpc(d).slice(1), req: true },
       { k: "fecha", label: "Fecha", tipo: "date", def: hoyIso },
-      { k: "texto", label: "Apuntes", tipo: "textarea", grande: true, ancho: true, ayuda: AYUDA_FORMATO },
+      { k: "texto", label: "Apuntes", tipo: "rico", ancho: true },
       { k: "enlace", label: "Enlace (opcional)", tipo: "url", ancho: true },
       { k: "archivos", label: "PDFs, presentaciones…", tipo: "archivos", ancho: true },
+      VISIBLE,
     ],
   },
   posts: {
@@ -49,6 +58,7 @@ export const ESQUEMAS = {
       { k: "etiquetas", label: "Etiquetas (separadas por comas)", tipo: "tags", ph: "redes, linux, curiosidades" },
       { k: "texto", label: "Qué quieres contar", tipo: "textarea", grande: true, req: true, ancho: true, ayuda: AYUDA_FORMATO },
       { k: "archivos", label: "Fotos (puedes elegir varias) u otros archivos", tipo: "archivos", ancho: true, fotosPrimero: true },
+      VISIBLE,
     ],
   },
   avisos: {
@@ -57,6 +67,7 @@ export const ESQUEMAS = {
       { k: "texto", label: "Nota", tipo: "textarea", req: true, ancho: true, ph: "p. ej. Mañana traer el portátil cargado" },
       { k: "fecha", label: "Fecha", tipo: "date", def: hoyIso },
       { k: "asignatura", label: "Materia", tipo: "select", opciones: asignaturasOpc(d) },
+      VISIBLE,
     ],
   },
   formacion: {
@@ -72,6 +83,7 @@ export const ESQUEMAS = {
       { k: "enlace", label: "Enlace (credencial, curso…)", tipo: "url", ancho: true },
       { k: "notas", label: "Qué he aprendido", tipo: "textarea", ancho: true, ayuda: AYUDA_FORMATO },
       { k: "archivos", label: "Certificado u otros archivos", tipo: "archivos", ancho: true },
+      VISIBLE,
     ],
   },
   eventos: {
@@ -79,9 +91,12 @@ export const ESQUEMAS = {
     campos: (d) => [
       { k: "titulo", label: "Qué es", tipo: "text", req: true, ancho: true, ph: "p. ej. Examen UF1 de Serveis" },
       { k: "fecha", label: "Fecha", tipo: "date", req: true },
+      { k: "fechaFin", label: "Hasta (si dura varios días)", tipo: "date" },
       { k: "tipo", label: "Tipo", tipo: "select", opciones: lista(TIPOS_EVENTO), def: "Examen" },
       { k: "asignatura", label: "Materia", tipo: "select", opciones: asignaturasOpc(d) },
       { k: "nota", label: "Detalle", tipo: "text", ph: "p. ej. Temas 1 a 3" },
+      { k: "temas", label: "Qué entra (para el modo examen)", tipo: "textarea", ancho: true, ph: "p. ej. RA1 y RA2: seguridad pasiva y copias" },
+      VISIBLE,
     ],
   },
   horario: {
@@ -100,8 +115,9 @@ export const ESQUEMAS = {
     campos: (d) => [
       { k: "nombre", label: "Nombre", tipo: "text", req: true, ancho: true, ph: "p. ej. 0227 Serveis de xarxa" },
       { k: "profe", label: "Profesor/a", tipo: "text" },
+      { k: "email", label: "Email del profe (para justificar faltas)", tipo: "email" },
       { k: "color", label: "Color", tipo: "color", def: () => COLORES[d.asignaturas.length % COLORES.length] },
-      { k: "descripcion", label: "Información y teoría de la materia", tipo: "textarea", grande: true, ancho: true, ayuda: AYUDA_FORMATO },
+      { k: "descripcion", label: "Información y teoría de la materia", tipo: "rico", ancho: true },
     ],
   },
   config: {
@@ -117,7 +133,7 @@ export const ESQUEMAS = {
 };
 
 // ---------- Construir un campo ----------
-function htmlCampo(c, valor) {
+function htmlCampo(c, valor, base = {}) {
   const id = `f-${c.k}`;
   const req = c.req ? "required" : "";
   const ph = c.ph ? `placeholder="${esc(c.ph)}"` : "";
@@ -136,10 +152,18 @@ function htmlCampo(c, valor) {
           <button type="button" class="boton fantasma peque" data-quitar-adjunto="${esc(r.id)}" aria-label="Quitar ${esc(r.nombre)}">${icono("cerrar")}</button></span>`).join("")}</div>
         <input id="${id}" name="${c.k}" type="file" ${c.una ? "" : "multiple"} ${c.soloImagenes ? 'accept="image/*"' : c.fotosPrimero ? 'accept="image/*,application/pdf,.doc,.docx,.ppt,.pptx,.zip,.txt,.py"' : ""}>
         <div class="previas" data-previas></div>`; break;
+    case "rico":
+      control = htmlEditor(id, base[c.k + "Html"] || formato(valor || ""));
+      break;
+    case "grupos": {
+      const marcados = Array.isArray(valor) ? valor : GRUPOS.map((g) => g.id);
+      control = `<div class="casillas" id="${id}">${GRUPOS.map((g) => `<label class="casilla"><input type="checkbox" name="${c.k}" value="${g.id}" ${marcados.includes(g.id) ? "checked" : ""}><span>${esc(g.nombre)}</span></label>`).join("")}</div>`;
+      break;
+    }
     default:
       control = `<input id="${id}" name="${c.k}" type="${c.tipo}" ${req} ${ph} value="${esc(valor ?? "")}" ${c.tipo === "number" ? 'min="0" step="1"' : ""}>`;
   }
-  return `<div class="campo ${c.ancho ? "ancho" : ""}"><label for="${id}">${esc(c.label)}${c.req ? " *" : ""}</label>${control}
+  return `<div class="campo ${c.ancho ? "ancho" : ""}"><label ${c.tipo === "grupos" || c.tipo === "rico" ? "" : `for="${id}"`}>${esc(c.label)}${c.req ? " *" : ""}</label>${control}
     ${c.ayuda ? `<span class="ayuda">${esc(c.ayuda)}</span>` : ""}</div>`;
 }
 
@@ -158,7 +182,7 @@ export function abrirFormulario(coleccion, datos, item = null, preset = {}) {
       <h2>${item ? "Editar" : "Añadir"} ${esc(esquema.titulo)}</h2>
       <button type="button" class="boton fantasma" data-cancelar aria-label="Cerrar">${icono("cerrar")}</button>
     </header>
-    <div class="modal-cuerpo rejilla-form">${campos.map((c) => htmlCampo(c, base[c.k])).join("")}
+    <div class="modal-cuerpo rejilla-form">${campos.map((c) => htmlCampo(c, base[c.k], base)).join("")}
       <div class="sugerencia ancho" aria-live="polite"></div>
       <p class="error ancho" role="alert"></p>
     </div>
@@ -169,6 +193,7 @@ export function abrirFormulario(coleccion, datos, item = null, preset = {}) {
     </footer>
   </form>`;
   document.body.appendChild(dlg);
+  activarEditor(dlg);
 
   const quitados = [];
   const $ = (s) => dlg.querySelector(s);
@@ -235,12 +260,26 @@ export function abrirFormulario(coleccion, datos, item = null, preset = {}) {
       for (const c of campos) {
         const el = $(`#f-${c.k}`);
         if (c.tipo === "archivos") { nuevos = [...el.files]; continue; }
+        if (c.tipo === "rico") {
+          const html = limpiar(el.innerHTML);
+          const texto = textoPlano(html);
+          if (c.req && !texto) { $(".error").textContent = `Rellena «${c.label}».`; return; }
+          valores[c.k] = texto;
+          valores[c.k + "Html"] = html;
+          continue;
+        }
+        if (c.tipo === "grupos") {
+          const marcados = [...el.querySelectorAll("input:checked")].map((x) => x.value);
+          valores[c.k] = marcados.length === GRUPOS.length ? undefined : marcados; // todo marcado = todos
+          continue;
+        }
         let v = el.value.trim();
         if (c.req && !v) { $(".error").textContent = `Rellena «${c.label}».`; el.focus(); return; }
         if (c.tipo === "tags") v = v.split(",").map((t) => t.trim()).filter(Boolean);
         if (c.numero || c.tipo === "number") v = v === "" ? "" : Number(v);
         valores[c.k] = v;
       }
+      if (valores.fechaFin && valores.fecha && valores.fechaFin < valores.fecha) { $(".error").textContent = "La fecha final no puede ser anterior a la inicial."; return; }
       if (valores.inicio && valores.fin && coleccion === "horario" && valores.fin <= valores.inicio) {
         $(".error").textContent = "La hora de fin tiene que ser después de la de inicio."; return;
       }

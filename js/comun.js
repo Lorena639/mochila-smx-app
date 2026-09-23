@@ -16,7 +16,7 @@ export const ESTADOS = [
   { id: "estudiar", nombre: "Para estudiar" },
 ];
 
-export const TIPOS_EVENTO = ["Examen", "Entrega", "Recuperación", "Festivo", "Otro"];
+export const TIPOS_EVENTO = ["Examen", "Entrega", "Recuperación", "Festivo", "Vacaciones", "Sin clase", "Evaluación", "Trámite", "Otro"];
 
 export const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
@@ -82,6 +82,16 @@ export function completarDatos(d) {
   d.avisos ||= [];
   d.formacion ||= [];
   d.comentariosOcultos ||= [];
+  d.config.claves ||= {};
+  d.config.grupos ||= {};
+  d.faltas ||= [];            // faltas y retrasos por hora de clase
+  d.faltasRevisadas ||= [];   // propuestas de falta ya contestadas
+  d.tarjetas ||= [];          // tarjetas de repaso
+  d.estudio ||= [];           // sesiones del temporizador
+  d.python ||= null;          // plan de Python (se crea al abrirlo)
+  d.estada ||= null;          // diario de la Estada a l'empresa
+  d.foro ||= { fijados: [], cerrados: [], ocultos: [] };
+  d.buzonLeidos ||= [];
   return d;
 }
 
@@ -140,6 +150,32 @@ export async function descifrarBytes(archivo, password) {
     e.code = "mala_password";
     throw e;
   }
+}
+
+// ---------- Cifrado con clave aleatoria (sin contraseña) ----------
+// Cada archivo nuevo lleva su propia clave, guardada dentro de los datos
+// cifrados. Así cada grupo (Familia, Profes, Amigos) puede abrir solo
+// los archivos de lo que puede ver, sin conocer tu contraseña.
+export { aB64, deB64 };
+export const claveAleatoria = () => aB64(crypto.getRandomValues(new Uint8Array(32)));
+const cacheCrudas = new Map();
+export function importarClave(b64) {
+  if (!cacheCrudas.has(b64)) cacheCrudas.set(b64, crypto.subtle.importKey("raw", deB64(b64), "AES-GCM", false, ["encrypt", "decrypt"]));
+  return cacheCrudas.get(b64);
+}
+export async function cifrarConClave(bytes, claveB64) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const datos = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await importarClave(claveB64), bytes);
+  return { v: 3, iv: aB64(iv), datos: aB64(datos) };
+}
+export async function descifrarConClave(archivo, claveB64) {
+  return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: deB64(archivo.iv) }, await importarClave(claveB64), deB64(archivo.datos)));
+}
+// Deriva una clave "cruda" (exportable) de una contraseña con una sal fija
+export async function derivarCruda(password, sal) {
+  const base = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(sal), iterations: ITERACIONES, hash: "SHA-256" }, base, 256);
+  return aB64(bits);
 }
 
 export const cifrar = (objeto, password) => cifrarBytes(enc.encode(JSON.stringify(objeto)), password);

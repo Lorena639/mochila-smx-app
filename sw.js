@@ -6,11 +6,13 @@
 //  - Datos (data/): siempre se piden nuevos; si no hay internet,
 //    se usa la última copia guardada (sigue cifrada).
 // =============================================================
-const VERSION = "mochila-v3";
+const VERSION = "mochila-v5";
 const ARCHIVOS = [
-  "./", "index.html", "css/estilos.css",
+  "./", "index.html", "css/estilos.css", "css/app.css",
   "js/app.js", "js/nucleo.js", "js/comun.js", "js/vistas.js", "js/iconos.js",
-  "js/archivos.js", "js/comentarios.js", "js/config.js",
+  "js/archivos.js", "js/comentarios.js", "js/config.js", "js/grupos.js", "js/asistencia.js",
+  "fichar.html", "js/fichar.js", "js/curso.js", "js/notas.js", "js/faltas.js", "js/comunidad.js", "js/estudio.js",
+  "js/herramientas.js", "js/python.js", "js/estada.js", "js/extras.js", "js/editor.js", "js/formularios.js",
   "manifest.webmanifest", "img/icono-192.png", "img/icono-512.png", "img/favicon.png",
   "img/logo-digitech.png", "img/logo-digitech-blanco.png",
 ];

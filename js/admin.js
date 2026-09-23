@@ -6,9 +6,17 @@
 // =============================================================
 import {
   RUTA_DATOS, datosIniciales, completarDatos, cifrar, descifrar, cifrarBytes, descifrarBytes,
+  claveAleatoria, derivarCruda,
 } from "./comun.js";
 import { GitHub, repoDesdeUrl } from "./github.js";
 import { iniciar } from "./nucleo.js";
+import { SAL_COMENTARIOS } from "./comentarios.js";
+import * as archivos from "./archivos.js";
+import { GRUPOS, activos as gruposActivos, paqueteGrupo, archivosAntiguos, abrirGrupos } from "./grupos.js";
+import { ponerCalendarioOficial, ponerNotasIniciales } from "./curso.js";
+import { crearClavesComunidad } from "./comunidad.js";
+
+const rutaGrupo = (id) => `data/grupos/${id}.enc.json`;
 
 const $ = (s) => document.querySelector(s);
 const CLAVE_TOKEN = "mochila-token";
@@ -97,7 +105,8 @@ $("#formPassword").addEventListener("submit", async (e) => {
     if (p1.length < 8) return ($("#errorPassword").textContent = "Usa al menos 8 caracteres.");
     if (p1 !== $("#pass2").value) return ($("#errorPassword").textContent = "Las contraseñas no coinciden.");
     password = p1;
-    datos = datosIniciales();
+    datos = completarDatos(datosIniciales());
+    await prepararClaves();
     arrancar();
     marcarCambios();
     return;
@@ -108,7 +117,9 @@ $("#formPassword").addEventListener("submit", async (e) => {
     datos = completarDatos(await descifrar(archivoCifrado, p1));
     password = p1;
     await recuperarCopia();
+    const nuevas = await prepararClaves();
     arrancar();
+    if (nuevas) marcarCambios();
   } catch {
     $("#errorPassword").textContent = "Contraseña incorrecta.";
   } finally {
@@ -116,10 +127,27 @@ $("#formPassword").addEventListener("submit", async (e) => {
   }
 });
 
+// Claves que no dependen de la contraseña (se crean una vez y se guardan cifradas):
+//  · comentarios: la misma que ya usabas (derivada de tu contraseña actual),
+//    así los comentarios antiguos se siguen leyendo aunque cambies la contraseña.
+//  · fichajes: aleatoria. Solo la reciben los grupos que pueden ver "Asistencia".
+async function prepararClaves() {
+  const c = datos.config.claves;
+  let nuevas = false;
+  if (!c.comentarios) { c.comentarios = await derivarCruda(password, SAL_COMENTARIOS); nuevas = true; }
+  if (!c.fichajes) { c.fichajes = claveAleatoria(); nuevas = true; }
+  if (await crearClavesComunidad(c)) nuevas = true;
+  // Calendario oficial 2026-27 y RA del currículo (solo la primera vez)
+  if (ponerCalendarioOficial(datos)) nuevas = true;
+  if (ponerNotasIniciales(datos)) nuevas = true;
+  return nuevas;
+}
+
 // =============================================================
 //  PASO 3 — Arrancar la web en modo edición
 // =============================================================
 function arrancar() {
+  shasGrupos = cargarShasGrupos();
   mostrarPaso("app");
   web = iniciar($("#app"), {
     datos,
@@ -129,6 +157,15 @@ function arrancar() {
     alCambiar: marcarCambios,
     salir,
     cambiarPassword,
+    reemplazarDatos(nuevos) { datos = nuevos; marcarCambios(); },
+    abrirGrupos: async () => {
+      const nuevo = await abrirGrupos(datos, password);
+      if (!nuevo) return false;
+      datos.config.grupos = nuevo;
+      marcarCambios();
+      web.aviso("Grupos guardados. Se publican en unos segundos.");
+      return true;
+    },
   });
   if (sinGuardar) web.ponerEstado("pendiente", "Cambios sin guardar…");
 }
@@ -163,10 +200,12 @@ async function guardar() {
   guardando = true;
   web?.ponerEstado("guardando", "Guardando…");
   try {
+    await migrarArchivosDeGrupos();
     const archivo = await cifrar(datos, password);
     try { localStorage.setItem(CLAVE_COPIA, JSON.stringify({ sha, archivo })); } catch {}
     sha = await gh.escribir(RUTA_DATOS, JSON.stringify(archivo), sha, "Actualizar Mochila SMX");
     try { localStorage.removeItem(CLAVE_COPIA); } catch {}
+    await publicarGrupos();
     sinGuardar = false;
     web?.ponerEstado("", "Todo guardado");
   } catch (err) {
@@ -174,6 +213,51 @@ async function guardar() {
   } finally {
     guardando = false;
     if (otraVez) { otraVez = false; guardar(); }
+  }
+}
+
+// =============================================================
+//  GRUPOS (Familia, Profes, Amigos)
+//  Tras guardar tus datos, se escribe un archivo cifrado por grupo
+//  con SOLO lo que ese grupo puede ver. Si no ha cambiado, no se toca.
+// =============================================================
+let shasGrupos = null;              // promesa { id: sha | null }
+const huellas = {};                 // lo último publicado en esta sesión
+async function cargarShasGrupos() {
+  const r = {};
+  for (const g of GRUPOS) { try { r[g.id] = await gh.sha(rutaGrupo(g.id)); } catch { r[g.id] = null; } }
+  return r;
+}
+
+// Los archivos antiguos iban cifrados con tu contraseña; los grupos no la tienen.
+// Se pasan (una sola vez) a clave propia los que vea algún grupo.
+async function migrarArchivosDeGrupos() {
+  const pendientes = new Set();
+  for (const g of gruposActivos(datos)) for (const r of archivosAntiguos(paqueteGrupo(datos, g.id).datos)) pendientes.add(r);
+  let n = 0;
+  for (const ref of pendientes) {
+    web?.ponerEstado("guardando", `Preparando archivos ${++n}/${pendientes.size}…`);
+    try { await archivos.migrar(gh, ref, password); } catch { /* se reintenta la próxima vez */ }
+  }
+}
+
+async function publicarGrupos() {
+  const shas = await shasGrupos;
+  for (const g of GRUPOS) {
+    const conf = datos.config.grupos?.[g.id];
+    const ruta = rutaGrupo(g.id);
+    if (!(conf?.activo && conf.password)) {
+      if (shas[g.id]) { await gh.borrar(ruta, `Quitar acceso de ${g.nombre}`); shas[g.id] = null; }
+      delete huellas[g.id];
+      continue;
+    }
+    const paquete = paqueteGrupo(datos, g.id);
+    const huella = JSON.stringify(paquete) + "|" + conf.password;
+    if (huellas[g.id] === huella) continue;
+    web?.ponerEstado("guardando", `Publicando la vista de ${g.nombre}…`);
+    const archivo = await cifrar(paquete, conf.password);
+    shas[g.id] = await gh.escribir(ruta, JSON.stringify(archivo), shas[g.id], `Actualizar vista de ${g.nombre}`);
+    huellas[g.id] = huella;
   }
 }
 
@@ -203,7 +287,8 @@ function cambiarPassword() {
   dlg.innerHTML = `<form class="modal-caja">
     <header class="modal-cabecera"><h2>Cambiar la contraseña de la web</h2></header>
     <div class="modal-cuerpo rejilla-form">
-      <p class="nota ancho">Tu profe necesitará la nueva contraseña. Los comentarios escritos con la contraseña antigua dejarán de verse.</p>
+      <p class="nota ancho">Es tu contraseña principal: abre <b>todo</b>. Las de los grupos (Familia, Profes, Amigos) no cambian,
+        y los comentarios y fichajes se siguen viendo.</p>
       <div class="campo"><label for="np1">Nueva contraseña</label><input id="np1" type="password" required autocomplete="new-password"></div>
       <div class="campo"><label for="np2">Repítela</label><input id="np2" type="password" required autocomplete="new-password"></div>
       <p class="error ancho" role="alert"></p>
@@ -224,7 +309,9 @@ function cambiarPassword() {
     const boton = dlg.querySelector("button[type=submit]");
     boton.disabled = true;
     try {
-      const refs = [...(datos.config.archivos || []), ...["trabajos", "apuntes", "posts", "formacion"].flatMap((c) => datos[c].flatMap((x) => x.archivos || []))];
+      // Solo hay que recifrar los archivos antiguos (los nuevos llevan su propia clave)
+      const refs = [...(datos.config.archivos || []), ...["trabajos", "apuntes", "posts", "formacion"].flatMap((c) => datos[c].flatMap((x) => x.archivos || []))]
+        .filter((r) => !r.clave);
       let hechos = 0;
       for (const r of refs) {
         boton.textContent = `Recifrando archivos ${++hechos}/${refs.length}…`;

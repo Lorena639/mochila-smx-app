@@ -5,39 +5,70 @@
 import { RUTA_DATOS, descifrar, completarDatos, sesion } from "./comun.js";
 import { iniciar } from "./nucleo.js";
 import * as comentarios from "./comentarios.js";
+import { GRUPOS, grupoDe } from "./grupos.js";
 
 const $ = (s) => document.querySelector(s);
 const CLAVE_SESION = "mochila-pass";
 
+// La contraseña decide qué se ve: primero se prueba con los grupos
+// (Familia, Profes, Amigos) y, si no, con la contraseña principal (todo).
+async function leer(ruta) {
+  const r = await fetch(`${ruta}?t=${Date.now()}`, { cache: "no-store" });
+  return r.ok ? r.json() : null;
+}
+async function abrir(password) {
+  const archivos = await Promise.all([...GRUPOS.map((g) => leer(`data/grupos/${g.id}.enc.json`).catch(() => null)), leer(RUTA_DATOS).catch(() => null)]);
+  if (archivos.every((a) => !a)) throw new Error("Todavía no hay contenido o no hay conexión.");
+  for (const [i, archivo] of archivos.entries()) {
+    if (!archivo) continue;
+    try {
+      const abierto = await descifrar(archivo, password);
+      if (i < GRUPOS.length) return { grupo: abierto.grupo, secciones: abierto.secciones, claves: abierto.claves || {}, datos: completarDatos(abierto.datos) };
+      const datos = completarDatos(abierto);
+      return { grupo: null, secciones: null, claves: datos.config.claves || {}, datos };
+    } catch (e) { if (e.code !== "mala_password") throw e; }
+  }
+  const e = new Error("Contraseña incorrecta");
+  e.code = "mala_password";
+  throw e;
+}
+
 async function entrar(password) {
-  const r = await fetch(`${RUTA_DATOS}?t=${Date.now()}`, { cache: "no-store" });
-  if (r.status === 404) throw new Error("Todavía no hay contenido.");
-  if (!r.ok) throw new Error("No se han podido cargar los datos.");
-  const datos = completarDatos(await descifrar(await r.json(), password));
+  const { grupo, secciones, claves, datos } = await abrir(password);
   sesion.set(CLAVE_SESION, password);
   $("#pantallaAcceso").hidden = true;
-  // Primera vez en este dispositivo: "crear cuenta" (solo nombre y rol)
-  if (!comentarios.quienSoy()) await pedirQuien();
-  comentarios.apuntarVisita(comentarios.quienSoy(), password);
+  // Primera vez en este dispositivo: "crear cuenta" (solo nombre; el rol lo pone el grupo)
+  let yo = comentarios.quienSoy();
+  if (!yo) { await pedirQuien(grupo); yo = comentarios.quienSoy(); }
+  if (grupo && yo.rol !== grupoDe(grupo)?.rol) { yo = { ...yo, rol: grupoDe(grupo).rol }; comentarios.guardarQuienSoy(yo); }
+  const acceso = claves.comentarios ? { clave: claves.comentarios } : password;
+  comentarios.apuntarVisita(yo, acceso);
   $("#app").hidden = false;
   iniciar($("#app"), {
     datos,
     password,
+    acceso,
+    secciones,
+    grupo,
+    claveFichajes: claves.fichajes || null,
+    clavesComunidad: grupo ? { foro: claves.foro || {}, buzonPublica: claves.buzonPublica } : undefined,
     editor: false,
     salir() { sesion.del(CLAVE_SESION); location.hash = ""; location.reload(); },
     cambiarQuien() { comentarios.olvidarQuienSoy(); location.reload(); },
   });
 }
 
-function pedirQuien() {
+function pedirQuien(grupo) {
   $("#pantallaQuien").hidden = false;
+  // Si la contraseña ya dice el grupo, no hace falta preguntar el rol
+  $("#campoRol").hidden = Boolean(grupo);
   $("#quienNombre").focus();
   return new Promise((resolver) => {
     $("#formQuien").addEventListener("submit", (e) => {
       e.preventDefault();
       const nombre = $("#quienNombre").value.trim();
       if (!nombre) return;
-      const rol = document.querySelector('input[name="rol"]:checked')?.value || "";
+      const rol = grupo ? grupoDe(grupo).rol : document.querySelector('input[name="rol"]:checked')?.value || "";
       comentarios.guardarQuienSoy({ nombre, rol });
       $("#pantallaQuien").hidden = true;
       resolver();
