@@ -96,6 +96,21 @@ function htmlClase(d, c, marcarAhora = false) {
   </div>`;
 }
 
+// «¿Qué me toca ahora?»: clase actual o la siguiente, con lo que falta
+function htmlAhora(d, clases) {
+  if (!clases.length) return "";
+  const n = new Date(); const m = n.getHours() * 60 + n.getMinutes();
+  const falta = (min) => (min >= 60 ? `${Math.floor(min / 60)} h ${min % 60 ? `${min % 60} min` : ""}` : `${min} min`).trim();
+  const actual = clases.find((c) => m >= aMin(c.inicio) && m < aMin(c.fin));
+  const siguiente = clases.find((c) => aMin(c.inicio) > m);
+  const nombre = (c) => esc(asigDe(d, c.asignatura)?.nombre || "Clase");
+  const lugar = (c) => (c.aula ? ` · ${esc(c.aula)}` : "");
+  if (actual) return `<div class="ahora-banner" style="--color:${esc(colorDe(d, actual.asignatura))}"><small>Ahora</small><b>${nombre(actual)}</b><span>Termina en ${falta(aMin(actual.fin) - m)}${lugar(actual)}</span>
+    ${siguiente ? `<span class="ahora-sig">Después: ${nombre(siguiente)} a las ${esc(siguiente.inicio)}</span>` : `<span class="ahora-sig">Es la última clase de hoy</span>`}</div>`;
+  if (siguiente) return `<div class="ahora-banner" style="--color:${esc(colorDe(d, siguiente.asignatura))}"><small>Siguiente</small><b>${nombre(siguiente)}</b><span>Empieza en ${falta(aMin(siguiente.inicio) - m)} (${esc(siguiente.inicio)})${lugar(siguiente)}</span></div>`;
+  return `<div class="ahora-banner fin"><small>Hoy</small><b>Clases terminadas</b><span>Mañana más.</span></div>`;
+}
+
 function htmlFechaItem(e, it) {
   const d = e.datos;
   const a = asigDe(d, it.asignatura);
@@ -162,7 +177,7 @@ export function vistaInicio(e) {
   const bloqueHoy = ve("calendario") || e.editor ? `<section class="panel"><div class="panel-titulo"><h2>${icono("reloj")} Clases de hoy</h2>
       ${ve("asistencia") && entradaHoy ? `<span class="chip ok"><span class="p"></span>Entrada ${horaEntrada}</span>` : ""}</div>
       ${sinClase ? `<p class="texto-suave">${esc(sinClase.titulo)}: no hay clase.</p>` : !clases.length ? `<p class="texto-suave">Hoy no hay clase.</p>`
-        : `<div class="linea-tiempo">${clases.map((x) => htmlClase(d, x, true)).join("")}</div>`}
+        : `${htmlAhora(d, clases)}<div class="linea-tiempo">${clases.map((x) => htmlClase(d, x, true)).join("")}</div>`}
       ${e.editor && ve("asistencia") ? botonesFicharInicio(e) : ""}</section>` : "";
   const bloqueManana = e.editor ? `<section class="panel manana"><div class="panel-titulo"><h2>${icono("calendario")} Próximo día de clase</h2></div>${htmlManana(e)}</section>` : "";
   const bloqueFechas = ve("calendario") ? `<section class="panel"><div class="panel-titulo"><h2>${icono("bandera")} Próximas fechas</h2>

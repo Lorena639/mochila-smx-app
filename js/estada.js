@@ -41,7 +41,8 @@ export function vistaEstada(e) {
       </section>
     </div>
     <section class="panel"><div class="panel-titulo"><h2>${icono("calendario")} Diario</h2>
-      ${regs.length && e.editor ? `<button class="enlace-ver" type="button" data-accion="estada-exportar">${icono("descargar")} Descargar para la memoria</button>` : ""}</div>
+      ${regs.length && e.editor ? `<span class="fila-botones"><button class="enlace-ver" type="button" data-accion="estada-informe">${icono("archivo")} Informe semanal (imprimir / PDF)</button>
+        <button class="enlace-ver" type="button" data-accion="estada-exportar">${icono("descargar")} Word</button></span>` : ""}</div>
       ${regs.length ? `<div class="diario-estada">${regs.map((r) => `<article class="de-dia"><header><b>${new Date(r.fecha + "T00:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}</b>
           <span class="chip">${h(n(r.horas))} h</span>${e.editor ? `<button class="boton icono peque" type="button" data-accion="estada-quitar" data-id="${esc(r.id)}" aria-label="Quitar">${icono("cerrar")}</button>` : ""}</header>
           <p>${esc(r.tareas).replace(/\n/g, "<br>")}</p>${r.aprendido ? `<p class="texto-suave">Aprendido: ${esc(r.aprendido)}</p>` : ""}</article>`).join("")}</div>`
@@ -64,6 +65,45 @@ export const cambios = {
 };
 export const acciones = {
   "estada-quitar"(b, api) { const s = api.datos().estada; s.registros = s.registros.filter((r) => r.id !== b.dataset.id); api.cambiar(); },
+  // Informe para el tutor: una tabla por semana (lunes a domingo), con total de horas y firmas
+  "estada-informe"(b, api) {
+    const d = api.datos();
+    const s = d.estada;
+    const regs = [...s.registros].sort((a, b2) => a.fecha.localeCompare(b2.fecha));
+    const lunesDe = (f) => { const x = new Date(f + "T00:00:00"); const w = (x.getDay() + 6) % 7; x.setDate(x.getDate() - w); return x; };
+    const semanas = new Map();
+    for (const r of regs) { const k = lunesDe(r.fecha).toISOString().slice(0, 10); if (!semanas.has(k)) semanas.set(k, []); semanas.get(k).push(r); }
+    const fl = (f) => new Date(f + "T00:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+    const fc = (x) => x.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+    let total = 0, nSem = 0;
+    const cuerpo = [...semanas.entries()].map(([k, rs]) => {
+      nSem++;
+      const l = new Date(k + "T00:00:00"); const dm = new Date(l); dm.setDate(dm.getDate() + 6);
+      const hs = rs.reduce((a, r) => a + n(r.horas), 0); total += hs;
+      return `<section class="semana"><h2>Semana ${nSem} · del ${fc(l)} al ${fc(dm)}</h2>
+        <table><thead><tr><th style="width:22%">Día</th><th style="width:8%">Horas</th><th>Tareas realizadas</th><th style="width:25%">Aprendizajes</th></tr></thead><tbody>
+        ${rs.map((r) => `<tr><td>${esc(fl(r.fecha))}</td><td class="c">${h(n(r.horas))}</td><td>${esc(r.tareas).replace(/\n/g, "<br>")}</td><td>${esc(r.aprendido || "")}</td></tr>`).join("")}
+        <tr class="tot"><td>Total semana</td><td class="c">${h(hs)} h</td><td colspan="2">Acumulado: ${h(total)} h${n(s.horasObjetivo) ? ` de ${h(n(s.horasObjetivo))} h` : ""}</td></tr></tbody></table>
+        <div class="firmas"><div>Firma alumna</div><div>Firma tutor/a empresa</div><div>Firma tutor/a centro</div></div></section>`;
+    }).join("");
+    const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Informe de prácticas · ${esc(d.config.nombreCompleto || d.config.nombre || "")}</title>
+      <style>body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:24px;font-size:12px}h1{font-size:20px;margin:0 0 4px}h2{font-size:14px;margin:18px 0 6px}
+      .datos{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;margin:10px 0 6px;padding:10px;border:1px solid #bbb;border-radius:6px}
+      table{width:100%;border-collapse:collapse}th,td{border:1px solid #999;padding:6px;vertical-align:top;text-align:left}th{background:#eef2f7}.c{text-align:center}
+      .tot td{background:#f6f6f6;font-weight:bold}.firmas{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:10px}
+      .firmas div{border-top:1px solid #333;padding-top:4px;margin-top:38px;text-align:center;color:#444}.semana{page-break-inside:avoid;page-break-after:always}
+      .semana:last-child{page-break-after:auto}.boton{position:fixed;top:12px;right:12px;padding:8px 14px;font-size:14px}@media print{.boton{display:none}body{margin:10mm}}</style></head>
+      <body><button class="boton" onclick="print()">Imprimir / Guardar PDF</button>
+      <h1>Informe de la Estada a l'empresa (FCT)</h1>
+      <div class="datos"><div><b>Alumna:</b> ${esc(d.config.nombreCompleto || d.config.nombre || "")}</div><div><b>Ciclo:</b> ${esc(d.config.curso || "SMX")}</div>
+        <div><b>Empresa:</b> ${esc(s.empresa)}</div><div><b>Dirección:</b> ${esc(s.direccion)}</div>
+        <div><b>Tutor/a empresa:</b> ${esc(s.tutorEmpresa)}</div><div><b>Tutor/a centro:</b> ${esc(s.tutorCentro)}</div>
+        <div><b>Horario:</b> ${esc(s.horario)}</div><div><b>Horas hechas:</b> ${h(total)}${n(s.horasObjetivo) ? ` de ${h(n(s.horasObjetivo))}` : ""}</div></div>
+      ${cuerpo}</body></html>`;
+    const w = window.open("", "_blank");
+    if (!w) { descargar("informe-practicas.html", html, "text/html"); api.aviso("Descargado. Ábrelo y pulsa Imprimir para sacar el PDF."); return; }
+    w.document.write(html); w.document.close();
+  },
   "estada-exportar"(b, api) {
     const s = api.datos().estada;
     const regs = [...s.registros].sort((a, b2) => a.fecha.localeCompare(b2.fecha));

@@ -6,6 +6,7 @@
 //   · Asistente: responde preguntas con tus propios datos (sin IA)
 // =============================================================
 import { esc, nuevoId, hoyIso, normalizar, diasHasta, notificar } from "./comun.js";
+import { GUIAS } from "./herr-guias.js";
 import { icono } from "./iconos.js";
 import { clasesDeFecha, iso } from "./curso.js";
 import { calcularFaltas } from "./faltas.js";
@@ -210,13 +211,65 @@ export function vistaExamen(e, id) {
 }
 
 // =============================================================
+//  SIMULACRO DE EXAMEN (tipo test, con tus tarjetas y las palabras clave)
+// =============================================================
+const barajar = (a) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+export function crearSimulacro(d, asignatura = "", conPalabras = true, n = 10) {
+  let pool = d.tarjetas.filter((t) => (!asignatura || t.asignatura === asignatura) && t.pregunta && t.respuesta).map((t) => ({ q: t.pregunta, r: t.respuesta }));
+  if (conPalabras) for (const g of Object.values(GUIAS)) for (const [p, def] of g.palabras || []) pool.push({ q: `¿Qué es ${p}?`, r: def });
+  const vistos = new Set();
+  pool = pool.filter((x) => { const k = normalizar(x.q); if (vistos.has(k)) return false; vistos.add(k); return true; });
+  if (pool.length < 4) return null;
+  return barajar(pool).slice(0, n).map((x) => {
+    const malas = barajar(pool.filter((y) => y.r !== x.r)).slice(0, 3).map((y) => y.r);
+    const opciones = barajar([x.r, ...malas]);
+    return { q: x.q, opciones, bien: opciones.indexOf(x.r) };
+  });
+}
+function htmlSimulacro(e) {
+  const d = e.datos;
+  const s = e.simu;
+  if (!s) {
+    const nT = d.tarjetas.length;
+    return `<section class="panel simulacro"><div class="panel-titulo"><h2>${icono("bandera")} Simulacro de examen</h2></div>
+      <p>Preguntas tipo test con 4 respuestas, sacadas de ${nT ? `tus <b>${nT}</b> tarjetas` : "tus tarjetas"} y de las palabras clave de las herramientas. Al final ves la nota y los fallos.</p>
+      <div class="rejilla-form">
+        <div class="campo"><label for="siA">Materia</label><select id="siA">${opcionesAsig(d, e.simuAsig || "", "Todas")}</select></div>
+        <div class="campo"><label for="siN">Preguntas</label><select id="siN">${[5, 10, 20].map((x) => `<option ${x === 10 ? "selected" : ""}>${x}</option>`).join("")}</select></div>
+        <label class="check ancho"><input type="checkbox" id="siP" checked> Incluir las palabras clave de las herramientas (redes, sistemas, hardware…)</label>
+      </div>
+      <div class="fila-botones"><button type="button" class="boton principal" data-accion="herr-simu-empezar">${icono("play")} Empezar</button></div></section>`;
+  }
+  if (s.i < s.preguntas.length) {
+    const p = s.preguntas[s.i];
+    const resp = s.respuestas[s.i];
+    return `<section class="panel simulacro"><div class="panel-titulo"><h2>Pregunta ${s.i + 1} de ${s.preguntas.length}</h2><span class="chip">${s.respuestas.filter((r, i) => r === s.preguntas[i].bien).length} bien</span></div>
+      <div class="progreso"><i style="width:${(s.i / s.preguntas.length) * 100}%"></i></div>
+      <p class="simu-q">${esc(p.q)}</p>
+      <div class="simu-ops">${p.opciones.map((o, i) => {
+        const cls = resp === undefined ? "" : i === p.bien ? "ok" : i === resp ? "mal" : "";
+        return `<button type="button" class="simu-op ${cls}" data-accion="herr-simu-resp" data-i="${i}" ${resp !== undefined ? "disabled" : ""}><b>${"ABCD"[i]}</b><span>${esc(o)}</span></button>`;
+      }).join("")}</div>
+      ${resp !== undefined ? `<div class="fila-botones"><button type="button" class="boton principal" data-accion="herr-simu-sig">${s.i + 1 < s.preguntas.length ? "Siguiente" : "Ver nota"}</button></div>` : ""}
+      <div class="fila-botones"><button type="button" class="enlace-ver" data-accion="herr-simu-salir">Salir del simulacro</button></div></section>`;
+  }
+  const bien = s.respuestas.filter((r, i) => r === s.preguntas[i].bien).length;
+  const nota = Math.round((bien / s.preguntas.length) * 100) / 10;
+  const fallos = s.preguntas.map((p, i) => ({ p, r: s.respuestas[i] })).filter((x) => x.r !== x.p.bien);
+  return `<section class="panel simulacro"><div class="panel-titulo"><h2>${icono("bandera")} Resultado</h2></div>
+    <div class="simu-nota ${nota >= 5 ? "ok" : "mal"}"><b>${String(nota).replace(".", ",")}</b><span>${bien} de ${s.preguntas.length} bien · ${nota >= 9 ? "¡Excelente!" : nota >= 7 ? "Muy bien" : nota >= 5 ? "Aprobado, sigue repasando" : "Toca repasar"}</span></div>
+    ${fallos.length ? `<h3 class="bib-seccion">Repasa estas</h3><ul class="simu-fallos">${fallos.map(({ p }) => `<li><b>${esc(p.q)}</b><span>${esc(p.opciones[p.bien])}</span></li>`).join("")}</ul>` : ""}
+    <div class="fila-botones"><button type="button" class="boton principal" data-accion="herr-simu-otra">Otro simulacro</button><button type="button" class="boton" data-accion="herr-simu-salir">Terminar</button></div></section>`;
+}
+
+// =============================================================
 //  Página "Estudiar"
 // =============================================================
 export function vistaEstudio(e, pestana = "tarjetas") {
   const tab = (id, t, ic) => `<button type="button" class="segmento" aria-pressed="${pestana === id}" data-ir="estudio/${id}">${icono(ic)}${t}</button>`;
-  const cuerpo = pestana === "temporizador" ? htmlTemporizador(e) : pestana === "examenes" ? htmlExamenes(e) : htmlTarjetas(e);
+  const cuerpo = pestana === "temporizador" ? htmlTemporizador(e) : pestana === "examenes" ? htmlExamenes(e) : pestana === "simulacro" ? htmlSimulacro(e) : htmlTarjetas(e);
   return `<header class="cabecera-seccion"><div><h1>Estudiar</h1><p>${e.editor ? "Tarjetas de repaso, temporizador y preparación de exámenes." : `Cómo estudia ${esc(e.datos.config.nombre || "Lorena")}: tarjetas, horas de estudio y exámenes.`}</p></div></header>
-    <div class="segmentos">${tab("tarjetas", "Tarjetas", "tarjetas")}${tab("temporizador", e.editor ? "Temporizador" : "Horas de estudio", "reloj")}${tab("examenes", "Exámenes", "bandera")}
+    <div class="segmentos">${tab("tarjetas", "Tarjetas", "tarjetas")}${tab("temporizador", e.editor ? "Temporizador" : "Horas de estudio", "reloj")}${tab("examenes", "Exámenes", "bandera")}${tab("simulacro", "Simulacro", "tarjetas")}
       <button type="button" class="segmento" data-ir="python">${icono("terminal")}Python</button></div>
     ${cuerpo}`;
 }
@@ -314,6 +367,21 @@ export const SUGERENCIAS = ["¿Qué tengo mañana?", "¿Cuántas faltas me queda
 //  Acciones
 // =============================================================
 export const acciones = {
+  "herr-simu-empezar"(b, api) {
+    const e = api.estado();
+    const asig = document.getElementById("siA")?.value || "";
+    const n = Number(document.getElementById("siN")?.value || 10);
+    const conP = document.getElementById("siP")?.checked !== false;
+    const preguntas = crearSimulacro(api.datos(), asig, conP, n);
+    if (!preguntas) return api.aviso("Hacen falta al menos 4 tarjetas (o marca «Incluir las palabras clave»).", 5000);
+    e.simuAsig = asig;
+    e.simu = { preguntas, i: 0, respuestas: [], opciones: { asig, n, conP } };
+    api.pintar();
+  },
+  "herr-simu-resp"(b, api) { const s = api.estado().simu; if (s && s.respuestas[s.i] === undefined) { s.respuestas[s.i] = Number(b.dataset.i); api.pintar(); } },
+  "herr-simu-sig"(b, api) { const s = api.estado().simu; s.i++; api.pintar(); },
+  "herr-simu-otra"(b, api) { const e = api.estado(); const o = e.simu.opciones; e.simu = { preguntas: crearSimulacro(api.datos(), o.asig, o.conP, o.n), i: 0, respuestas: [], opciones: o }; api.pintar(); },
+  "herr-simu-salir"(b, api) { api.estado().simu = null; api.pintar(); },
   "repaso-empezar"(b, api) {
     const d = api.datos();
     const cola = pendientes(d, b.dataset.asig || api.estado().filtros.asignatura || "").map((t) => t.id).sort(() => Math.random() - 0.5);

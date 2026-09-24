@@ -613,3 +613,34 @@ textarea.codigo { font-family: var(--f-mono) !important; font-size: 13.5px; line
 .herr-filtros .segmentos { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
 .herr-filtros .segmento { white-space: nowrap; }
 .herr-filtros .buscador { max-width: 460px; }
+.lista-raros { list-style: none; padding: 0; margin: 10px 0; display: grid; gap: 6px; }
+.lista-raros li { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--superficie-2); border-radius: 10px; padding: 8px 10px; }
+.checks-avisos { display: grid; gap: 8px; margin-top: 12px; }
+.checks-avisos .check { align-items: flex-start; }
+.ahora-banner { display: grid; gap: 2px; padding: 12px 14px; margin-bottom: 10px; border-radius: 14px; background: color-mix(in srgb, var(--color, var(--acento)) 12%, var(--superficie)); border-left: 4px solid var(--color, var(--acento)); }
+.ahora-banner small { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--color, var(--acento)); }
+.ahora-banner b { font-size: 17px; }
+.ahora-banner span { color: var(--suave); font-size: 13.5px; }
+.ahora-banner .ahora-sig { margin-top: 4px; font-size: 12.5px; }
+.ahora-banner.fin { --color: var(--ok); }
+/* Diccionario, terminal, checklists, simulacro */
+.dic { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin: 12px 0 0; }
+.dic > div { position: relative; background: var(--superficie-2); border-radius: 12px; padding: 10px 12px 26px; }
+.dic dt { font-weight: 800; } .dic dd { margin: 3px 0 0; color: var(--suave); font-size: 13.5px; line-height: 1.45; }
+.dic-de { position: absolute; right: 10px; bottom: 6px; font-size: 11px; color: var(--acento); text-decoration: none; font-weight: 700; }
+.terminal { background: #0B1220; color: #D6E2F5; border-radius: 14px; padding: 12px 14px; font-family: var(--f-mono); font-size: 13px; max-height: 420px; overflow-y: auto; }
+.terminal pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: inherit; }
+.term-linea { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+.term-linea span { color: #4ADE80; white-space: nowrap; }
+.term-linea input { flex: 1; min-width: 0; background: transparent !important; border: 0 !important; color: #fff; font: inherit; outline: none; box-shadow: none !important; padding: 2px 0; }
+.chk-pasos { counter-reset: paso; } .chk-pasos li { padding: 4px 0; }
+.simu-q { font-size: 18px; font-weight: 700; margin: 16px 0 12px; }
+.simu-ops { display: grid; gap: 8px; }
+.simu-op { display: flex; gap: 12px; align-items: flex-start; text-align: left; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--linea); background: var(--superficie); color: var(--tinta); cursor: pointer; font: inherit; }
+.simu-op b { width: 26px; height: 26px; flex: none; display: grid; place-items: center; border-radius: 8px; background: var(--superficie-2); }
+.simu-op:hover:not(:disabled) { border-color: var(--acento); }
+.simu-op.ok { border-color: var(--ok); background: var(--ok-suave); } .simu-op.mal { border-color: var(--mal); background: var(--mal-suave); }
+.simu-nota { display: flex; gap: 16px; align-items: center; padding: 16px; border-radius: 16px; background: var(--superficie-2); margin: 10px 0; }
+.simu-nota b { font-size: 44px; line-height: 1; } .simu-nota.ok b { color: var(--ok); } .simu-nota.mal b { color: var(--mal); }
+.simu-fallos { list-style: none; padding: 0; display: grid; gap: 8px; } .simu-fallos li { display: grid; gap: 2px; background: var(--superficie-2); border-radius: 12px; padding: 10px 12px; }
+.simu-fallos span { color: var(--ok); font-size: 14px; }

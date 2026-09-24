@@ -266,6 +266,28 @@ export const GUIAS = {
       ["Puerto", "Una «puerta» numerada por la que entra cada servicio: 80 web, 22 SSH, 53 DNS…"],
     ],
   },
+  diccionario: {
+    nivel: "basico",
+    que: "Todas las palabras técnicas de la app en un solo buscador, y un diccionario de inglés técnico (lo que sale en Packet Tracer, Windows Server o los manuales).",
+    cuando: "Cuando un profe o un manual usa una palabra que no conoces.",
+    ejemplo: { dicQ: "gateway", dicModo: "todo" },
+    palabras: [["Glosario", "Lista de palabras con su significado."], ["Inglés técnico", "Las palabras en inglés que salen en los programas y comandos."]],
+  },
+  terminal: {
+    nivel: "basico",
+    que: "Una terminal de Linux de mentira para practicar comandos (ls, cd, mkdir, chmod…). Nada de lo que hagas afecta a tu ordenador.",
+    cuando: "Antes de las prácticas de Linux o para repasar comandos para el examen. Completa los retos.",
+    palabras: [
+      ["Terminal", "La ventana donde escribes órdenes al sistema."], ["Directorio", "Carpeta."], ["Ruta absoluta", "Empieza por / (desde la raíz): /home/lorena/Documentos."],
+      ["Ruta relativa", "Desde donde estás: Documentos, ../practicas…"], ["~", "Tu carpeta personal (/home/lorena)."], [">", "Guarda la salida de un comando en un archivo (lo sobrescribe). >> lo añade al final."],
+    ],
+  },
+  checklists: {
+    nivel: "basico",
+    que: "Listas paso a paso de las prácticas típicas para ir marcando lo que haces y no saltarte nada.",
+    cuando: "Durante la práctica, con el móvil al lado. Luego la puedes guardar en tus apuntes.",
+    palabras: [["Checklist", "Lista de comprobación: pasos que vas marcando."], ["Pulsera antiestática", "Evita que la electricidad de tu cuerpo estropee las piezas."], ["Ámbito (DHCP)", "El rango de IPs que reparte el servidor."], ["Controlador de dominio", "El servidor que tiene Active Directory."]],
+  },
   biblioteca: {
     nivel: "basico",
     que: "Trozos de código de los lenguajes más usados, listos para copiar, con lo que hace cada uno.",

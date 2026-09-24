@@ -15,6 +15,7 @@ import * as Seg from "./herr-seguridad.js";
 import * as Hw from "./herr-hardware.js";
 import * as Biblio from "./biblioteca.js";
 import { GUIAS, NIVELES } from "./herr-guias.js";
+import * as Extra from "./herr-extra.js";
 
 // ---------- Subredes ----------
 const aNum = (ip) => ip.split(".").reduce((a, o) => (a << 8) + Number(o), 0) >>> 0;
@@ -155,6 +156,58 @@ export const CHULETAS = {
     L("show vlan brief", "VLAN y sus puertos"), L("show interfaces trunk", "Troncales"), L("show cdp neighbors", "Equipos vecinos"),
     L("copy running-config startup-config", "Guarda la configuración (o: write)"), L("reload", "Reinicia el equipo"),
   ] },
+  powershell: { nombre: "PowerShell", items: [
+    L("Get-Help comando -Examples", "Ayuda con ejemplos de cualquier comando"), L("Get-Command *red*", "Busca comandos por nombre"),
+    L("Get-ChildItem (ls, dir)", "Lista archivos y carpetas"), L("Set-Location C:\\ (cd)", "Cambia de carpeta"),
+    L("New-Item -ItemType Directory Nombre", "Crea una carpeta"), L("Copy-Item / Move-Item / Remove-Item", "Copiar, mover y borrar"),
+    L("Get-Content archivo.txt", "Muestra el contenido de un archivo"), L("Get-Process | Sort-Object CPU -Descending", "Procesos que más gastan"),
+    L("Stop-Process -Name notepad", "Cierra un programa"), L("Get-Service | Where Status -eq Running", "Servicios en marcha"),
+    L("Restart-Service Spooler", "Reinicia un servicio (la cola de impresión)"), L("Get-NetIPConfiguration", "Configuración de red"),
+    L("Test-Connection 8.8.8.8", "Ping en PowerShell"), L("Test-NetConnection web.com -Port 443", "Comprueba si un puerto responde"),
+    L("New-NetIPAddress -InterfaceAlias Ethernet -IPAddress 192.168.1.10 -PrefixLength 24 -DefaultGateway 192.168.1.1", "Pone una IP fija"),
+    L("Set-DnsClientServerAddress -InterfaceAlias Ethernet -ServerAddresses 8.8.8.8", "Cambia el DNS"),
+    L("Get-LocalUser / New-LocalUser Ana", "Usuarios locales"), L("Add-LocalGroupMember -Group Administradores -Member Ana", "Hace a un usuario administrador"),
+    L("Rename-Computer -NewName PC01 -Restart", "Cambia el nombre del equipo"), L("Get-ComputerInfo", "Información completa del equipo"),
+    L("Set-ExecutionPolicy RemoteSigned", "Permite ejecutar tus propios scripts .ps1"),
+  ] },
+  winserver: { nombre: "Windows Server / AD", items: [
+    L("Install-WindowsFeature AD-Domain-Services -IncludeManagementTools", "Instala el rol de Active Directory"),
+    L("Install-ADDSForest -DomainName smx.local", "Crea un dominio nuevo (promociona a controlador de dominio)"),
+    L("Add-Computer -DomainName smx.local -Restart", "Une un equipo cliente al dominio"),
+    L("New-ADOrganizationalUnit -Name Alumnos", "Crea una unidad organizativa (OU)"),
+    L("New-ADUser -Name \"Ana Pérez\" -SamAccountName ana -Path \"OU=Alumnos,DC=smx,DC=local\" -Enabled $true -AccountPassword (Read-Host -AsSecureString)", "Crea un usuario del dominio"),
+    L("New-ADGroup -Name 2SMX -GroupScope Global", "Crea un grupo"), L("Add-ADGroupMember 2SMX -Members ana", "Mete un usuario en un grupo"),
+    L("Get-ADUser -Filter * | Select Name", "Lista los usuarios del dominio"), L("Unlock-ADAccount ana", "Desbloquea una cuenta"),
+    L("Install-WindowsFeature DHCP -IncludeManagementTools", "Instala el servidor DHCP"), L("Install-WindowsFeature DNS", "Instala el servidor DNS"),
+    L("gpupdate /force", "Aplica las GPO ya"), L("gpresult /r", "Qué GPO se aplican"),
+    L("dsa.msc", "Usuarios y equipos de Active Directory"), L("gpmc.msc", "Administración de directivas de grupo (GPO)"),
+    L("dnsmgmt.msc · dhcpmgmt.msc", "Consolas de DNS y DHCP"), L("servermanager", "Administrador del servidor"),
+    L("Recurso compartido: \\\\servidor\\carpeta", "Ruta de red para compartir carpetas"),
+  ] },
+  packet: { nombre: "Packet Tracer", items: [
+    L("Cable negro continuo", "Directo (straight-through): PC ↔ switch, switch ↔ router"), L("Cable negro discontinuo", "Cruzado (crossover): equipos iguales"),
+    L("Cable azul claro", "Consola: para configurar un router/switch desde un PC (Terminal)"), L("Cable rojo en zigzag", "Serie (entre routers, WAN)"),
+    L("Rayo naranja", "Conexión automática: Packet Tracer elige el cable"), L("Punto verde / naranja / rojo", "Enlace activo / arrancando / apagado"),
+    L("PC → Desktop → IP Configuration", "Poner IP, máscara, gateway y DNS a mano o por DHCP"), L("PC → Desktop → Command Prompt", "ping, ipconfig, tracert…"),
+    L("Router → pestaña CLI", "Consola para escribir comandos Cisco"), L("Modo Simulation (abajo a la derecha)", "Ver los paquetes viajar paso a paso"),
+    L("Módulos (router apagado)", "Para añadir tarjetas (p. ej. HWIC-2T) hay que apagar el equipo"), L("Ctrl+S", "Guardar el .pkt (hazlo a menudo)"),
+  ] },
+  virtualbox: { nombre: "VirtualBox", items: [
+    L("Adaptador puente (Bridged)", "La VM sale a tu red como un equipo más (IP del router de clase)"),
+    L("NAT", "La VM tiene internet pero no se ve desde fuera"), L("Red interna", "Las VM se ven entre ellas, sin internet ni tu PC"),
+    L("Solo anfitrión (Host-only)", "La VM solo se ve con tu PC"), L("Red NAT", "Varias VM juntas con internet"),
+    L("Instantánea (Snapshot)", "Guardar el estado para volver atrás si algo sale mal"), L("Clonar → Reinicializar MAC", "Copiar una VM sin que choquen las MAC"),
+    L("Insertar imagen de Guest Additions", "Pantalla completa, portapapeles compartido y carpetas compartidas"),
+    L("Ctrl derecho", "Tecla anfitrión: suelta el ratón de la VM"), L("Ctrl derecho + F", "Pantalla completa"),
+    L("Configuración → Sistema → Orden de arranque", "Arrancar desde la ISO para instalar"),
+  ] },
+  atajos: { nombre: "Atajos de teclado", items: [
+    L("Win + E", "Explorador de archivos"), L("Win + R", "Ejecutar (cmd, services.msc, control…)"), L("Win + X", "Menú de administración"),
+    L("Win + L", "Bloquear el equipo (hazlo siempre al levantarte)"), L("Win + D", "Mostrar el escritorio"), L("Win + V", "Historial del portapapeles"),
+    L("Win + Shift + S", "Captura de una parte de la pantalla"), L("Ctrl + Shift + Esc", "Administrador de tareas"), L("Alt + Tab", "Cambiar de ventana"),
+    L("Ctrl + Z / Ctrl + Y", "Deshacer / rehacer"), L("F2", "Cambiar el nombre de un archivo"), L("Ctrl + Alt + T", "Terminal (Ubuntu)"),
+    L("Tab (en terminal)", "Autocompletar comandos y rutas"), L("Ctrl + C (en terminal)", "Parar el comando que está en marcha"), L("Flecha arriba (en terminal)", "Repetir comandos anteriores"),
+  ] },
   puertos: { nombre: "Puertos", items: [
     L("20/21 TCP", "FTP (datos / control)"), L("22 TCP", "SSH, SCP, SFTP"), L("23 TCP", "Telnet (inseguro)"), L("25 TCP", "SMTP (envío de correo)"),
     L("53 UDP/TCP", "DNS"), L("67/68 UDP", "DHCP (servidor / cliente)"), L("69 UDP", "TFTP"), L("80 TCP", "HTTP"), L("110 TCP", "POP3"),
@@ -187,7 +240,7 @@ const BASE = [
 ];
 export function lista() {
   const orden = ["Redes", "Sistemas", "Seguridad", "Hardware", "Referencia"];
-  const todas = [...BASE, ...Redes.HERRAMIENTAS, ...Sis.HERRAMIENTAS, ...Seg.HERRAMIENTAS, ...Hw.HERRAMIENTAS];
+  const todas = [...BASE, ...Redes.HERRAMIENTAS, ...Sis.HERRAMIENTAS, ...Seg.HERRAMIENTAS, ...Hw.HERRAMIENTAS, ...Extra.HERRAMIENTAS];
   return todas.sort((a, b) => orden.indexOf(a.grupo) - orden.indexOf(b.grupo));
 }
 const ICONO_GRUPO = { Redes: "red", Sistemas: "terminal", Seguridad: "candado", Hardware: "herramienta", Referencia: "materias" };
@@ -220,6 +273,7 @@ const ICONO_HERR = {
   contrasenas: "candado", hash: "candado", codificar: "terminal", regex: "buscar",
   rj45: "red", transferencia: "reloj", sai: "chispa", presupuesto: "maletin",
   conversor: "terminal", chuletas: "materias", biblioteca: "materias",
+  diccionario: "buscar", terminal: "terminal", checklists: "bandera",
 };
 const COLOR_GRUPO = { Redes: "g-redes", Sistemas: "g-sistemas", Seguridad: "g-seguridad", Hardware: "g-hardware", Referencia: "g-referencia" };
 const chipNivel = (id) => { const n = NIVELES[GUIAS[id]?.nivel]; return n ? `<span class="chip ${n.clase}">${n.t}</span>` : ""; };
@@ -274,7 +328,8 @@ export function vistaHerramientas(e, pestana = "") {
     </section>
     <div class="segmentos segmentos-scroll">${hermanas.map((x) => `<button type="button" class="segmento" aria-pressed="${x.id === h.id}" data-ir="herramientas/${x.id}">${esc(x.t)}</button>`).join("")}</div>
     <div class="herr-cuerpo">${h.html(e)}</div>
-    ${g.palabras?.length ? `<section class="panel herr-palabras"><div class="panel-titulo"><h2>${icono("bombilla")} Palabras clave</h2></div>
+    ${g.palabras?.length ? `<section class="panel herr-palabras"><div class="panel-titulo"><h2>${icono("bombilla")} Palabras clave</h2>
+      ${e.editor ? `<button type="button" class="boton peque" data-accion="herr-a-tarjetas" data-id="${esc(h.id)}">${icono("tarjetas")} Añadir a mis tarjetas</button>` : ""}</div>
       <dl>${g.palabras.map(([p, d]) => `<div><dt>${esc(p)}</dt><dd>${esc(d)}</dd></div>`).join("")}</dl></section>` : ""}`;
 }
 
@@ -333,6 +388,36 @@ export const acciones = {
     });
     dlg.showModal();
   },
+  "herr-a-tarjetas"(b, api) {
+    const d = api.datos();
+    const g = GUIAS[b.dataset.id];
+    const dlg = document.createElement("dialog");
+    dlg.className = "modal";
+    dlg.innerHTML = `<form class="modal-caja"><header class="modal-cabecera"><h2>Añadir a mis tarjetas</h2></header>
+      <div class="modal-cuerpo rejilla-form"><p class="ancho">Se crean <b>${g.palabras.length}</b> tarjetas de repaso («¿Qué es…?»). Las que ya tengas no se repiten.</p>
+        <div class="campo ancho"><label for="atM">Materia</label><select id="atM"><option value="">Sin materia</option>${(d.asignaturas || []).map((a) => `<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join("")}</select></div></div>
+      <footer class="modal-pie"><button type="button" class="boton" data-cancelar>Cancelar</button><button type="submit" class="boton principal">Añadir</button></footer></form>`;
+    document.body.appendChild(dlg);
+    const cerrar = () => { dlg.close(); dlg.remove(); };
+    dlg.querySelector("[data-cancelar]").addEventListener("click", cerrar);
+    dlg.addEventListener("cancel", cerrar);
+    dlg.querySelector("form").addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const asignatura = dlg.querySelector("#atM").value;
+      const ya = new Set(d.tarjetas.map((x) => normalizar(x.pregunta)));
+      let n = 0;
+      for (const [p, def] of g.palabras) {
+        const pregunta = `¿Qué es ${p}?`;
+        if (ya.has(normalizar(pregunta))) continue;
+        d.tarjetas.push({ id: nuevoId(), asignatura, pregunta, respuesta: def, caja: 1, proxima: hoyIso() });
+        n++;
+      }
+      cerrar();
+      api.cambiar(false);
+      api.aviso(n ? `${n} tarjetas nuevas. Las tienes en Estudiar → Tarjetas.` : "Ya tenías todas estas tarjetas.");
+    });
+    dlg.showModal();
+  },
   "herr-nivel"(b, api) { api.estado().herr.nivelHerr = b.dataset.v; api.pintar(); },
   "herr-ejemplo"(b, api) {
     const t = api.estado().herr;
@@ -346,12 +431,12 @@ export const acciones = {
     api.aviso("Ejemplo cargado. Cambia los datos para probar los tuyos.");
   },
   "herr-cat"(b, api) { const e = api.estado(); e.herr = { ...(e.herr || {}), cat: b.dataset.cat, buscar: "" }; api.pintar(); },
-  ...Redes.acciones, ...Sis.acciones, ...Seg.acciones, ...Hw.acciones, ...Biblio.acciones,
+  ...Redes.acciones, ...Sis.acciones, ...Seg.acciones, ...Hw.acciones, ...Biblio.acciones, ...Extra.acciones,
 };
-export const formularios = { ...Redes.formularios };
+export const formularios = { ...Redes.formularios, ...Extra.formularios };
 
 // Campos con nombre especial (tablas, config Cisco…). Devuelve true si lo ha guardado.
 export function alEscribir(t, k, v) {
-  return Sis.alEscribir(t, k, v) || Hw.alEscribir(t, k, v);
+  return Sis.alEscribir(t, k, v) || Hw.alEscribir(t, k, v) || Extra.alEscribir(t, k, v);
 }
 export const alArchivo = (input, api) => Seg.alArchivo(input, api);

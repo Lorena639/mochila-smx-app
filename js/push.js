@@ -6,6 +6,7 @@
 // =============================================================
 import { SUPABASE_URL, SUPABASE_CLAVE } from "./config.js";
 import { calcularFaltas } from "./faltas.js";
+import { clasesDeFecha, iso } from "./curso.js";
 
 const MARCA = "mochila-push";
 
@@ -134,6 +135,39 @@ export function calcularRecordatorios(d) {
       lista.push({ id: `faltas-${m.a.id}-${m.estado}`, cuando: cuando.toISOString(), titulo: `Faltas · ${corto(m.a.nombre)}`, texto, url: "./#asistencia" });
     }
   } catch { /* sin datos de asistencia */ }
+  // «¿Has fichado?»: 10 min antes de la primera clase de los próximos 7 días
+  // (la función de Supabase no lo manda si ya hay una entrada ese día)
+  if (d.config?.avisoFichar !== false && d.config?.instituto) {
+    for (let i = 0; i < 7; i++) {
+      const f = new Date(); f.setDate(f.getDate() + i);
+      const dia = iso(f);
+      const clases = clasesDeFecha(d, dia);
+      if (!clases.length) continue;
+      const cuando = new Date(`${dia}T${clases[0].inicio}:00`); cuando.setMinutes(cuando.getMinutes() - 10);
+      if (cuando > ahora) lista.push({ id: `fichar-${dia}`, cuando: cuando.toISOString(), titulo: "¿Has fichado?", texto: `La primera clase empieza a las ${clases[0].inicio} y todavía no hay entrada fichada.`, url: "./#asistencia" });
+    }
+  }
+  // Resumen semanal: domingo a las 20:00
+  if (d.config?.resumenSemanal !== false) {
+    const dom = new Date(); dom.setDate(dom.getDate() + ((7 - dom.getDay()) % 7)); dom.setHours(20, 0, 0, 0);
+    if (dom <= ahora) dom.setDate(dom.getDate() + 7);
+    const lunes = new Date(dom); lunes.setDate(lunes.getDate() - 6);
+    const desde = iso(lunes), hasta = iso(dom);
+    const sig1 = new Date(dom); sig1.setDate(sig1.getDate() + 1);
+    const sig7 = new Date(dom); sig7.setDate(sig7.getDate() + 7);
+    const a1 = iso(sig1), a7 = iso(sig7);
+    const nuevas = [...(d.posts || []), ...(d.apuntes || [])].filter((x) => x.fecha >= desde && x.fecha <= hasta && visibleFamilia(x)).length;
+    const prox = (d.eventos || []).filter((ev) => ["Examen", "Entrega", "Recuperación"].includes(ev.tipo) && ev.fecha >= a1 && ev.fecha <= a7 && visibleFamilia(ev));
+    const entregas = (d.trabajos || []).filter((t) => t.estado === "curso" && t.fecha >= a1 && t.fecha <= a7 && visibleFamilia(t));
+    const partes = [];
+    partes.push(nuevas ? `${nuevas} ${nuevas === 1 ? "cosa nueva" : "cosas nuevas"} esta semana` : "Semana tranquila");
+    const ex = prox.filter((x) => x.tipo === "Examen").length;
+    if (ex) partes.push(`${ex} ${ex === 1 ? "examen" : "exámenes"} la próxima semana`);
+    const en = prox.filter((x) => x.tipo !== "Examen").length + entregas.length;
+    if (en) partes.push(`${en} ${en === 1 ? "entrega" : "entregas"}`);
+    if (!ex && !en) partes.push("sin exámenes ni entregas la próxima semana");
+    lista.push({ id: `resumen-${hasta}`, cuando: dom.toISOString(), titulo: "Resumen de la semana", texto: partes.join(" · "), url: "./#inicio" });
+  }
   // Novedades de las últimas 3 h (salen en la próxima vuelta del cron, como mucho 15 min)
   for (const n of d.config?.novedades || []) {
     if (Date.now() - n.t < 3 * 3600 * 1000) lista.push({ id: `nov-${n.id}`, cuando: new Date(n.t).toISOString(), titulo: n.titulo, texto: n.texto, url: n.url });

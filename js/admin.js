@@ -226,6 +226,11 @@ async function prepararClaves() {
 // =============================================================
 function arrancar() {
   idsConocidos = Push.idsDe(datos);
+  // Caducidad del token: si GitHub la dice, se apunta sola
+  if (gh?.caduca) {
+    const f = new Date(gh.caduca.replace(" UTC", "Z").replace(" ", "T"));
+    if (!isNaN(f)) { const v = f.toISOString().slice(0, 10); if (datos.config.tokenCaduca !== v) { datos.config.tokenCaduca = v; setTimeout(marcarCambios, 1500); } }
+  }
   shasGrupos = cargarShasGrupos();
   mostrarPaso("app");
   web = iniciar($("#app"), {
@@ -238,6 +243,7 @@ function arrancar() {
     cambiarPassword,
     vincular,
     accesoRemoto,
+    revisarRepo,
     reemplazarDatos(nuevos) { datos = nuevos; idsConocidos = Push.idsDe(nuevos); marcarCambios(); },
     abrirGrupos: async () => {
       const nuevo = await abrirGrupos(datos, password);
@@ -500,6 +506,48 @@ async function accesoRemoto(activar) {
     catch (err) { web.aviso(`No se ha podido desactivar: ${err.message}`, 6000); }
   }
   web.pintar();
+}
+
+// =============================================================
+//  REVISAR EL REPOSITORIO: busca carpetas o archivos que sobran
+// =============================================================
+const ESPERADOS = new Set(["index.html", "admin.html", "fichar.html", "sw.js", "manifest.webmanifest", "manifest-admin.webmanifest",
+  "README.md", "css", "js", "img", "data", ".nojekyll", ".gitignore", "LICENSE", "CNAME", "404.html", "favicon.ico"]);
+async function revisarRepo() {
+  let items;
+  try { items = await gh.listar(""); } catch (err) { web.aviso(`No se ha podido revisar: ${err.message}`, 6000); return; }
+  const raros = items.filter((x) => !ESPERADOS.has(x.name));
+  const faltan = ["index.html", "admin.html", "sw.js", "js", "css"].filter((n) => !items.some((x) => x.name === n));
+  const dlg = document.createElement("dialog");
+  dlg.className = "modal";
+  dlg.innerHTML = `<div class="modal-caja">
+    <header class="modal-cabecera"><h2>Revisión del repositorio</h2></header>
+    <div class="modal-cuerpo">
+      ${faltan.length ? `<p class="error">Faltan cosas importantes: <b>${faltan.join(", ")}</b>. Súbelas desde el último zip.</p>` : `<p><span class="chip ok">Bien</span> Están todos los archivos de la app.</p>`}
+      ${raros.length ? `<p>Esto <b>sobra</b> (no lo usa la app). Seguramente son subidas antiguas:</p>
+        <ul class="lista-raros">${raros.map((x) => `<li><span>${x.type === "dir" ? "Carpeta" : "Archivo"} <b class="mono">${x.name}</b></span>
+          <button type="button" class="boton peque" data-borrar="${x.path}" data-tipo="${x.type}">Borrar</button></li>`).join("")}</ul>
+        <p class="nota">Borrar no toca tus datos (carpeta <b>data</b>) ni la app. Si dudas, déjalo: no molesta.</p>`
+        : `<p><span class="chip ok">Limpio</span> No sobra nada.</p>`}
+      <p class="texto-suave" id="progresoRepo"></p>
+    </div>
+    <footer class="modal-pie"><button type="button" class="boton principal" data-cerrar>Cerrar</button></footer></div>`;
+  document.body.appendChild(dlg);
+  const cerrar = () => { dlg.close(); dlg.remove(); };
+  dlg.querySelector("[data-cerrar]").addEventListener("click", cerrar);
+  dlg.addEventListener("cancel", cerrar);
+  dlg.querySelectorAll("[data-borrar]").forEach((b) => b.addEventListener("click", async () => {
+    if (!(await web.confirmar(`¿Borrar «${b.dataset.borrar}» del repositorio?`))) return;
+    b.disabled = true; b.textContent = "Borrando…";
+    const prog = dlg.querySelector("#progresoRepo");
+    try {
+      if (b.dataset.tipo === "dir") await gh.borrarCarpeta(b.dataset.borrar, `Limpiar ${b.dataset.borrar}`, (p) => { prog.textContent = `Borrado ${p}`; });
+      else await gh.borrar(b.dataset.borrar, `Limpiar ${b.dataset.borrar}`);
+      b.closest("li").innerHTML = `<span class="chip ok">Borrado</span> <b class="mono">${b.dataset.borrar}</b>`;
+      prog.textContent = "";
+    } catch (err) { b.disabled = false; b.textContent = "Borrar"; prog.textContent = `No se ha podido borrar: ${err.message}`; }
+  }));
+  dlg.showModal();
 }
 
 // Entrar solo con la contraseña (viene de la app o de un dispositivo vinculado)

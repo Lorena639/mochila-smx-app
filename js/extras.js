@@ -40,6 +40,11 @@ export function calcularAvisos(e) {
     if (p) lista.push({ nivel: "info", texto: `${p} ${p === 1 ? "día" : "días"} por revisar en asistencia`, ir: "asistencia" });
     const nuevos = (e.buzon || []).filter((m) => !d.buzonLeidos.includes(m.id)).length;
     if (nuevos) lista.push({ nivel: "info", texto: `${nuevos} ${nuevos === 1 ? "mensaje nuevo" : "mensajes nuevos"} en el buzón`, ir: "buzon" });
+    if (d.config.tokenCaduca) {
+      const k = diasHasta(d.config.tokenCaduca);
+      if (k <= 7) lista.push({ nivel: k <= 2 ? "mal" : "aviso", texto: k < 0 ? "Tu token de GitHub ha caducado: la app no puede guardar" : `Tu token de GitHub caduca en ${k} ${k === 1 ? "día" : "días"}`, ir: "ajustes" });
+    }
+    if (!d.config.ultimaCopia || diasHasta(d.config.ultimaCopia) < -30) lista.push({ nivel: "info", texto: "Hace más de un mes que no descargas una copia de seguridad", ir: "ajustes" });
     const tj = pendientes(d).length;
     if (tj) lista.push({ nivel: "info", texto: `${tj} tarjetas para repasar hoy`, ir: "estudio/tarjetas" });
   }
@@ -148,8 +153,14 @@ export function vistaAjustes(e) {
       ${htmlPush(c)}
       <section class="panel"><div class="panel-titulo"><h2>${icono("descargar")} Copia de seguridad</h2></div>
         <p class="texto-suave">Descarga todo tu contenido (sin los archivos adjuntos, que siguen en GitHub). Guárdala en un sitio seguro: va <b>sin cifrar</b>.</p>
+        <p class="texto-suave">${c.ultimaCopia ? `Última copia: <b>${new Date(c.ultimaCopia + "T00:00:00").toLocaleDateString("es-ES", { day: "numeric", month: "long" })}</b>. Te aviso cada mes.` : "Todavía no has descargado ninguna. Te aviso cada mes."}</p>
         <div class="fila-botones"><button class="boton" type="button" data-accion="copia-descargar">${icono("descargar")} Descargar copia</button>
           <label class="boton">${icono("subir")} Restaurar copia<input type="file" accept=".json,application/json" hidden data-restaurar></label></div></section>
+      <section class="panel"><div class="panel-titulo"><h2>${icono("web")} GitHub</h2></div>
+        <div class="campo"><label for="ajTok">Mi token caduca el</label><input id="ajTok" type="date" data-cambio="config" data-k="tokenCaduca" value="${esc(c.tokenCaduca || "")}"></div>
+        <p class="texto-suave">${c.tokenCaduca ? (() => { const k = diasHasta(c.tokenCaduca); return k < 0 ? `<span class="chip mal">Caducado</span> Crea un token nuevo en GitHub y vuelve a entrar.` : `Quedan <b>${k}</b> días. Te aviso una semana antes.`; })() : "Si no se rellena solo, míralo en GitHub → Settings → Developer settings → Fine-grained tokens."}</p>
+        <div class="fila-botones"><button class="boton" type="button" data-accion="revisar-repo">${icono("buscar")} Revisar repositorio</button></div>
+        <p class="nota-pie">Busca carpetas o archivos que sobran de subidas antiguas y te deja borrarlos.</p></section>
       <section class="panel"><div class="panel-titulo"><h2>${icono("candado")} Seguridad</h2></div>
         <p><b>Entrar como Lorena (modo estudiante) en cualquier dispositivo</b></p>
         ${c.accesoRemoto
@@ -183,7 +194,11 @@ function htmlPush(c) {
         <button class="boton principal" type="button" data-accion="push-activar">Activar en este dispositivo</button>
         <button class="boton" type="button" data-accion="push-probar">Enviar prueba</button>
         <button class="boton" type="button" data-accion="push-desactivar">Desactivar aquí</button></div>
-      <label class="check" style="margin-top:12px"><input type="checkbox" data-cambio="avisar-novedades" ${c.avisarNovedades === false ? "" : "checked"}> Avisar cuando añado algo nuevo (día a día, apuntes, trabajos, formación, fechas)</label>
+      <div class="checks-avisos">
+        <label class="check"><input type="checkbox" data-cambio="avisar-novedades" ${c.avisarNovedades === false ? "" : "checked"}> Cuando añado algo nuevo (día a día, apuntes, trabajos, formación, fechas)</label>
+        <label class="check"><input type="checkbox" data-cambio="config-bool" data-k="avisoFichar" ${c.avisoFichar === false ? "" : "checked"}> «¿Has fichado?» 10 min antes de clase si aún no hay entrada</label>
+        <label class="check"><input type="checkbox" data-cambio="config-bool" data-k="resumenSemanal" ${c.resumenSemanal === false ? "" : "checked"}> Resumen de la semana, los domingos a las 20:00</label>
+      </div>
       <p class="nota-pie">Los fichajes avisan solos al momento. Lo nuevo que añades llega en unos minutos (máx. 15). Lo marcado «Solo yo» no avisa. Familia las activa desde la campana de avisos. En iPhone, primero hay que añadir la app a la pantalla de inicio.</p></section>`;
 }
 
@@ -229,7 +244,7 @@ const pushAcciones = {
 export const acciones = {
   ...pushAcciones,
   "ics"(b, api) { exportarICS(api.datos()); api.aviso("Calendario descargado. Impórtalo en Google Calendar."); },
-  "copia-descargar"(b, api) { descargarCopia(api.datos()); },
+  "copia-descargar"(b, api) { descargarCopia(api.datos()); api.datos().config.ultimaCopia = hoyIso(); api.cambiar(false); },
   async "avisos-sistema"(b, api) {
     try { const p = await Notification.requestPermission(); api.aviso(p === "granted" ? "Notificaciones activadas" : "No se han activado las notificaciones"); } catch {}
     api.pintar();
@@ -237,6 +252,7 @@ export const acciones = {
 };
 export const cambios = {
   "config"(el, api) { api.datos().config[el.dataset.k] = el.value.trim(); api.cambiar(false); },
+  "config-bool"(el, api) { api.datos().config[el.dataset.k] = el.checked; api.cambiar(false); },
   "avisar-novedades"(el, api) { api.datos().config.avisarNovedades = el.checked; api.cambiar(false); },
   "fechas-curso"(el, api) { const c = api.datos().config; c.fechasCurso ||= {}; c.fechasCurso[el.dataset.k] = el.value; api.cambiar(); },
 };

@@ -46,6 +46,9 @@ export class GitHub {
         ...(opciones.body ? { "Content-Type": "application/json" } : {}),
       },
     });
+    // Fecha de caducidad del token (GitHub la manda en cada respuesta, si el navegador la deja leer)
+    const cad = r.headers.get("github-authentication-token-expiration");
+    if (cad) this.caduca = cad;
     if (!r.ok) {
       const e = new Error(`GitHub respondió ${r.status}`);
       e.status = r.status;
@@ -97,6 +100,22 @@ export class GitHub {
     } catch (e) {
       if (e.status === 404) return null;
       throw e;
+    }
+  }
+
+  // Lista una carpeta del repositorio: [{ name, path, type, sha }]
+  async listar(ruta = "") {
+    return this.peticion(`/repos/${this.usuario}/${this.repo}/contents/${ruta}?ref=${this.rama}`);
+  }
+  // Borra una carpeta entera (archivo a archivo)
+  async borrarCarpeta(ruta, mensaje, alAvanzar) {
+    const items = await this.listar(ruta);
+    for (const it of items) {
+      if (it.type === "dir") await this.borrarCarpeta(it.path, mensaje, alAvanzar);
+      else {
+        await this.peticion(`/repos/${this.usuario}/${this.repo}/contents/${it.path}`, { method: "DELETE", body: JSON.stringify({ message: mensaje, sha: it.sha, branch: this.rama }) });
+        alAvanzar?.(it.path);
+      }
     }
   }
 
