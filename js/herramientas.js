@@ -14,6 +14,7 @@ import * as Sis from "./herr-sistemas.js";
 import * as Seg from "./herr-seguridad.js";
 import * as Hw from "./herr-hardware.js";
 import * as Biblio from "./biblioteca.js";
+import { GUIAS, NIVELES } from "./herr-guias.js";
 
 // ---------- Subredes ----------
 const aNum = (ip) => ip.split(".").reduce((a, o) => (a << 8) + Number(o), 0) >>> 0;
@@ -213,28 +214,73 @@ function guardarEstado(e) {
   }, 400);
 }
 
+const ICONO_HERR = {
+  subredes: "red", vlsm: "red", ejercicios: "tarjetas", ipv6: "red", dns: "web",
+  chmod: "candado", cisco: "terminal", raid: "archivo", cron: "reloj",
+  contrasenas: "candado", hash: "candado", codificar: "terminal", regex: "buscar",
+  rj45: "red", transferencia: "reloj", sai: "chispa", presupuesto: "maletin",
+  conversor: "terminal", chuletas: "materias", biblioteca: "materias",
+};
+const COLOR_GRUPO = { Redes: "g-redes", Sistemas: "g-sistemas", Seguridad: "g-seguridad", Hardware: "g-hardware", Referencia: "g-referencia" };
+const chipNivel = (id) => { const n = NIVELES[GUIAS[id]?.nivel]; return n ? `<span class="chip ${n.clase}">${n.t}</span>` : ""; };
+
+function tarjeta(x) {
+  return `<a class="tarjeta-herr ${COLOR_GRUPO[x.grupo] || ""}" href="#herramientas/${x.id}">
+    <span class="th-icono">${icono(ICONO_HERR[x.id] || ICONO_GRUPO[x.grupo] || "herramienta")}</span>
+    <span class="th-texto"><b>${esc(x.t)}</b><span>${esc(x.desc)}</span></span>
+    <span class="th-chips">${chipNivel(x.id)}${x.internet ? `<span class="chip">Internet</span>` : ""}</span></a>`;
+}
+
 export function vistaHerramientas(e, pestana = "") {
   cargarEstado(e);
   e.herr ||= {};
   guardarEstado(e);
+  const t = e.herr;
   const todas = lista();
   const h = todas.find((x) => x.id === pestana);
   if (!h) {
-    const grupos = [...new Set(todas.map((x) => x.grupo))];
-    return `<header class="cabecera-seccion"><div><h1>Herramientas</h1><p>Para las prácticas de redes, sistemas y programación. Casi todas funcionan sin internet.</p></div></header>
-      ${grupos.map((g) => `<h2 class="subtitulo-seccion">${icono(ICONO_GRUPO[g] || "herramienta")} ${g}</h2>
-        <div class="rejilla-herr">${todas.filter((x) => x.grupo === g).map((x) => `<a class="tarjeta-herr" href="#herramientas/${x.id}"><b>${esc(x.t)}</b><span>${esc(x.desc)}</span>${x.internet ? `<small class="chip">Necesita internet</small>` : ""}</a>`).join("")}</div>`).join("")}`;
+    const q = normalizar(t.buscarHerr || "");
+    const nivel = t.nivelHerr || "";
+    const filtradas = todas.filter((x) => (!nivel || GUIAS[x.id]?.nivel === nivel)
+      && (!q || normalizar(`${x.t} ${x.desc} ${x.grupo} ${GUIAS[x.id]?.que || ""}`).includes(q)));
+    const grupos = [...new Set(filtradas.map((x) => x.grupo))];
+    const bib = todas.find((x) => x.id === "biblioteca");
+    return `<header class="herr-hero">
+        <div><h1>Herramientas</h1><p>Calculadoras, chuletas y código para las prácticas de SMX. Cada una te explica qué es y trae un ejemplo.</p></div>
+        <a class="herr-destacada" href="#herramientas/biblioteca"><span class="th-icono">${icono("materias")}</span>
+          <span><b>${esc(bib.t)}</b><small>HTML · CSS · JavaScript · Python · Java · C · C++ · SQL · PHP · Bash · Git</small></span>${icono("flecha-der")}</a>
+      </header>
+      <div class="herr-filtros">
+        <label class="buscador">${icono("buscar")}<input type="search" id="herrQ" data-herr="buscarHerr" value="${esc(t.buscarHerr || "")}" placeholder="Buscar herramienta: cable, permisos, IP…" aria-label="Buscar herramienta"></label>
+        <div class="segmentos">${[["", "Todas"], ["basico", "Básico"], ["medio", "Medio"], ["avanzado", "Avanzado"]].map(([v, l]) => `<button type="button" class="segmento" aria-pressed="${nivel === v}" data-accion="herr-nivel" data-v="${v}">${l}</button>`).join("")}</div>
+      </div>
+      ${filtradas.length ? grupos.map((g) => `<section class="herr-grupo"><h2 class="subtitulo-seccion">${icono(ICONO_GRUPO[g] || "herramienta")} ${g}</h2>
+        <div class="rejilla-herr">${filtradas.filter((x) => x.grupo === g).map(tarjeta).join("")}</div></section>`).join("")
+        : `<div class="vacio">No hay herramientas con esa búsqueda.</div>`}`;
   }
+  const g = GUIAS[h.id] || {};
   const hermanas = todas.filter((x) => x.grupo === h.grupo);
-  return `<div class="herr-barra"><button type="button" class="volver" data-ir="herramientas">${icono("flecha-izq")} Herramientas</button>
-      ${e.editor ? `<button type="button" class="boton peque" data-accion="herr-guardar" data-t="${esc(h.t)}">${icono("materias")} Guardar en una materia</button>` : ""}</div>
+  return `<div class="herr-barra"><button type="button" class="volver" data-ir="herramientas">${icono("flecha-izq")} Herramientas</button></div>
+    <section class="herr-cabecera ${COLOR_GRUPO[h.grupo] || ""}">
+      <div class="hc-titulo"><span class="th-icono grande">${icono(ICONO_HERR[h.id] || "herramienta")}</span>
+        <div><small>${esc(h.grupo)}</small><h1>${esc(h.t)}</h1></div>${chipNivel(h.id)}</div>
+      ${g.que ? `<div class="hc-explica">
+        <div><b>¿Qué es?</b><p>${esc(g.que)}</p></div>
+        <div><b>¿Cuándo lo uso en clase?</b><p>${esc(g.cuando)}</p></div></div>` : ""}
+      <div class="fila-botones">
+        ${g.ejemplo ? `<button type="button" class="boton principal" data-accion="herr-ejemplo" data-id="${esc(h.id)}">${icono("play")} Probar con el ejemplo</button>` : ""}
+        ${e.editor ? `<button type="button" class="boton" data-accion="herr-guardar" data-t="${esc(h.t)}">${icono("materias")} Guardar en una materia</button>` : ""}
+      </div>
+    </section>
     <div class="segmentos segmentos-scroll">${hermanas.map((x) => `<button type="button" class="segmento" aria-pressed="${x.id === h.id}" data-ir="herramientas/${x.id}">${esc(x.t)}</button>`).join("")}</div>
-    ${h.html(e)}`;
+    <div class="herr-cuerpo">${h.html(e)}</div>
+    ${g.palabras?.length ? `<section class="panel herr-palabras"><div class="panel-titulo"><h2>${icono("bombilla")} Palabras clave</h2></div>
+      <dl>${g.palabras.map(([p, d]) => `<div><dt>${esc(p)}</dt><dd>${esc(d)}</dd></div>`).join("")}</dl></section>` : ""}`;
 }
 
 // Copia lo que se ve en la herramienta (resultados, tablas, código) como apunte de una materia
 function capturarHerramienta() {
-  const vista = document.querySelector(".segmentos-scroll")?.parentElement;
+  const vista = document.querySelector(".herr-cuerpo");
   const paneles = vista ? [...vista.querySelectorAll(":scope > section.panel")] : [];
   const trozos = paneles.map((p) => {
     const c = p.cloneNode(true);
@@ -286,6 +332,18 @@ export const acciones = {
       api.aviso(`Guardado en ${materias.find((a) => a.id === asignatura)?.nombre || "la materia"} → Apuntes`);
     });
     dlg.showModal();
+  },
+  "herr-nivel"(b, api) { api.estado().herr.nivelHerr = b.dataset.v; api.pintar(); },
+  "herr-ejemplo"(b, api) {
+    const t = api.estado().herr;
+    const ej = GUIAS[b.dataset.id]?.ejemplo;
+    if (!ej) return;
+    const { _nuevoEjercicio, _calcularHash, ...datos } = JSON.parse(JSON.stringify(ej));
+    Object.assign(t, datos);
+    if (_nuevoEjercicio) return acciones["herr-ej-otro"](b, api);
+    if (_calcularHash) return acciones["herr-hash-texto"](b, api);
+    api.pintar();
+    api.aviso("Ejemplo cargado. Cambia los datos para probar los tuyos.");
   },
   "herr-cat"(b, api) { const e = api.estado(); e.herr = { ...(e.herr || {}), cat: b.dataset.cat, buscar: "" }; api.pintar(); },
   ...Redes.acciones, ...Sis.acciones, ...Seg.acciones, ...Hw.acciones, ...Biblio.acciones,
