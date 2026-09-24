@@ -5,6 +5,7 @@
 //   · Chuletas: Linux, Windows, Cisco IOS y puertos
 //   · Y el resto: herr-redes, herr-sistemas, herr-seguridad,
 //     herr-hardware y biblioteca (programación)
+//   · herr-guias (qué es / cuándo) y herr-pasos (cómo se ha hecho)
 // =============================================================
 import { esc, normalizar, nuevoId, hoyIso } from "./comun.js";
 import { limpiar } from "./editor.js";
@@ -15,6 +16,7 @@ import * as Seg from "./herr-seguridad.js";
 import * as Hw from "./herr-hardware.js";
 import * as Biblio from "./biblioteca.js";
 import { GUIAS, NIVELES } from "./herr-guias.js";
+import { PASOS } from "./herr-pasos.js";
 import * as Extra from "./herr-extra.js";
 
 // ---------- Subredes ----------
@@ -236,24 +238,40 @@ const BASE = [
   { id: "subredes", t: "Subredes IPv4", grupo: "Redes", desc: "Red, broadcast, hosts, paso a paso", html: htmlSubred },
   { id: "conversor", t: "Conversor de bases", grupo: "Referencia", desc: "Binario, decimal, hexadecimal", html: htmlConversor },
   { id: "chuletas", t: "Chuletas de comandos", grupo: "Referencia", desc: "Linux, Windows, Cisco y puertos", html: htmlChuletas },
-  { id: "biblioteca", t: "Biblioteca de programación", grupo: "Referencia", desc: "HTML, CSS, JS, Python, SQL, Linux, Windows… con zona de pruebas", html: (e) => Biblio.vistaBiblioteca(e) },
+  { id: "biblioteca", t: "Biblioteca de programación", grupo: "Referencia", desc: "HTML, CSS, JS, Python, SQL, Linux, Windows, Git…", html: (e) => Biblio.vistaBiblioteca(e) },
 ];
+// Orden y grupo de cada herramienta (de lo más básico a lo más avanzado dentro de cada grupo)
+const ORGANIZACION = {
+  Redes: ["subredes", "conversor", "ejercicios", "vlsm", "ipv6", "rj45", "cisco", "dns"],
+  Sistemas: ["chmod", "cron", "raid", "regex"],
+  Seguridad: ["contrasenas", "hash", "codificar"],
+  Hardware: ["presupuesto", "transferencia", "sai"],
+  Referencia: ["biblioteca", "chuletas", "diccionario", "checklists"],
+};
+const GRUPO_DE = Object.fromEntries(Object.entries(ORGANIZACION).flatMap(([g, ids]) => ids.map((id, i) => [id, { g, i }])));
+let cacheLista = null;
 export function lista() {
-  const orden = ["Redes", "Sistemas", "Seguridad", "Hardware", "Referencia"];
-  const todas = [...BASE, ...Redes.HERRAMIENTAS, ...Sis.HERRAMIENTAS, ...Seg.HERRAMIENTAS, ...Hw.HERRAMIENTAS, ...Extra.HERRAMIENTAS];
-  return todas.sort((a, b) => orden.indexOf(a.grupo) - orden.indexOf(b.grupo));
+  if (cacheLista) return cacheLista;
+  const grupos = Object.keys(ORGANIZACION);
+  const todas = [...BASE, ...Redes.HERRAMIENTAS, ...Sis.HERRAMIENTAS, ...Seg.HERRAMIENTAS, ...Hw.HERRAMIENTAS, ...Extra.HERRAMIENTAS]
+    .map((x) => ({ ...x, grupo: GRUPO_DE[x.id]?.g || x.grupo }));
+  const pos = (x) => grupos.indexOf(x.grupo) * 100 + (GRUPO_DE[x.id]?.i ?? 99);
+  cacheLista = todas.sort((a, b) => pos(a) - pos(b));
+  return cacheLista;
 }
 const ICONO_GRUPO = { Redes: "red", Sistemas: "terminal", Seguridad: "candado", Hardware: "herramienta", Referencia: "materias" };
 
 // ---------- Lo que escribes en las herramientas se recuerda en este dispositivo (30 días) ----------
 const CLAVE_HERR = "mochila-herramientas";
-const NO_GUARDAR = new Set(["pwProbar", "pwGen", "hashRes", "hashCargando", "dnsError", "zonaSal", "termPre"]);
+const NO_GUARDAR = new Set(["pwProbar", "pwGen", "hashRes", "hashCargando", "dnsError"]);
+const OBSOLETAS = ["zona", "zonaSal", "termPre", "term", "termWin", "termSo"]; // de versiones anteriores
 function cargarEstado(e) {
   if (e.herrCargado) return;
   e.herrCargado = true;
   try {
     const g = JSON.parse(localStorage.getItem(CLAVE_HERR) || "null");
     if (g && Date.now() - g.t < 30 * 86400 * 1000) e.herr = { ...g.v, ...(e.herr || {}) };
+    for (const k of OBSOLETAS) delete e.herr?.[k];
   } catch { /* sin almacenamiento */ }
 }
 let temporizadorGuardar = null;
@@ -273,7 +291,7 @@ const ICONO_HERR = {
   contrasenas: "candado", hash: "candado", codificar: "terminal", regex: "buscar",
   rj45: "red", transferencia: "reloj", sai: "chispa", presupuesto: "maletin",
   conversor: "terminal", chuletas: "materias", biblioteca: "materias",
-  diccionario: "buscar", terminal: "terminal", checklists: "bandera",
+  diccionario: "buscar", checklists: "bandera",
 };
 const COLOR_GRUPO = { Redes: "g-redes", Sistemas: "g-sistemas", Seguridad: "g-seguridad", Hardware: "g-hardware", Referencia: "g-referencia" };
 const chipNivel = (id) => { const n = NIVELES[GUIAS[id]?.nivel]; return n ? `<span class="chip ${n.clase}">${n.t}</span>` : ""; };
@@ -301,8 +319,12 @@ export function vistaHerramientas(e, pestana = "") {
     const bib = todas.find((x) => x.id === "biblioteca");
     return `<header class="herr-hero">
         <div><h1>Herramientas</h1><p>Calculadoras, chuletas y código para las prácticas de SMX. Cada una te explica qué es y trae un ejemplo.</p></div>
-        <a class="herr-destacada" href="#herramientas/biblioteca"><span class="th-icono">${icono("materias")}</span>
-          <span><b>${esc(bib.t)}</b><small>HTML · CSS · JavaScript · Python · SQL · Java · C · C++ · PHP · Linux · Windows · Git — y en cada uno, una zona para probar código</small></span>${icono("flecha-der")}</a>
+        <div class="herr-destacadas">
+          <a class="herr-destacada" href="#herramientas/biblioteca"><span class="th-icono">${icono("materias")}</span>
+            <span><b>${esc(bib.t)}</b><small>HTML · CSS · JavaScript · Python · SQL · Java · C · C++ · PHP · Linux · Windows · Git</small></span>${icono("flecha-der")}</a>
+          <a class="herr-destacada sb" href="#sandbox"><span class="th-icono">${icono("cubo")}</span>
+            <span><b>Sandbox</b><small>Linux de verdad, Windows, Git, Python, SQL y Web para practicar</small></span>${icono("flecha-der")}</a>
+        </div>
       </header>
       <div class="herr-filtros">
         <label class="buscador">${icono("buscar")}<input type="search" id="herrQ" data-herr="buscarHerr" value="${esc(t.buscarHerr || "")}" placeholder="Buscar herramienta: cable, permisos, IP…" aria-label="Buscar herramienta"></label>
@@ -328,9 +350,22 @@ export function vistaHerramientas(e, pestana = "") {
     </section>
     <div class="segmentos segmentos-scroll">${hermanas.map((x) => `<button type="button" class="segmento" aria-pressed="${x.id === h.id}" data-ir="herramientas/${x.id}">${esc(x.t)}</button>`).join("")}</div>
     <div class="herr-cuerpo">${h.html(e)}</div>
+    ${htmlPasos(h.id, t.verPasos === h.id)}
     ${g.palabras?.length ? `<section class="panel herr-palabras"><div class="panel-titulo"><h2>${icono("bombilla")} Palabras clave</h2>
       ${e.editor ? `<button type="button" class="boton peque" data-accion="herr-a-tarjetas" data-id="${esc(h.id)}">${icono("tarjetas")} Añadir a mis tarjetas</button>` : ""}</div>
       <dl>${g.palabras.map(([p, d]) => `<div><dt>${esc(p)}</dt><dd>${esc(d)}</dd></div>`).join("")}</dl></section>` : ""}`;
+}
+
+// «¿Cómo se ha hecho?»: el ejemplo explicado paso a paso, desde cero
+function htmlPasos(id, abierto) {
+  const p = PASOS[id];
+  if (!p) return "";
+  return `<details class="panel herr-pasos" id="herrPasos" ${abierto ? "open" : ""}>
+    <summary><span>${icono("bombilla")}</span><b>¿Cómo se ha hecho? Explicado paso a paso</b></summary>
+    <p class="hp-intro">${esc(p.intro)}</p>
+    <ol class="hp-lista">${p.pasos.map(([que, como]) => `<li><b>${esc(que)}</b><p>${esc(como)}</p></li>`).join("")}</ol>
+    ${p.truco ? `<p class="hp-truco">${icono("chispa")} ${esc(p.truco)}</p>` : ""}
+  </details>`;
 }
 
 // Copia lo que se ve en la herramienta (resultados, tablas, código) como apunte de una materia
@@ -425,10 +460,12 @@ export const acciones = {
     if (!ej) return;
     const { _nuevoEjercicio, _calcularHash, ...datos } = JSON.parse(JSON.stringify(ej));
     Object.assign(t, datos);
+    t.verPasos = b.dataset.id;
+    setTimeout(() => document.getElementById("herrPasos")?.scrollIntoView({ behavior: "smooth", block: "start" }), 250);
     if (_nuevoEjercicio) return acciones["herr-ej-otro"](b, api);
     if (_calcularHash) return acciones["herr-hash-texto"](b, api);
     api.pintar();
-    api.aviso("Ejemplo cargado. Cambia los datos para probar los tuyos.");
+    api.aviso("Ejemplo cargado. Abajo tienes cómo se ha hecho, paso a paso.");
   },
   "herr-cat"(b, api) { const e = api.estado(); e.herr = { ...(e.herr || {}), cat: b.dataset.cat, buscar: "" }; api.pintar(); },
   ...Redes.acciones, ...Sis.acciones, ...Seg.acciones, ...Hw.acciones, ...Biblio.acciones, ...Extra.acciones,

@@ -517,6 +517,9 @@ async function revisarRepo() {
   let items;
   try { items = await gh.listar(""); } catch (err) { web.aviso(`No se ha podido revisar: ${err.message}`, 6000); return; }
   const raros = items.filter((x) => !ESPERADOS.has(x.name));
+  // Archivos de versiones anteriores que ya no se usan
+  const viejos = new Set(["consolas.js", "zona.js"]);
+  try { raros.push(...(await gh.listar("js")).filter((x) => viejos.has(x.name)).map((x) => ({ ...x, name: `js/${x.name}` }))); } catch { /* sin carpeta js */ }
   const faltan = ["index.html", "admin.html", "sw.js", "js", "css"].filter((n) => !items.some((x) => x.name === n));
   const dlg = document.createElement("dialog");
   dlg.className = "modal";

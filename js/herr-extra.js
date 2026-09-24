@@ -1,11 +1,10 @@
 // =============================================================
-//  herr-extra.js — Diccionario SMX (con inglés técnico),
-//  terminal Linux/Windows (en consolas.js) y checklists de prácticas
+//  herr-extra.js — Diccionario SMX (con inglés técnico)
+//  y checklists de prácticas
 // =============================================================
 import { esc, normalizar } from "./comun.js";
 import { icono } from "./iconos.js";
 import { GUIAS } from "./herr-guias.js";
-import { htmlConsola, htmlRetos, ejecutarEn } from "./consolas.js";
 
 // ---------- Inglés técnico: [inglés, castellano, nota] ----------
 export const INGLES = [
@@ -66,22 +65,6 @@ function htmlDiccionario(e) {
 }
 
 
-// ---------- Terminal (Linux o Windows, simulada) ----------
-function htmlTerminal(e) {
-  const t = (e.herr ||= {});
-  const so = t.termSo === "windows" ? "windows" : "linux";
-  const pista = so === "windows"
-    ? "Prueba: <code>dir</code>, <code>cd Documentos</code>, <code>type leeme.txt</code>, <code>ipconfig /all</code>, <code>Get-ChildItem</code>…"
-    : "Prueba: <code>ls -l</code>, <code>cd Documentos</code>, <code>cat leeme.txt</code>, <code>mkdir practicas</code>, <code>git init</code>…";
-  return `<section class="panel"><div class="panel-titulo"><h2>${icono("terminal")} ${so === "windows" ? "PowerShell / CMD" : "Terminal Linux"} de práctica</h2>
-      <button type="button" class="enlace-ver" data-accion="herr-term-reset" data-so="${so}">Empezar de cero</button></div>
-    <div class="segmentos term-so">${[["linux", "Linux (Bash + git)"], ["windows", "Windows (CMD y PowerShell)"]].map(([v, l]) => `<button type="button" class="segmento" aria-pressed="${so === v}" data-accion="herr-term-so" data-so="${v}">${l}</button>`).join("")}</div>
-    ${htmlConsola(e, so)}
-    <p class="texto-suave">Es una simulación: puedes equivocarte sin miedo. ${pista}</p>
-  </section>
-  ${htmlRetos(e, so)}`;
-}
-
 // ---------- Checklists de prácticas ----------
 export const CHECKLISTS = {
   cable: { t: "Crimpar un cable de red", pasos: ["Corta el cable a la medida (máx. 100 m)", "Pela unos 3 cm de funda sin cortar los hilos", "Destrenza y ordena los hilos según T568B", "Alinea y corta los hilos rectos a ~1,3 cm", "Mete los hilos hasta el fondo del RJ45 (la funda dentro)", "Crimpa con fuerza", "Repite en la otra punta con el mismo orden", "Comprueba con el tester: 1-1, 2-2 … 8-8"] },
@@ -111,27 +94,15 @@ function htmlChecklists(e) {
 
 export const HERRAMIENTAS = [
   { id: "diccionario", t: "Diccionario SMX", grupo: "Referencia", desc: "Todas las definiciones y el inglés técnico", html: htmlDiccionario },
-  { id: "terminal", t: "Terminal Linux y Windows", grupo: "Sistemas", desc: "Practica Bash, git, CMD y PowerShell sin miedo a romper nada", html: htmlTerminal },
   { id: "checklists", t: "Checklists de prácticas", grupo: "Hardware", desc: "Paso a paso: cable, PC, dominio, DHCP…", html: htmlChecklists },
 ];
 
 export const acciones = {
   "herr-dic-modo"(b, api) { api.estado().herr.dicModo = b.dataset.v; api.pintar(); },
-  "herr-term-reset"(b, api) { const t = api.estado().herr; delete t[b.dataset.so === "windows" ? "termWin" : "term"]; api.pintar(); },
-  "herr-term-so"(b, api) { api.estado().herr.termSo = b.dataset.so; api.pintar(); },
   "herr-chk-sel"(b, api) { api.estado().herr.chkSel = b.dataset.k; api.pintar(); },
   "herr-chk-reset"(b, api) { const t = api.estado().herr; (t.chk ||= {})[b.dataset.k] = []; api.pintar(); },
 };
-export const formularios = {
-  "herr-term"(form, api) {
-    const t = api.estado().herr;
-    const so = form.dataset.so || "linux";
-    ejecutarEn(t, so, String(new FormData(form).get("cmd") || ""));
-    if (t.termPre) delete t.termPre[so];
-    api.pintar();
-    setTimeout(() => { const el = document.getElementById("termIn"); el?.focus({ preventScroll: true }); const tt = document.getElementById("terminal"); if (tt) tt.scrollTop = tt.scrollHeight; }, 0);
-  },
-};
+export const formularios = {};
 // Casillas de las checklists: "chk.cable.3"
 export function alEscribir(t, k, v) {
   const m = k.match(/^chk\.(\w+)\.(\d+)$/);

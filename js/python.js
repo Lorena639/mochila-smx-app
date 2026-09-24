@@ -39,7 +39,7 @@ export function prepararPython(d) {
 // ---------- Consola ----------
 let pyodide = null;
 let cargando = null;
-async function cargarPyodide() {
+export async function cargarPyodide() {
   if (pyodide) return pyodide;
   if (!cargando) {
     cargando = new Promise((ok, mal) => {

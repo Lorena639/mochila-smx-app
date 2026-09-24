@@ -4,10 +4,13 @@
 //   · RA aprobado con 5. Si un RA no se aprueba, el módulo no se aprueba.
 //   · Módulo: media ponderada de sus RA (sin decimales). Estada a l'empresa: 10 %.
 //   · Ciclo: media de los módulos ponderada por horas (2 decimales).
+//   · 1º: se puede importar el «Certificat de qualificacions» en PDF.
+//     Los módulos «PQ» (se cierran en 2º con la Estada) salen como provisionales.
 // =============================================================
 import { esc, nuevoId } from "./comun.js";
 import { icono } from "./iconos.js";
 import { MODULOS_OFICIALES } from "./curso.js";
+import { textoDePdf, leerCertificado } from "./notas-pdf.js";
 
 const num = (v) => (v === "" || v === null || v === undefined || isNaN(Number(String(v).replace(",", "."))) ? null : Number(String(v).replace(",", ".")));
 export const f1 = (n) => (n === null || n === undefined ? "—" : (Math.round(n * 100) / 100).toLocaleString("es-ES", { maximumFractionDigits: 2 }));
@@ -73,6 +76,26 @@ export function calcularModulo(m) {
   };
 }
 
+// Un módulo de 1º: nota final o, si aún es «PQ», una estimación con sus RA
+export function calcularPrimero(p) {
+  const nota = num(p.nota);
+  const ras = (p.ras || []).filter((r) => num(r.nota) !== null);
+  const suspRA = ras.filter((r) => num(r.nota) < 5).map((r) => r.id);
+  if (nota !== null) return { nota, estado: nota >= 5 ? "aprobado" : "suspendido", provisional: false, suspRA };
+  if (!ras.length) return { nota: null, estado: "pendiente", provisional: true, suspRA };
+  const base = ras.reduce((sum, r) => sum + num(r.nota), 0) / ras.length;
+  const estada = p.estada ? num(p.notaEstada) : null;
+  const n = p.estada && estada !== null ? 0.9 * base + 0.1 * estada : base;
+  const suspendido = suspRA.length > 0 || (estada !== null && estada < 5);
+  return { nota: n, estado: suspendido ? "suspendido" : "proceso", provisional: true, suspRA, faltaEstada: p.estada && estada === null };
+}
+export function calcularPrimeroTotal(d) {
+  const partes = (d.notasPrimero || []).map((p) => ({ p, c: calcularPrimero(p) })).filter((x) => x.c.nota !== null && x.c.estado !== "suspendido" && num(x.p.horas));
+  if (!partes.length) return null;
+  const h = partes.reduce((sum, x) => sum + num(x.p.horas), 0);
+  return { nota: partes.reduce((sum, x) => sum + x.c.nota * num(x.p.horas), 0) / h, provisional: partes.some((x) => x.c.provisional) };
+}
+
 // Nota del ciclo (2º + 1º), ponderada por horas oficiales
 export function calcularCiclo(d) {
   const partes = [];
@@ -81,10 +104,15 @@ export function calcularCiclo(d) {
     const horas = num(m.horas);
     if (c.nota !== null && horas) partes.push({ n: c.final ?? c.nota, h: horas, provisional: !c.completo });
   }
-  for (const p of d.notasPrimero || []) if (num(p.nota) !== null && num(p.horas)) partes.push({ n: num(p.nota), h: num(p.horas), provisional: false });
+  const pendientes = [];
+  for (const p of d.notasPrimero || []) {
+    const c = calcularPrimero(p);
+    if (c.estado === "suspendido") { pendientes.push(p.codigo); continue; }
+    if (c.nota !== null && num(p.horas)) partes.push({ n: c.provisional ? c.nota : c.nota, h: num(p.horas), provisional: c.provisional });
+  }
   if (!partes.length) return null;
   const h = partes.reduce((s, x) => s + x.h, 0);
-  return { nota: partes.reduce((s, x) => s + x.n * x.h, 0) / h, provisional: partes.some((x) => x.provisional), modulos: partes.length };
+  return { nota: partes.reduce((s, x) => s + x.n * x.h, 0) / h, provisional: partes.some((x) => x.provisional) || pendientes.length > 0, modulos: partes.length, pendientes };
 }
 
 // ---------- Vistas ----------
@@ -159,18 +187,34 @@ export function vistaNotas(e) {
       <span class="mn-ras">${c.ras.map(({ ra, r }) => `<i title="${esc(ra.id)}: ${r.nota === null ? "sin nota" : f1(r.nota)}" class="${r.estado}"></i>`).join("")}</span>
       <small class="texto-suave">${c.aprobadosRA}/${c.totalRA} RA aprobados</small>
     </button>`).join("");
-  const primero = (d.notasPrimero || []).map((p) => `<tr><td><span class="mn-cod">${esc(p.codigo)}</span> ${esc(p.nombre)}</td><td>${esc(p.horas)} h</td>
-      <td>${e.editor ? `<input type="text" inputmode="decimal" class="corto" data-cambio="nota-primero" data-id="${esc(p.id)}" value="${esc(p.nota ?? "")}" placeholder="—">` : `<b>${esc(p.nota || "—")}</b>`}</td></tr>`).join("");
+  const primero = (d.notasPrimero || []).map((p) => {
+    const c = calcularPrimero(p);
+    const chips = (p.ras || []).map((r) => `<i class="${num(r.nota) === null ? "" : num(r.nota) >= 5 ? "aprobado" : "suspendido"}" title="${esc(r.id)}: ${esc(r.nota ?? "—")}">${esc(r.nota ?? "·")}</i>`).join("");
+    const notaTxt = c.nota === null ? "—" : c.provisional ? `≈ ${f1(c.nota)}` : f1(c.nota);
+    const detalle = c.estado === "suspendido" && c.suspRA.length ? `Falta aprobar ${c.suspRA.join(", ")}` : c.faltaEstada ? "Se cierra con la Estada en 2º" : c.provisional && c.nota !== null ? "Estimada con sus RA" : "";
+    return `<tr class="p1-${c.estado}"><td><span class="mn-cod">${esc(p.codigo)}</span> ${esc(p.nombre)}${detalle ? `<small class="p1-det">${esc(detalle)}</small>` : ""}</td>
+      <td>${esc(p.horas)} h</td>
+      <td><span class="p1-ras">${chips || `<small class="texto-suave">—</small>`}</span>
+        ${e.editor ? `<input type="text" class="p1-ras-in" data-cambio="nota-primero-ras" data-id="${esc(p.id)}" value="${esc((p.ras || []).map((r) => r.nota ?? "").join(" "))}" placeholder="RA: 8 6 7…" aria-label="Notas de los RA de ${esc(p.codigo)}">` : ""}</td>
+      <td>${e.editor ? `<input type="text" inputmode="decimal" class="corto" data-cambio="nota-primero" data-id="${esc(p.id)}" value="${esc(p.nota ?? "")}" placeholder="final" aria-label="Nota final de ${esc(p.codigo)}">` : ""}
+        <b class="p1-nota ${c.estado}">${notaTxt}</b>${chipEstado(c.estado)}
+        ${p.estada ? `<label class="p1-estada">Estada ${e.editor ? `<input type="text" inputmode="decimal" class="corto" data-cambio="nota-primero-estada" data-id="${esc(p.id)}" value="${esc(p.notaEstada ?? "")}" placeholder="—">` : `<b>${esc(p.notaEstada || "—")}</b>`}</label>` : ""}</td></tr>`;
+  }).join("");
+  const nota1 = calcularPrimeroTotal(d);
   return `<header class="cabecera-seccion"><div><h1>Notas</h1><p>Calculadas con las normas del centro: RA, 40/60 y nota del ciclo por horas.</p></div></header>
     <div class="kpis">
       <div class="panel kpi"><span class="kpi-num">${ciclo ? f1(ciclo.nota) : "—"}</span><span class="kpi-que">Nota del ciclo${ciclo?.provisional ? " (provisional)" : ""}</span></div>
+      <div class="panel kpi"><span class="kpi-num">${nota1 ? f1(nota1.nota) : "—"}</span><span class="kpi-que">Media de 1º${nota1?.provisional ? " (aprox.)" : ""}</span></div>
       <div class="panel kpi"><span class="kpi-num">${raOk}<small>/${raTot}</small></span><span class="kpi-que">RA aprobados</span></div>
       <div class="panel kpi"><span class="kpi-num">${mods.filter((x) => x.c.estado === "aprobado").length}<small>/${mods.length}</small></span><span class="kpi-que">Módulos de 2º aprobados</span></div>
     </div>
     <div class="modulos-nota">${tarjetas}</div>
     <section class="panel" style="margin-top:20px"><div class="panel-titulo"><h2>${icono("formacion")} Módulos de 1º</h2></div>
-      <p class="texto-suave">Pon la nota final de cada módulo de 1º para calcular la nota del ciclo. Deja en blanco los que no cursaste.</p>
-      <table class="tabla"><thead><tr><th>Módulo</th><th>Horas</th><th>Nota</th></tr></thead><tbody>${primero}</tbody></table>
+      <p class="texto-suave">Los módulos con nota «PQ» en el certificado se cierran en 2º con la Estada a l'empresa (10 %): mientras, se calcula una nota aproximada con sus RA (todos pesan igual). Un módulo con algún RA suspendido no cuenta para la media hasta que lo recuperes.</p>
+      ${ciclo?.pendientes?.length ? `<p class="aviso-ra">Pendiente de aprobar: ${esc(ciclo.pendientes.join(", "))}. La nota del ciclo es provisional.</p>` : ""}
+      ${e.editor ? `<div class="fila-botones"><label class="boton">${icono("subir")} Importar certificado de notas (PDF)<input type="file" accept="application/pdf,.pdf" hidden data-cambio="notas-pdf"></label>
+        <small class="texto-suave">El PDF se lee en tu dispositivo: solo se guardan módulos, horas y notas.</small></div>` : ""}
+      <div class="tabla-scroll"><table class="tabla tabla-primero"><thead><tr><th>Módulo</th><th>Horas</th><th>RA</th><th>Nota</th></tr></thead><tbody>${primero}</tbody></table></div>
     </section>`;
 }
 
@@ -228,6 +272,34 @@ export const cambios = {
   "ra-final"(el, api) { const ra = raDe(api, el.dataset.mod, el.dataset.ra); ra.notaFinal = el.value.trim(); api.cambiar(); },
   "nota-estada"(el, api) { modDe(api, el.dataset.mod).notaEstada = el.value.trim(); api.cambiar(); },
   "nota-primero"(el, api) { const p = api.datos().notasPrimero.find((x) => x.id === el.dataset.id); p.nota = el.value.trim(); api.cambiar(); },
+  "nota-primero-estada"(el, api) { const p = api.datos().notasPrimero.find((x) => x.id === el.dataset.id); p.notaEstada = el.value.trim(); api.cambiar(); },
+  "nota-primero-ras"(el, api) {
+    const p = api.datos().notasPrimero.find((x) => x.id === el.dataset.id);
+    const notas = el.value.split(/[\s;]+/).map((x) => x.trim()).filter(Boolean).map((x) => num(x));
+    if (notas.some((n) => n === null || n < 0 || n > 10)) return api.aviso("Escribe las notas de los RA separadas por espacios, entre 0 y 10. Ej.: 8 6 7 9");
+    p.ras = notas.map((n, i) => ({ id: `RA${i + 1}`, nota: n }));
+    api.cambiar();
+  },
+  // Importa el «Certificat de qualificacions» de 1º (PDF de Alexia / secretaría)
+  async "notas-pdf"(el, api) {
+    const archivo = el.files?.[0];
+    el.value = "";
+    if (!archivo) return;
+    api.aviso("Leyendo el certificado…", 8000);
+    try {
+      const mods = leerCertificado(await textoDePdf(archivo));
+      if (!mods.length) return api.aviso("No he encontrado módulos en ese PDF. ¿Es el «Certificat de qualificacions»?", 6000);
+      const d = api.datos();
+      d.notasPrimero ||= [];
+      for (const m of mods) {
+        let p = d.notasPrimero.find((x) => x.codigo === m.codigo);
+        if (!p) { p = { id: m.codigo, codigo: m.codigo, nombre: m.nombre, horas: m.horas, nota: "", ras: [], estada: m.estada, notaEstada: "" }; d.notasPrimero.push(p); }
+        Object.assign(p, { horas: m.horas, nota: m.nota === null ? "" : String(m.nota), ras: m.ras, estada: m.estada || p.estada });
+      }
+      api.cambiar();
+      api.aviso(`Importados ${mods.length} módulos de 1º. Revisa que las notas coincidan con el PDF.`, 6000);
+    } catch (err) { api.aviso(err.message || "No se ha podido leer el PDF.", 6000); }
+  },
 };
 
 // Para el asistente y el modo examen

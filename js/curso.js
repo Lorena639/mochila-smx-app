@@ -149,16 +149,18 @@ export const MODULOS_OFICIALES = {
   ] },
 };
 
-// Módulos de 1º (para la nota final del ciclo: pones la nota que sacaste)
+// Módulos de 1º (para la nota final del ciclo). [código, nombre, horas, tiene Estada a l'empresa]
+// Los que tienen Estada salen «PQ» (pendiente) en el certificado de 1º: se cierran en 2º.
 export const MODULOS_PRIMERO = [
-  ["0221", "Muntatge i manteniment d'equips", 231],
-  ["0222", "Sistemes operatius monolloc", 132],
-  ["0223", "Aplicacions ofimàtiques", 198],
-  ["0225", "Xarxes locals", 198],
+  ["0221", "Muntatge i manteniment d'equips", 231, true],
+  ["0222", "Sistemes operatius monolloc", 132, true],
+  ["0223", "Aplicacions ofimàtiques", 198, true],
+  ["0225", "Xarxes locals", 198, true],
   ["1709", "Itinerari personal per a l'ocupabilitat I", 99],
   ["1664", "Digitalització aplicada als sectors productius", 33],
   ["1708", "Sostenibilitat aplicada al sistema productiu", 33],
   ["0156", "Anglès professional", 66],
+  ["MPO", "Informàtica aplicada a Sistemes Electrònics (Robòtica) i Programació en Python", 66],
 ];
 
 // Crea la estructura de notas la primera vez
@@ -181,9 +183,12 @@ export function ponerNotasIniciales(d) {
     };
     cambiado = true;
   }
-  if (!d.notasPrimero) {
-    d.notasPrimero = MODULOS_PRIMERO.map(([codigo, nombre, horas]) => ({ id: codigo, codigo, nombre, horas, nota: "" }));
-    cambiado = true;
+  if (!d.notasPrimero) { d.notasPrimero = []; cambiado = true; }
+  // Añade los módulos que falten (p. ej. el MPO de Python, que llegó más tarde)
+  for (const [codigo, nombre, horas, estada] of MODULOS_PRIMERO) {
+    const p = d.notasPrimero.find((x) => x.codigo === codigo);
+    if (!p) { d.notasPrimero.push({ id: codigo, codigo, nombre, horas, nota: "", ras: [], estada: Boolean(estada), notaEstada: "" }); cambiado = true; }
+    else if (p.estada === undefined) { p.estada = Boolean(estada); p.ras ||= []; p.notaEstada ??= ""; cambiado = true; }
   }
   return cambiado;
 }

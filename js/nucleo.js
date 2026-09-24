@@ -17,6 +17,7 @@ import * as Faltas from "./faltas.js";
 import * as Comunidad from "./comunidad.js";
 import * as Estudio from "./estudio.js";
 import * as Herr from "./herramientas.js";
+import * as Sandbox from "./sandbox.js";
 import * as Py from "./python.js";
 import * as Estada from "./estada.js";
 import * as Extras from "./extras.js";
@@ -32,8 +33,9 @@ const SECCIONES = [
   { id: "notas", t: "Notas", ic: "nota", parte: "notas", grupo: "Estudios" },
   { id: "trabajos", t: "Trabajos", ic: "trabajos", parte: "trabajos", grupo: "Estudios" },
   { id: "formacion", t: "Formación", ic: "formacion", parte: "formacion", grupo: "Estudios" },
-  { id: "estudio", t: "Estudiar", ic: "estudiar", parte: "estudio", grupo: "Estudios" },
-  { id: "herramientas", t: "Herramientas", ic: "herramienta", parte: "herramientas", grupo: "Estudios" },
+  { id: "estudio", t: "Estudiar", ic: "estudiar", parte: "estudio", grupo: "Aprender" },
+  { id: "herramientas", t: "Herramientas", ic: "herramienta", parte: "herramientas", grupo: "Aprender" },
+  { id: "sandbox", t: "Sandbox", ic: "cubo", parte: "herramientas", grupo: "Aprender" },
   { id: "calendario", t: "Calendario", ic: "calendario", parte: "calendario", grupo: "Agenda" },
   { id: "asistencia", t: "Asistencia", ic: "ubicacion", parte: "asistencia", grupo: "Agenda" },
   { id: "estada", t: "Prácticas", ic: "maletin", parte: "estada", grupo: "Agenda" },
@@ -45,7 +47,7 @@ const SECCIONES = [
 const RUTA_SECCION = { materia: "materias", python: "estudio" };
 
 // Módulos que responden a data-accion, data-form y data-cambio
-const MODULOS = [Notas, Faltas, Comunidad, Estudio, Herr, Py, Estada, Extras, A];
+const MODULOS = [Notas, Faltas, Comunidad, Estudio, Herr, Sandbox, Py, Estada, Extras, A];
 const ACCIONES = Object.assign({}, ...MODULOS.map((m) => m.acciones || {}));
 const FORMULARIOS = Object.assign({}, ...MODULOS.map((m) => m.formularios || {}));
 const CAMBIOS = Object.assign({}, ...MODULOS.map((m) => m.cambios || {}));
@@ -195,7 +197,8 @@ export function iniciar(raiz, ctx) {
   function vistaMas() {
     const visibles = SECCIONES.filter(veSeccion);
     return `<header class="cabecera-seccion"><div><h1>Todas las secciones</h1></div></header>
-      <div class="rejilla-mas">${visibles.map((s) => `<a class="panel mas-item" href="#${s.id}">${icono(s.ic)}<b>${s.id === "buzon" && !esEditor() ? `Escribir a ${esc(c.nombre || "Lorena")}` : s.t}</b></a>`).join("")}
+      ${[...new Set(visibles.map((s) => s.grupo || ""))].map((g) => `${g ? `<h2 class="subtitulo-seccion">${esc(g)}</h2>` : ""}<div class="rejilla-mas">${visibles.filter((s) => (s.grupo || "") === g).map((s) => `<a class="panel mas-item" href="#${s.id}">${icono(s.ic)}<b>${s.id === "buzon" && !esEditor() ? `Escribir a ${esc(c.nombre || "Lorena")}` : s.t}</b></a>`).join("")}</div>`).join("")}
+      <div class="rejilla-mas">
         ${ctx.editor ? "" : `<button type="button" class="panel mas-item" data-accion="quien">${icono("persona")}<b>Cambiar mi nombre</b></button>`}
         <button type="button" class="panel mas-item" data-accion="salir">${icono("salir")}<b>Cerrar sesión</b></button></div>`;
   }
@@ -223,6 +226,7 @@ export function iniciar(raiz, ctx) {
       case "estudio": html = a === "examen" ? Estudio.vistaExamen(v, b) : Estudio.vistaEstudio(v, a || "tarjetas"); break;
       case "python": html = Py.vistaPython(v); break;
       case "herramientas": html = Herr.vistaHerramientas(v, a || ""); break;
+      case "sandbox": html = Sandbox.vistaSandbox(v, a || ""); break;
       case "calendario": html = V.vistaCalendario(v, a === "horario" ? "horario" : "mes"); break;
       case "asistencia": html = A.vistaAsistencia(v); break;
       case "estada": html = Estada.vistaEstada(v); break;
@@ -239,6 +243,7 @@ export function iniciar(raiz, ctx) {
     pintarMenus(activa);
     document.title = `${c.nombre || "Mochila"} · Mochila SMX`;
     cargarImagenes();
+    Sandbox.montar(api);
     prepararCarruseles();
     const reloj = $("#pildoraReloj");
     if (reloj) reloj.hidden = !Estudio.temporizadorActivo();
@@ -337,6 +342,7 @@ export function iniciar(raiz, ctx) {
       if (veParte("formacion")) buscar(d.formacion, (x) => `${x.titulo} ${x.entidad || ""}`, () => "formacion", "Formación", "formacion");
       buscar(e.foro?.temas || [], (x) => `${x.titulo} ${x.texto}`, (x) => `comunidad/${x.id}`, "Foro", "comentario");
       buscar(Herr.lista().map((x) => ({ ...x, titulo: x.t })), (x) => `${x.t} ${x.desc}`, (x) => `herramientas/${x.id}`, "Herramienta", "herramienta");
+      buscar(Sandbox.ENTORNOS.map((x) => ({ ...x, titulo: `Sandbox: ${x.t}` })), (x) => `sandbox terminal consola practicar ${x.t} ${x.desc}`, (x) => `sandbox/${x.id}`, "Sandbox", "cubo");
       if (esEditor()) buscar(Herr.CHULETAS ? Object.values(Herr.CHULETAS).flatMap((cc) => cc.items.map((it) => ({ titulo: `${it.cmd} — ${it.desc}` }))) : [], (x) => x.titulo, () => "herramientas/chuletas", "Chuleta", "terminal");
     }
     $("#paletaRes").innerHTML = `${respuesta ? `<div class="paleta-respuesta">${icono("chispa")}<div>${respuesta}</div></div>` : ""}
@@ -568,7 +574,7 @@ export function iniciar(raiz, ctx) {
 
     // Acciones de los módulos
     if (acc && ACCIONES[acc]) {
-      if (!esEditor() && !PERMITIDO_VISITANTE.has(acc) && !acc.startsWith("herr-")) return;
+      if (!esEditor() && !PERMITIDO_VISITANTE.has(acc) && !/^(herr|sb)-/.test(acc)) return;
       return ACCIONES[acc](b, api);
     }
 
@@ -643,6 +649,8 @@ export function iniciar(raiz, ctx) {
 
   // ---------- Teclado ----------
   document.addEventListener("keydown", (ev) => {
+    // Dentro de una terminal o del editor nano, las teclas son para ellos
+    if (ev.target.closest?.(".xterm, .sb-nano")) return;
     if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === "k") { ev.preventDefault(); return $("#paleta").hidden ? abrirPaleta() : cerrarPaleta(); }
     if (ev.key === "Escape" && !$("#paleta").hidden) return cerrarPaleta();
     if (ev.key === "Escape" && e.avisosAbiertos) return pintarAvisos(false);
@@ -719,7 +727,7 @@ export function iniciar(raiz, ctx) {
     const k = form.dataset.form;
     if (k && FORMULARIOS[k]) {
       ev.preventDefault();
-      if (!esEditor() && !PERMITIDO_VISITANTE.has(k) && !k.startsWith("herr-")) return;
+      if (!esEditor() && !PERMITIDO_VISITANTE.has(k) && !/^(herr|sb)-/.test(k)) return;
       const boton = form.querySelector("button[type=submit]");
       if (boton) boton.disabled = true;
       try { await FORMULARIOS[k](form, api); } finally { if (boton) boton.disabled = false; }

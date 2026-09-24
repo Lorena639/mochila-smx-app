@@ -1,12 +1,12 @@
 // =============================================================
 //  biblioteca.js — Chuletas de programación con ejemplos
 //  HTML, CSS, JavaScript, Python, Java, C, C++, PHP, SQL, Linux, Windows y Git
-//  + zona de pruebas en cada lenguaje (zona.js)
+//  Cada trozo de código se puede abrir en el Sandbox para probarlo.
 //  + conceptos clave de SMX. Funciona sin internet.
 // =============================================================
 import { esc, normalizar } from "./comun.js";
 import { icono } from "./iconos.js";
-import * as Zona from "./zona.js";
+import { sePuedeProbar, abrirDesdeBiblioteca } from "./sandbox.js";
 
 // Cada entrada: [código, explicación]
 export const BIBLIOTECA = {
@@ -655,7 +655,7 @@ export function vistaBiblioteca(e) {
   let id = 0;
   const bloque = ([cod, exp], extra = "", lang = lenguaje) => {
     const k = `bib${id++}`;
-    const probar = Zona.sePuedeProbar(lang, cod) ? `<button type="button" class="boton peque bib-probar" data-accion="herr-zona-cargar" data-de="${k}" data-l="${lang}" aria-label="Probar este código">${icono("play")} Probar</button>` : "";
+    const probar = sePuedeProbar(lang) ? `<button type="button" class="boton peque bib-probar" data-accion="herr-bib-probar" data-de="${k}" data-l="${lang}" aria-label="Probar este código en el Sandbox">${icono("play")} Probar</button>` : "";
     return `<div class="bib-item"><div class="bib-codigo"><pre id="${k}"><code>${esc(cod)}</code></pre>
       <div class="bib-botones">${probar}<button type="button" class="boton icono peque" data-accion="herr-copiar" data-de="${k}" aria-label="Copiar">${icono("archivo")}</button></div></div>
       <p>${esc(exp)}${extra}</p></div>`;
@@ -668,7 +668,7 @@ export function vistaBiblioteca(e) {
     cuerpo = res.length ? res.slice(0, 60).map((r) => bloque(r.it, ` <small class="texto-suave">· ${esc(r.donde)}</small>`, r.lang)).join("") : `<p class="texto-suave">Nada coincide.</p>`;
   } else {
     const l = BIBLIOTECA[lenguaje];
-    cuerpo = `<p class="texto-suave">${esc(l.desc)}</p>` + Zona.htmlZona(e, lenguaje) + l.secciones.map((s) => `<h3 class="bib-seccion">${esc(s.t)}</h3>${s.items.map((it) => bloque(it)).join("")}`).join("");
+    cuerpo = `<p class="texto-suave">${esc(l.desc)}</p>` + (sePuedeProbar(lenguaje) ? `<a class="bib-sandbox" href="#sandbox/${{ bash: "linux", html: "web", css: "web", javascript: "web" }[lenguaje] || lenguaje}">${icono("cubo")} <span><b>Practica ${esc(l.nombre)} en el Sandbox</b><small>Con guía paso a paso y chuleta. O pulsa «Probar» en cualquier trozo de código.</small></span>${icono("flecha-der")}</a>` : "") + l.secciones.map((s) => `<h3 class="bib-seccion">${esc(s.t)}</h3>${s.items.map((it) => bloque(it)).join("")}`).join("");
   }
   return `<section class="panel"><div class="panel-titulo"><h2>${icono("materias")} Biblioteca de programación</h2></div>
     <div class="filtros"><label class="buscador">${icono("buscar")}<input type="search" id="bibQ" data-herr="bibBuscar" value="${esc(t.bibBuscar || "")}" placeholder="Buscar: bucle for, flexbox, JOIN…" aria-label="Buscar en la biblioteca"></label></div>
@@ -678,11 +678,14 @@ export function vistaBiblioteca(e) {
 }
 
 export const acciones = {
-  ...Zona.acciones,
+  // «Probar»: abre ese código en el Sandbox
+  "herr-bib-probar"(b) {
+    const pre = document.getElementById(b.dataset.de);
+    const destino = pre && abrirDesdeBiblioteca(b.dataset.l, pre.textContent);
+    if (destino) location.hash = `#sandbox/${destino}`;
+  },
   "herr-bib"(b, api) {
     const t = api.estado().herr; t.bib = b.dataset.l; t.bibBuscar = "";
-    const tab = { html: "html", css: "css", javascript: "js" }[t.bib];
-    if (tab && t.zona?.web) t.zona.web.tab = tab;
     api.pintar();
   },
 };
