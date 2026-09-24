@@ -275,11 +275,13 @@ export const GUIAS = {
   },
   terminal: {
     nivel: "basico",
-    que: "Una terminal de Linux de mentira para practicar comandos (ls, cd, mkdir, chmod…). Nada de lo que hagas afecta a tu ordenador.",
+    que: "Una terminal de Linux (con git) y una consola de Windows (CMD y PowerShell) de mentira para practicar comandos. Nada de lo que hagas afecta a tu ordenador.",
     cuando: "Antes de las prácticas de Linux o para repasar comandos para el examen. Completa los retos.",
     palabras: [
       ["Terminal", "La ventana donde escribes órdenes al sistema."], ["Directorio", "Carpeta."], ["Ruta absoluta", "Empieza por / (desde la raíz): /home/lorena/Documentos."],
       ["Ruta relativa", "Desde donde estás: Documentos, ../practicas…"], ["~", "Tu carpeta personal (/home/lorena)."], [">", "Guarda la salida de un comando en un archivo (lo sobrescribe). >> lo añade al final."],
+      ["PowerShell", "La consola moderna de Windows. Sus órdenes son Verbo-Nombre: Get-ChildItem, New-Item…"], ["CMD", "El «símbolo del sistema», la consola clásica de Windows (dir, cd, ipconfig)."],
+      ["Commit (git)", "Una foto guardada de tus archivos con un mensaje. Se hace con git add + git commit."], ["Rama (git)", "Una línea de trabajo separada para probar cosas sin estropear main."],
     ],
   },
   checklists: {
@@ -290,7 +292,7 @@ export const GUIAS = {
   },
   biblioteca: {
     nivel: "basico",
-    que: "Trozos de código de los lenguajes más usados, listos para copiar, con lo que hace cada uno.",
+    que: "Trozos de código de los lenguajes más usados, listos para copiar, con lo que hace cada uno. Cada lenguaje tiene su zona de pruebas para escribir código y ver qué pasa.",
     cuando: "Cuando programas (HTML, CSS, Python…) y no te acuerdas de cómo se escribía algo.",
     ejemplo: { bib: "python", bibBuscar: "" },
     palabras: [

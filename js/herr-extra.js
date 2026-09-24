@@ -1,10 +1,11 @@
 // =============================================================
 //  herr-extra.js — Diccionario SMX (con inglés técnico),
-//  simulador de terminal Linux y checklists de prácticas
+//  terminal Linux/Windows (en consolas.js) y checklists de prácticas
 // =============================================================
 import { esc, normalizar } from "./comun.js";
 import { icono } from "./iconos.js";
 import { GUIAS } from "./herr-guias.js";
+import { htmlConsola, htmlRetos, ejecutarEn } from "./consolas.js";
 
 // ---------- Inglés técnico: [inglés, castellano, nota] ----------
 export const INGLES = [
@@ -64,162 +65,21 @@ function htmlDiccionario(e) {
   </section>`;
 }
 
-// ---------- Terminal Linux (simulada) ----------
-const INICIO_FS = () => ({
-  "/": { t: "d" }, "/home": { t: "d" }, "/home/lorena": { t: "d" }, "/home/lorena/Documentos": { t: "d" },
-  "/home/lorena/Documentos/leeme.txt": { t: "f", c: "Bienvenida a la terminal de práctica.\nEscribe «help» para ver los comandos.", p: "644" },
-  "/etc": { t: "d" }, "/etc/hostname": { t: "f", c: "pc-lorena", p: "644" }, "/tmp": { t: "d" },
-});
-const RETOS = [
-  ["Entra en tu carpeta Documentos", (s) => s.cwd === "/home/lorena/Documentos"],
-  ["Crea una carpeta llamada practicas dentro de tu carpeta personal", (s) => s.fs["/home/lorena/practicas"]?.t === "d"],
-  ["Crea el archivo notas.txt dentro de practicas con el texto «hola» (echo hola > …)", (s) => s.fs["/home/lorena/practicas/notas.txt"]?.c?.trim() === "hola"],
-  ["Dale permisos 600 a notas.txt", (s) => s.fs["/home/lorena/practicas/notas.txt"]?.p === "600"],
-  ["Copia leeme.txt a la carpeta practicas", (s) => Boolean(s.fs["/home/lorena/practicas/leeme.txt"])],
-  ["Borra la carpeta /tmp/basura (créala antes con mkdir)", (s) => s.creoBasura && !s.fs["/tmp/basura"]],
-];
-const AYUDA = {
-  pwd: "Muestra en qué carpeta estás", ls: "Lista archivos (ls -l para ver permisos)", cd: "Cambia de carpeta (cd .. sube, cd ~ vuelve a casa)",
-  mkdir: "Crea una carpeta (mkdir -p a/b crea también las de en medio)", touch: "Crea un archivo vacío", echo: "Escribe texto (echo hola > archivo lo guarda)",
-  cat: "Muestra un archivo", cp: "Copia (cp origen destino)", mv: "Mueve o cambia el nombre", rm: "Borra (rm -r para carpetas)",
-  chmod: "Cambia permisos (chmod 755 archivo)", whoami: "Tu usuario", hostname: "Nombre del equipo", date: "Fecha y hora", clear: "Limpia la pantalla",
-  "ip a": "Tus direcciones IP", ping: "Comprueba si un equipo responde", history: "Comandos que has escrito", help: "Esta ayuda", reset: "Vuelve a empezar desde cero",
-};
-function estadoTerm(t) {
-  if (!t.term?.fs) t.term = { fs: INICIO_FS(), cwd: "/home/lorena", lineas: ["Terminal de práctica (simulada). Nada de lo que hagas aquí afecta a tu ordenador. Escribe «help»."], hist: [] };
-  return t.term;
-}
-function ruta(s, p) {
-  if (!p || p === "~") return "/home/lorena";
-  let base = p.startsWith("/") ? [] : s.cwd.split("/").filter(Boolean);
-  if (p.startsWith("~/")) { base = ["home", "lorena"]; p = p.slice(2); }
-  for (const parte of p.split("/").filter(Boolean)) {
-    if (parte === ".") continue;
-    if (parte === "..") base.pop(); else base.push(parte);
-  }
-  return "/" + base.join("/");
-}
-const padre = (p) => p.slice(0, p.lastIndexOf("/")) || "/";
-const hijos = (s, dir) => Object.keys(s.fs).filter((k) => k !== dir && padre(k) === dir).sort();
-const perm = (o) => [...o].map((d) => { const n = +d; return (n & 4 ? "r" : "-") + (n & 2 ? "w" : "-") + (n & 1 ? "x" : "-"); }).join("");
-export function ejecutarTerm(s, linea) {
-  const out = [];
-  const err = (m) => out.push(m);
-  const redir = linea.match(/^(.*?)\s*(>>?)\s*(\S+)\s*$/);
-  let cmd = linea, destino = null, anadir = false;
-  if (redir && /^echo\b/.test(redir[1].trim())) { cmd = redir[1]; destino = redir[3]; anadir = redir[2] === ">>"; }
-  const partes = cmd.trim().match(/"[^"]*"|'[^']*'|\S+/g) || [];
-  const args = partes.slice(1).map((a) => a.replace(/^["']|["']$/g, ""));
-  const flags = args.filter((a) => a.startsWith("-")).join("");
-  const nom = args.filter((a) => !a.startsWith("-"));
-  switch (partes[0]) {
-    case undefined: break;
-    case "help": out.push(...Object.entries(AYUDA).map(([k, v]) => `${k.padEnd(9)} ${v}`)); break;
-    case "pwd": out.push(s.cwd); break;
-    case "whoami": out.push("lorena"); break;
-    case "hostname": out.push(s.fs["/etc/hostname"]?.c || "pc-lorena"); break;
-    case "date": out.push(new Date().toString()); break;
-    case "clear": s.lineas = []; return [];
-    case "reset": Object.assign(s, { fs: INICIO_FS(), cwd: "/home/lorena", lineas: [], hist: [], creoBasura: false }); return ["Terminal reiniciada."];
-    case "history": out.push(...s.hist.map((h, i) => `${String(i + 1).padStart(4)}  ${h}`)); break;
-    case "ls": {
-      const dir = ruta(s, nom[0] || ".");
-      if (!s.fs[dir]) { err(`ls: no se puede acceder a '${nom[0]}': No existe el archivo o el directorio`); break; }
-      if (s.fs[dir].t === "f") { out.push(nom[0]); break; }
-      const hs = hijos(s, dir);
-      if (flags.includes("l")) out.push(`total ${hs.length}`, ...hs.map((k) => { const x = s.fs[k]; return `${x.t === "d" ? "d" : "-"}${perm(x.p || "755")} 1 lorena lorena ${String(x.c?.length || 4096).padStart(5)} ${k.split("/").pop()}`; }));
-      else out.push(hs.map((k) => k.split("/").pop() + (s.fs[k].t === "d" ? "/" : "")).join("  ") || "");
-      break;
-    }
-    case "cd": {
-      const dir = ruta(s, nom[0] || "~");
-      if (!s.fs[dir]) err(`cd: ${nom[0]}: No existe el archivo o el directorio`);
-      else if (s.fs[dir].t !== "d") err(`cd: ${nom[0]}: No es un directorio`);
-      else s.cwd = dir;
-      break;
-    }
-    case "mkdir": {
-      if (!nom.length) { err("mkdir: falta un operando"); break; }
-      for (const n of nom) {
-        const p = ruta(s, n);
-        if (s.fs[p]) { err(`mkdir: no se puede crear el directorio «${n}»: El archivo ya existe`); continue; }
-        if (!s.fs[padre(p)] && !flags.includes("p")) { err(`mkdir: no se puede crear el directorio «${n}»: No existe el archivo o el directorio (usa -p)`); continue; }
-        let acc = "";
-        for (const trozo of p.split("/").filter(Boolean)) { acc += "/" + trozo; s.fs[acc] ||= { t: "d", p: "755" }; }
-        if (p === "/tmp/basura") s.creoBasura = true;
-      }
-      break;
-    }
-    case "touch": for (const n of nom) { const p = ruta(s, n); if (!s.fs[padre(p)]) err(`touch: no se puede tocar '${n}': No existe el directorio`); else s.fs[p] ||= { t: "f", c: "", p: "644" }; } break;
-    case "echo": {
-      const texto = args.join(" ");
-      if (!destino) { out.push(texto); break; }
-      const p = ruta(s, destino);
-      if (!s.fs[padre(p)]) { err(`bash: ${destino}: No existe el archivo o el directorio`); break; }
-      const prev = anadir && s.fs[p]?.c ? s.fs[p].c + "\n" : "";
-      s.fs[p] = { t: "f", c: prev + texto, p: s.fs[p]?.p || "644" };
-      break;
-    }
-    case "cat": for (const n of nom) { const x = s.fs[ruta(s, n)]; if (!x) err(`cat: ${n}: No existe el archivo o el directorio`); else if (x.t === "d") err(`cat: ${n}: Es un directorio`); else out.push(...x.c.split("\n")); } break;
-    case "rm": for (const n of nom) {
-      const p = ruta(s, n);
-      if (!s.fs[p]) { err(`rm: no se puede borrar '${n}': No existe el archivo o el directorio`); continue; }
-      if (s.fs[p].t === "d" && !flags.includes("r")) { err(`rm: no se puede borrar '${n}': Es un directorio (usa rm -r)`); continue; }
-      if (p === "/" || p === "/home" || p === "/home/lorena") { err("rm: mejor no borres eso (en un Linux real te quedarías sin sistema)"); continue; }
-      for (const k of Object.keys(s.fs)) if (k === p || k.startsWith(p + "/")) delete s.fs[k];
-    } break;
-    case "cp": case "mv": {
-      if (nom.length < 2) { err(`${partes[0]}: falta el archivo de destino`); break; }
-      const o = ruta(s, nom[0]); let d = ruta(s, nom[1]);
-      if (!s.fs[o]) { err(`${partes[0]}: no se puede efectuar 'stat' sobre '${nom[0]}': No existe el archivo o el directorio`); break; }
-      if (s.fs[d]?.t === "d") d = `${d === "/" ? "" : d}/${o.split("/").pop()}`;
-      if (s.fs[o].t === "d" && partes[0] === "cp" && !flags.includes("r")) { err(`cp: se omite el directorio '${nom[0]}' (usa cp -r)`); break; }
-      for (const k of Object.keys(s.fs)) if (k === o || k.startsWith(o + "/")) {
-        s.fs[d + k.slice(o.length)] = { ...s.fs[k] };
-        if (partes[0] === "mv") delete s.fs[k];
-      }
-      break;
-    }
-    case "chmod": {
-      const [modo, n] = nom;
-      const p = ruta(s, n || "");
-      if (!/^[0-7]{3}$/.test(modo || "")) { err("chmod: usa un número de 3 cifras, por ejemplo chmod 644 archivo"); break; }
-      if (!s.fs[p]) { err(`chmod: no se puede acceder a '${n}': No existe el archivo o el directorio`); break; }
-      s.fs[p].p = modo;
-      break;
-    }
-    case "ip": if (args[0] === "a" || args[0] === "addr") out.push("1: lo: <LOOPBACK,UP>", "    inet 127.0.0.1/8 scope host lo", "2: enp0s3: <BROADCAST,MULTICAST,UP>", "    link/ether 08:00:27:3a:1c:5e", "    inet 192.168.1.37/24 brd 192.168.1.255 scope global enp0s3"); else err("Prueba: ip a"); break;
-    case "ping": {
-      const h = nom[0];
-      if (!h) { err("ping: falta el destino"); break; }
-      out.push(`PING ${h} 56(84) bytes of data.`);
-      for (let i = 1; i <= 4; i++) out.push(`64 bytes from ${h}: icmp_seq=${i} ttl=117 time=${(10 + Math.random() * 8).toFixed(1)} ms`);
-      out.push(`--- ${h} ping statistics ---`, "4 packets transmitted, 4 received, 0% packet loss");
-      break;
-    }
-    case "sudo": out.push("[sudo] contraseña para lorena: ", "(En esta terminal de práctica no hace falta sudo.)"); break;
-    case "man": out.push(AYUDA[nom[0]] ? `${nom[0]}: ${AYUDA[nom[0]]}` : "No hay manual para eso aquí. Escribe «help»."); break;
-    default: err(`${partes[0]}: orden no encontrada. Escribe «help» para ver lo que se puede probar.`);
-  }
-  return out;
-}
+
+// ---------- Terminal (Linux o Windows, simulada) ----------
 function htmlTerminal(e) {
   const t = (e.herr ||= {});
-  const s = estadoTerm(t);
-  const hechos = RETOS.filter(([, ok]) => ok(s)).length;
-  const prompt = `lorena@pc-lorena:${s.cwd.replace("/home/lorena", "~")}$`;
-  return `<section class="panel"><div class="panel-titulo"><h2>${icono("terminal")} Terminal Linux de práctica</h2>
-      <button type="button" class="enlace-ver" data-accion="herr-term-reset">Empezar de cero</button></div>
-    <div class="terminal" id="terminal">
-      <pre>${s.lineas.map(esc).join("\n")}</pre>
-      <form data-form="herr-term" class="term-linea" autocomplete="off"><span class="mono">${esc(prompt)}</span>
-        <input id="termIn" name="cmd" class="mono" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Comando" autofocus></form>
-    </div>
-    <p class="texto-suave">Es una simulación: puedes equivocarte sin miedo. Prueba: <code>ls -l</code>, <code>cd Documentos</code>, <code>cat leeme.txt</code>, <code>mkdir practicas</code>…</p>
+  const so = t.termSo === "windows" ? "windows" : "linux";
+  const pista = so === "windows"
+    ? "Prueba: <code>dir</code>, <code>cd Documentos</code>, <code>type leeme.txt</code>, <code>ipconfig /all</code>, <code>Get-ChildItem</code>…"
+    : "Prueba: <code>ls -l</code>, <code>cd Documentos</code>, <code>cat leeme.txt</code>, <code>mkdir practicas</code>, <code>git init</code>…";
+  return `<section class="panel"><div class="panel-titulo"><h2>${icono("terminal")} ${so === "windows" ? "PowerShell / CMD" : "Terminal Linux"} de práctica</h2>
+      <button type="button" class="enlace-ver" data-accion="herr-term-reset" data-so="${so}">Empezar de cero</button></div>
+    <div class="segmentos term-so">${[["linux", "Linux (Bash + git)"], ["windows", "Windows (CMD y PowerShell)"]].map(([v, l]) => `<button type="button" class="segmento" aria-pressed="${so === v}" data-accion="herr-term-so" data-so="${v}">${l}</button>`).join("")}</div>
+    ${htmlConsola(e, so)}
+    <p class="texto-suave">Es una simulación: puedes equivocarte sin miedo. ${pista}</p>
   </section>
-  <section class="panel"><div class="panel-titulo"><h2>${icono("bandera")} Retos</h2><span class="chip ${hechos === RETOS.length ? "ok" : ""}">${hechos}/${RETOS.length}</span></div>
-    <ul class="checklist">${RETOS.map(([txt, ok]) => `<li><label><input type="checkbox" disabled ${ok(s) ? "checked" : ""}> <span>${esc(txt)}</span></label></li>`).join("")}</ul>
-  </section>`;
+  ${htmlRetos(e, so)}`;
 }
 
 // ---------- Checklists de prácticas ----------
@@ -251,28 +111,25 @@ function htmlChecklists(e) {
 
 export const HERRAMIENTAS = [
   { id: "diccionario", t: "Diccionario SMX", grupo: "Referencia", desc: "Todas las definiciones y el inglés técnico", html: htmlDiccionario },
-  { id: "terminal", t: "Terminal Linux", grupo: "Sistemas", desc: "Practica comandos sin miedo a romper nada", html: htmlTerminal },
+  { id: "terminal", t: "Terminal Linux y Windows", grupo: "Sistemas", desc: "Practica Bash, git, CMD y PowerShell sin miedo a romper nada", html: htmlTerminal },
   { id: "checklists", t: "Checklists de prácticas", grupo: "Hardware", desc: "Paso a paso: cable, PC, dominio, DHCP…", html: htmlChecklists },
 ];
 
 export const acciones = {
   "herr-dic-modo"(b, api) { api.estado().herr.dicModo = b.dataset.v; api.pintar(); },
-  "herr-term-reset"(b, api) { const t = api.estado().herr; delete t.term; api.pintar(); },
+  "herr-term-reset"(b, api) { const t = api.estado().herr; delete t[b.dataset.so === "windows" ? "termWin" : "term"]; api.pintar(); },
+  "herr-term-so"(b, api) { api.estado().herr.termSo = b.dataset.so; api.pintar(); },
   "herr-chk-sel"(b, api) { api.estado().herr.chkSel = b.dataset.k; api.pintar(); },
   "herr-chk-reset"(b, api) { const t = api.estado().herr; (t.chk ||= {})[b.dataset.k] = []; api.pintar(); },
 };
 export const formularios = {
   "herr-term"(form, api) {
     const t = api.estado().herr;
-    const s = estadoTerm(t);
-    const linea = String(new FormData(form).get("cmd") || "");
-    const prompt = `lorena@pc-lorena:${s.cwd.replace("/home/lorena", "~")}$ ${linea}`;
-    if (linea.trim()) s.hist.push(linea);
-    const out = ejecutarTerm(s, linea);
-    if (linea.trim() !== "clear") s.lineas.push(prompt, ...out);
-    s.lineas = s.lineas.slice(-200);
+    const so = form.dataset.so || "linux";
+    ejecutarEn(t, so, String(new FormData(form).get("cmd") || ""));
+    if (t.termPre) delete t.termPre[so];
     api.pintar();
-    setTimeout(() => { const el = document.getElementById("termIn"); el?.focus(); const tt = document.getElementById("terminal"); if (tt) tt.scrollTop = tt.scrollHeight; }, 0);
+    setTimeout(() => { const el = document.getElementById("termIn"); el?.focus({ preventScroll: true }); const tt = document.getElementById("terminal"); if (tt) tt.scrollTop = tt.scrollHeight; }, 0);
   },
 };
 // Casillas de las checklists: "chk.cable.3"

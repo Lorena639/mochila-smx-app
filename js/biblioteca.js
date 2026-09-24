@@ -1,10 +1,12 @@
 // =============================================================
 //  biblioteca.js — Chuletas de programación con ejemplos
-//  HTML, CSS, JavaScript, Python, Java, C, C++, PHP, SQL, Bash y Git
+//  HTML, CSS, JavaScript, Python, Java, C, C++, PHP, SQL, Linux, Windows y Git
+//  + zona de pruebas en cada lenguaje (zona.js)
 //  + conceptos clave de SMX. Funciona sin internet.
 // =============================================================
 import { esc, normalizar } from "./comun.js";
 import { icono } from "./iconos.js";
+import * as Zona from "./zona.js";
 
 // Cada entrada: [código, explicación]
 export const BIBLIOTECA = {
@@ -485,7 +487,22 @@ FLUSH PRIVILEGES;`, "Usuario con permisos mínimos."],
     ] },
   ] },
 
-  bash: { nombre: "Bash (scripts)", desc: "Automatizar en Linux", secciones: [
+  bash: { nombre: "Linux / Bash", desc: "Comandos de Linux y scripts para automatizar", secciones: [
+    { t: "Comandos básicos (pruébalos en la terminal de arriba)", items: [
+      ["pwd", "Dice en qué carpeta estás."],
+      ["ls -l", "Lista lo que hay, con permisos, dueño y tamaño."],
+      ["cd Documentos", "Entra en una carpeta. cd .. sube una; cd ~ vuelve a tu carpeta personal."],
+      ["mkdir -p practicas/tema1", "Crea carpetas (con -p también las de en medio)."],
+      ["touch notas.txt", "Crea un archivo vacío."],
+      ["echo hola > notas.txt", "Escribe en un archivo (lo sobrescribe). Con >> añade al final."],
+      ["cat notas.txt", "Muestra lo que tiene un archivo."],
+      ["cp notas.txt copia.txt", "Copia. Para carpetas: cp -r."],
+      ["mv copia.txt practicas", "Mueve (o cambia el nombre si el destino no es una carpeta)."],
+      ["rm -r practicas/tema1", "Borra. ¡En Linux no hay papelera!"],
+      ["chmod 755 script.sh", "Permisos: 7 dueño (rwx), 5 grupo (r-x), 5 otros (r-x)."],
+      ["ip a", "Tus direcciones IP."],
+      ["ping 8.8.8.8", "Comprueba si llegas a un equipo."],
+    ] },
     { t: "Script base", items: [
       [`#!/bin/bash
 nombre="Ana"
@@ -517,6 +534,56 @@ origen="/home/usuario/documentos"
 destino="/backup/copia-$(date +%F).tar.gz"
 tar -czf "$destino" "$origen" && echo "Copia OK: $destino"
 find /backup -name "copia-*.tar.gz" -mtime +7 -delete`, "Comprime una carpeta y borra copias de más de 7 días. Prográmalo con cron."],
+    ] },
+  ] },
+
+  windows: { nombre: "Windows (CMD / PowerShell)", desc: "La consola de Windows: CMD clásico y PowerShell", secciones: [
+    { t: "Archivos y carpetas", items: [
+      ["dir", "CMD: lista archivos y carpetas. En PowerShell también vale (y ls)."],
+      ["Get-ChildItem", "PowerShell: lo mismo que dir. Abreviado: gci."],
+      ["cd Documentos", "Entra en una carpeta. cd .. sube; cd solo dice dónde estás (en CMD)."],
+      ["mkdir practicas", "Crea una carpeta (también md)."],
+      ["New-Item -ItemType Directory practicas2", "PowerShell: crea una carpeta."],
+      ["New-Item notas.txt", "PowerShell: crea un archivo vacío."],
+      ["echo hola > notas.txt", "Guarda texto en un archivo. Con >> añade al final."],
+      ["type notas.txt", "CMD: muestra un archivo. En PowerShell: Get-Content notas.txt (o cat)."],
+      ["copy notas.txt practicas", "Copia. PowerShell: Copy-Item. Carpetas: xcopy /e o Copy-Item -Recurse."],
+      ["move notas.txt practicas", "Mueve. PowerShell: Move-Item."],
+      ["ren notas.txt apuntes.txt", "Cambia el nombre. PowerShell: Rename-Item."],
+      ["del apuntes.txt", "Borra un archivo (va sin papelera)."],
+      ["rmdir /s practicas", "Borra una carpeta con todo. PowerShell: Remove-Item -Recurse practicas."],
+      ["tree /f", "Dibuja el árbol de carpetas (con /f, también los archivos)."],
+    ] },
+    { t: "Red", items: [
+      ["ipconfig", "IP, máscara y puerta de enlace."],
+      ["ipconfig /all", "Todo: MAC, DHCP, DNS…"],
+      ["ipconfig /release", "Suelta la IP que te dio el DHCP (luego /renew pide otra)."],
+      ["ipconfig /flushdns", "Borra la caché de DNS (cuando una web «no cambia»)."],
+      ["ping 8.8.8.8", "¿Llego a ese equipo? En Windows manda 4 paquetes."],
+      ["tracert google.com", "Por qué routers pasa el paquete."],
+      ["nslookup google.com", "Pregunta al DNS la IP de un nombre."],
+    ] },
+    { t: "Sistema", items: [
+      ["whoami", "Tu usuario (equipo\\usuario o dominio\\usuario)."],
+      ["hostname", "Nombre del equipo."],
+      ["systeminfo", "Datos del sistema: versión, RAM, dominio…"],
+      ["tasklist", "Programas en marcha. PowerShell: Get-Process."],
+      ["Get-Date", "Fecha y hora."],
+      ["cls", "Limpia la pantalla (PowerShell: Clear-Host)."],
+    ] },
+    { t: "Scripts (.bat y .ps1)", items: [
+      [`@echo off
+echo Hola %USERNAME%
+set carpeta=C:\\copias
+if not exist %carpeta% mkdir %carpeta%
+xcopy "%USERPROFILE%\\Documents" %carpeta% /e /y
+pause`, "Script .bat de CMD: copia tus Documentos a C:\\copias."],
+      [`$nombre = "Lorena"
+Write-Host "Hola $nombre"
+foreach ($f in Get-ChildItem *.txt) {
+    Write-Host $f.Name $f.Length "bytes"
+}`, "Script .ps1 de PowerShell: variable y bucle por los .txt."],
+      ["Set-ExecutionPolicy RemoteSigned -Scope CurrentUser", "Permite ejecutar tus scripts .ps1 (por defecto Windows los bloquea)."],
     ] },
   ] },
 
@@ -586,21 +653,22 @@ export function vistaBiblioteca(e) {
   const q = normalizar(t.bibBuscar || "");
   const lenguaje = BIBLIOTECA[t.bib] ? t.bib : "html";
   let id = 0;
-  const bloque = ([cod, exp], extra = "") => {
+  const bloque = ([cod, exp], extra = "", lang = lenguaje) => {
     const k = `bib${id++}`;
+    const probar = Zona.sePuedeProbar(lang, cod) ? `<button type="button" class="boton peque bib-probar" data-accion="herr-zona-cargar" data-de="${k}" data-l="${lang}" aria-label="Probar este código">${icono("play")} Probar</button>` : "";
     return `<div class="bib-item"><div class="bib-codigo"><pre id="${k}"><code>${esc(cod)}</code></pre>
-      <button type="button" class="boton icono peque" data-accion="herr-copiar" data-de="${k}" aria-label="Copiar">${icono("archivo")}</button></div>
+      <div class="bib-botones">${probar}<button type="button" class="boton icono peque" data-accion="herr-copiar" data-de="${k}" aria-label="Copiar">${icono("archivo")}</button></div></div>
       <p>${esc(exp)}${extra}</p></div>`;
   };
   let cuerpo;
   if (q) {
     const res = [];
     for (const [k, l] of Object.entries(BIBLIOTECA)) for (const s of l.secciones) for (const it of s.items)
-      if (normalizar(`${l.nombre} ${s.t} ${it[0]} ${it[1]}`).includes(q)) res.push({ it, donde: `${l.nombre} · ${s.t}` });
-    cuerpo = res.length ? res.slice(0, 60).map((r) => bloque(r.it, ` <small class="texto-suave">· ${esc(r.donde)}</small>`)).join("") : `<p class="texto-suave">Nada coincide.</p>`;
+      if (normalizar(`${l.nombre} ${s.t} ${it[0]} ${it[1]}`).includes(q)) res.push({ it, donde: `${l.nombre} · ${s.t}`, lang: k });
+    cuerpo = res.length ? res.slice(0, 60).map((r) => bloque(r.it, ` <small class="texto-suave">· ${esc(r.donde)}</small>`, r.lang)).join("") : `<p class="texto-suave">Nada coincide.</p>`;
   } else {
     const l = BIBLIOTECA[lenguaje];
-    cuerpo = `<p class="texto-suave">${esc(l.desc)}</p>` + l.secciones.map((s) => `<h3 class="bib-seccion">${esc(s.t)}</h3>${s.items.map((it) => bloque(it)).join("")}`).join("");
+    cuerpo = `<p class="texto-suave">${esc(l.desc)}</p>` + Zona.htmlZona(e, lenguaje) + l.secciones.map((s) => `<h3 class="bib-seccion">${esc(s.t)}</h3>${s.items.map((it) => bloque(it)).join("")}`).join("");
   }
   return `<section class="panel"><div class="panel-titulo"><h2>${icono("materias")} Biblioteca de programación</h2></div>
     <div class="filtros"><label class="buscador">${icono("buscar")}<input type="search" id="bibQ" data-herr="bibBuscar" value="${esc(t.bibBuscar || "")}" placeholder="Buscar: bucle for, flexbox, JOIN…" aria-label="Buscar en la biblioteca"></label></div>
@@ -610,5 +678,11 @@ export function vistaBiblioteca(e) {
 }
 
 export const acciones = {
-  "herr-bib"(b, api) { const t = api.estado().herr; t.bib = b.dataset.l; t.bibBuscar = ""; api.pintar(); },
+  ...Zona.acciones,
+  "herr-bib"(b, api) {
+    const t = api.estado().herr; t.bib = b.dataset.l; t.bibBuscar = "";
+    const tab = { html: "html", css: "css", javascript: "js" }[t.bib];
+    if (tab && t.zona?.web) t.zona.web.tab = tab;
+    api.pintar();
+  },
 };

@@ -236,7 +236,7 @@ const BASE = [
   { id: "subredes", t: "Subredes IPv4", grupo: "Redes", desc: "Red, broadcast, hosts, paso a paso", html: htmlSubred },
   { id: "conversor", t: "Conversor de bases", grupo: "Referencia", desc: "Binario, decimal, hexadecimal", html: htmlConversor },
   { id: "chuletas", t: "Chuletas de comandos", grupo: "Referencia", desc: "Linux, Windows, Cisco y puertos", html: htmlChuletas },
-  { id: "biblioteca", t: "Biblioteca de programación", grupo: "Referencia", desc: "HTML, CSS, JS, Python, Java, C, C++, SQL…", html: (e) => Biblio.vistaBiblioteca(e) },
+  { id: "biblioteca", t: "Biblioteca de programación", grupo: "Referencia", desc: "HTML, CSS, JS, Python, SQL, Linux, Windows… con zona de pruebas", html: (e) => Biblio.vistaBiblioteca(e) },
 ];
 export function lista() {
   const orden = ["Redes", "Sistemas", "Seguridad", "Hardware", "Referencia"];
@@ -247,7 +247,7 @@ const ICONO_GRUPO = { Redes: "red", Sistemas: "terminal", Seguridad: "candado", 
 
 // ---------- Lo que escribes en las herramientas se recuerda en este dispositivo (30 días) ----------
 const CLAVE_HERR = "mochila-herramientas";
-const NO_GUARDAR = new Set(["pwProbar", "pwGen", "hashRes", "hashCargando", "dnsError"]);
+const NO_GUARDAR = new Set(["pwProbar", "pwGen", "hashRes", "hashCargando", "dnsError", "zonaSal", "termPre"]);
 function cargarEstado(e) {
   if (e.herrCargado) return;
   e.herrCargado = true;
@@ -302,7 +302,7 @@ export function vistaHerramientas(e, pestana = "") {
     return `<header class="herr-hero">
         <div><h1>Herramientas</h1><p>Calculadoras, chuletas y código para las prácticas de SMX. Cada una te explica qué es y trae un ejemplo.</p></div>
         <a class="herr-destacada" href="#herramientas/biblioteca"><span class="th-icono">${icono("materias")}</span>
-          <span><b>${esc(bib.t)}</b><small>HTML · CSS · JavaScript · Python · Java · C · C++ · SQL · PHP · Bash · Git</small></span>${icono("flecha-der")}</a>
+          <span><b>${esc(bib.t)}</b><small>HTML · CSS · JavaScript · Python · SQL · Java · C · C++ · PHP · Linux · Windows · Git — y en cada uno, una zona para probar código</small></span>${icono("flecha-der")}</a>
       </header>
       <div class="herr-filtros">
         <label class="buscador">${icono("buscar")}<input type="search" id="herrQ" data-herr="buscarHerr" value="${esc(t.buscarHerr || "")}" placeholder="Buscar herramienta: cable, permisos, IP…" aria-label="Buscar herramienta"></label>

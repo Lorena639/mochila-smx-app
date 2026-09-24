@@ -597,6 +597,7 @@ export function iniciar(raiz, ctx) {
     if (acc === "vincular") return ctx.vincular?.();
     if (acc === "acceso-remoto") return ctx.accesoRemoto?.(b.dataset.on === "1");
     if (acc === "revisar-repo") return ctx.revisarRepo?.();
+    if (acc === "visitas-recargar") return cargarComentarios().then(() => aviso("Actualizado"));
     if (acc === "grupos") return ctx.abrirGrupos?.().then((cambiado) => { if (cambiado) pintar(true); });
     if (acc === "exportar") return exportar(ds.col, ds.id, ds.formato);
     if (ds.fichar) return ficharAhora(ds.fichar);

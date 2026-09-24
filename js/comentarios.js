@@ -60,12 +60,13 @@ async function descifrarFila(f, acceso) {
 // Devuelve { porPost: { idPost: [ {id, tipo, nombre, rol, texto, disp, fecha} ] }, visitas: [...] }
 export async function cargar(acceso) {
   if (!activos()) return { porPost: {}, visitas: [] };
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios?select=id,post,datos,creado&post=not.in.(${POST_FICHAJES},_foro,_buzon,_buzon_r)&order=creado.asc&limit=3000`, { headers: cabeceras() });
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/comentarios?select=id,post,datos,creado&post=not.in.(${POST_FICHAJES},_foro,_buzon,_buzon_r)&order=creado.desc&limit=3000`, { headers: cabeceras() });
   if (!r.ok) throw new Error("No se han podido cargar los comentarios.");
   const porPost = {};
   const visitas = [];
   const likesVistos = new Set();
-  for (const f of await r.json()) {
+  // Se piden las 3000 más recientes y se recorren de la más antigua a la más nueva
+  for (const f of (await r.json()).reverse()) {
     try {
       const c = { id: f.id, fecha: f.creado, tipo: "comentario", ...(await descifrarFila(f.datos, acceso)) };
       if (c.tipo === "visita") { visitas.push(c); continue; }
@@ -96,15 +97,14 @@ export const enviar = (post, { nombre, rol, texto }, acceso) =>
 export const darLike = (post, { nombre, rol }, acceso) =>
   guardarFila(post, { tipo: "like", nombre: nombre.slice(0, 60), rol: (rol || "").slice(0, 40) }, acceso);
 
-// Apunta una visita como mucho una vez al día por dispositivo
+// Apunta una visita cada vez que alguien abre la app (como mucho una cada 2 horas por dispositivo)
 export async function apuntarVisita(yo, acceso) {
   if (!activos() || !yo) return;
-  const hoy = new Date().toISOString().slice(0, 10);
   const clave = "mochila-ultima-visita";
-  try { if (localStorage.getItem(clave) === hoy) return; } catch {}
+  try { const u = Number(localStorage.getItem(clave)); if (u && Date.now() - u < 2 * 3600 * 1000) return; } catch {}
   try {
     await guardarFila(POST_VISITAS, { tipo: "visita", nombre: yo.nombre, rol: yo.rol || "" }, acceso);
-    localStorage.setItem(clave, hoy);
+    localStorage.setItem(clave, String(Date.now()));
   } catch {}
 }
 

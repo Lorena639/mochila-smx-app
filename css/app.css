@@ -644,3 +644,54 @@ textarea.codigo { font-family: var(--f-mono) !important; font-size: 13.5px; line
 .simu-nota b { font-size: 44px; line-height: 1; } .simu-nota.ok b { color: var(--ok); } .simu-nota.mal b { color: var(--mal); }
 .simu-fallos { list-style: none; padding: 0; display: grid; gap: 8px; } .simu-fallos li { display: grid; gap: 2px; background: var(--superficie-2); border-radius: 12px; padding: 10px 12px; }
 .simu-fallos span { color: var(--ok); font-size: 14px; }
+
+/* v2.9 — Zona de pruebas, consolas, calendario y visitas */
+.bib-codigo .bib-botones { position: absolute; top: 6px; right: 6px; display: flex; gap: 6px; }
+.bib-codigo .bib-botones .boton { position: static; }
+.bib-codigo:has(.bib-probar) pre { padding-right: 130px; }
+.bib-probar { font-size: 12px; padding: 4px 10px; gap: 4px; }
+.bib-probar svg { width: 14px; height: 14px; }
+.zona { margin: 14px 0 6px; padding: 14px; border-radius: 16px; border: 1px dashed color-mix(in srgb, var(--acento) 55%, var(--linea)); background: color-mix(in srgb, var(--acento) 5%, var(--superficie)); scroll-margin-top: 80px; }
+.zona .panel-titulo { margin-bottom: 10px; }
+.zona .panel-titulo h3 { margin: 0; font-size: 15px; display: flex; gap: 8px; align-items: center; }
+.zona textarea.zona-cod { min-height: 170px; width: 100%; }
+.zona .fila-botones { margin-top: 8px; align-items: center; }
+.zona-tabs { margin-bottom: 8px; }
+.zona-web { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+@media (min-width: 900px) { .zona-web { grid-template-columns: 3fr 2fr; } }
+.zona-vista { width: 100%; height: 280px; border: 1px solid var(--linea); border-radius: 12px; background: #fff; }
+.zona-consola { min-height: 60px; max-height: 250px; overflow-y: auto; margin-top: 4px; color: #DDE6F5; }
+.zona-consola .zc-error { color: #FF9A9A; }
+.zona-consola .zc-aviso { color: #FCD34D; }
+.zona-esquema { margin-top: 10px; font-size: 13.5px; }
+.zona-esquema .mono { font-size: 12.5px; line-height: 1.7; }
+.zona-sql-salida { margin-top: 12px; }
+.zona-tabla { font-size: 13px; background: var(--superficie); }
+.tabla-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--linea); margin-bottom: 4px; }
+.zona-ok { color: var(--bien, #16a34a); font-weight: 600; margin: 6px 0; }
+.zona-err { color: var(--mal); font-weight: 600; margin: 6px 0; font-family: var(--f-mono); font-size: 13px; }
+.zona .terminal { max-height: 320px; }
+.terminal.ps { background: #012456; color: #EEEDF0; }
+.terminal.ps .term-linea span { color: #FFF; }
+.term-so { margin: 0 0 10px; flex-wrap: wrap; }
+
+/* Calendario: los trámites de varios días se ven como una barra seguida */
+.cal-cosa.rango { opacity: 1; font-style: normal; }
+.cal-cosa.cont { color: transparent; border-left-color: transparent; border-radius: 0; margin-left: -6px; padding-left: 0; user-select: none; }
+.cal-cosa.rango:not(.fin) { border-top-right-radius: 0; border-bottom-right-radius: 0; margin-right: -6px; }
+.cal-dia:focus { outline: none; }
+.cal-dia:focus-visible { box-shadow: inset 0 0 0 2px var(--acento); }
+
+/* Quién ha entrado */
+.visitas-todas { margin-top: 10px; }
+.visitas-todas summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--acento); }
+.visitas-dia { margin: 10px 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--suave); font-weight: 700; }
+.visitas-resumen { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+@media (hover: none) { .cal-dia:hover:not([aria-pressed="true"]) { box-shadow: none; } }
+.cal-dia.fuera:hover:not([aria-pressed="true"]) { box-shadow: none; }
+@media (max-width: 700px) {
+  .bib-codigo .bib-botones { position: static; justify-content: flex-end; margin-top: 6px; }
+  .bib-codigo:has(.bib-probar) pre, .bib-codigo pre { padding-right: 14px; }
+  .bib-codigo .bib-botones .boton { background: var(--superficie); color: var(--tinta); border: 1px solid var(--linea); }
+  .zona { padding: 10px; }
+}

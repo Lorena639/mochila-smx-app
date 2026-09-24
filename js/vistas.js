@@ -194,10 +194,9 @@ export function vistaInicio(e) {
         return `<li style="--color:${esc(asig ? asig.color : "var(--acento)")}"><div class="texto">${formato(a.texto)}</div>
           <div class="detalle">${a.fecha ? esc(fechaCorta(a.fecha)) : ""}${asig ? ` · ${esc(nombreSinCodigo(asig))}` : ""}${botonesEdicion(e, "avisos", a.id)}</div></li>`;
       }).join("")}</ul>` : `<p class="texto-suave">${e.editor ? "Apunta aquí lo que digan en clase." : "Sin notas por ahora."}</p>`}</section>` : "";
-  const bloqueVisitas = e.editor && comentariosActivos() ? `<section class="panel"><div class="panel-titulo"><h2>${icono("ojo")} Quién ha entrado</h2><span class="chip">Solo lo ves tú</span></div>
-      ${e.visitas.length ? `<div class="visitas">${e.visitas.slice(0, 6).map((v) => `<div class="visita">${avatarPersona(v.nombre, v.rol)}
-        <span><b>${esc(v.nombre)}</b><small>${esc(v.rol || "")} · ${esc(new Date(v.fecha).toLocaleDateString("es-ES", { day: "numeric", month: "short" }))} ${esc(new Date(v.fecha).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }))}</small></span></div>`).join("")}</div>`
-        : `<p class="texto-suave">Todavía no ha entrado nadie.</p>`}</section>` : "";
+  const bloqueVisitas = e.editor && comentariosActivos() ? `<section class="panel"><div class="panel-titulo"><h2>${icono("ojo")} Quién ha entrado</h2>
+      <span class="fila-botones"><span class="chip">Solo lo ves tú</span><button type="button" class="enlace-ver" data-accion="visitas-recargar">Actualizar</button></span></div>
+      ${e.visitas.length ? htmlVisitas(e.visitas) : `<p class="texto-suave">Todavía no ha entrado nadie.</p>`}</section>` : "";
   const posts = [...d.posts].sort((a, b) => (b.fecha || "").localeCompare(a.fecha || "")).slice(0, 3);
   const bloquePosts = ve("diario") ? `<section class="panel"><div class="panel-titulo"><h2>${icono("diario")} Del día a día</h2>
       <button class="enlace-ver" type="button" data-ir="diario">Ver todo ${icono("flecha")}</button></div>
@@ -249,6 +248,23 @@ function botonesFicharInicio(e) {
   return `<div class="fichar-botones"><button class="boton" type="button" data-fichar="entrada" ${e.fichando ? "disabled" : ""}>${icono("ubicacion")} Fichar entrada</button>
     <button class="boton principal" type="button" data-fichar="salida" ${e.fichando ? "disabled" : ""}>Fichar salida</button></div>`;
 }
+// ---------- Visitas: las 6 últimas y, desplegando, todas por días ----------
+const diaVisita = (f) => { const x = new Date(f); return tiempoRelativo(`${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`); };
+const horaVisita = (f) => new Date(f).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+const filaVisita = (v, conDia = true) => `<div class="visita">${avatarPersona(v.nombre, v.rol)}
+  <span><b>${esc(v.nombre)}</b><small>${esc(v.rol || "")} · ${conDia ? `${esc(diaVisita(v.fecha))} · ` : ""}${esc(horaVisita(v.fecha))}</small></span></div>`;
+function htmlVisitas(visitas) {
+  const porPersona = {};
+  for (const v of visitas) { const k = `${v.nombre}|${v.rol || ""}`; (porPersona[k] ||= { ...v, veces: 0 }).veces++; }
+  const porDia = {};
+  for (const v of visitas) (porDia[new Date(v.fecha).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })] ||= []).push(v);
+  return `<div class="visitas">${visitas.slice(0, 6).map((v) => filaVisita(v)).join("")}</div>
+    ${visitas.length > 6 || Object.keys(porPersona).length > 1 ? `<details class="visitas-todas"><summary>Ver todas (${visitas.length} entradas)</summary>
+      <div class="visitas-resumen">${Object.values(porPersona).sort((a, b) => b.veces - a.veces).map((p) => `<span class="chip">${esc(p.nombre)} · ${p.veces} ${p.veces === 1 ? "vez" : "veces"}</span>`).join("")}</div>
+      ${Object.entries(porDia).map(([dia, vs]) => `<div class="visitas-dia">${esc(dia)}</div><div class="visitas">${vs.map((v) => filaVisita(v, false)).join("")}</div>`).join("")}
+    </details>` : ""}`;
+}
+
 export function avatarPersona(nombre = "?", rol = "") {
   const ini = nombre.trim().split(/\s+/).map((p) => p[0]).join("").slice(0, 2).toUpperCase() || "?";
   const cl = /profe/i.test(rol) ? "v" : /famil/i.test(rol) ? "m" : /amig|compa/i.test(rol) ? "n" : "";
@@ -557,6 +573,7 @@ export function vistaCalendario(e, modo = "mes") {
     </div>`}`;
 }
 
+const SEGUIDOS = ["Vacaciones", "Sin clase", "Festivo"];
 function htmlMes(e) {
   const d = e.datos;
   const { anio, mes, dia: sel } = e.cal;
@@ -568,14 +585,23 @@ function htmlMes(e) {
   for (let i = 0; i < 42; i++) {
     const f = new Date(inicio); f.setDate(inicio.getDate() + i);
     const clave = iso(f);
-    const cosas = items.filter((it) => clave >= it.fecha && clave <= it.fin);
+    const finde = diaSemana(f) > 5;
+    // Los trámites/exámenes de varios días no se pintan en fin de semana (las vacaciones sí)
+    const cosas = items.filter((it) => clave >= it.fecha && clave <= it.fin && !(finde && it.fecha !== it.fin && !SEGUIDOS.includes(it.clase)))
+      .sort((a, b) => (b.fecha !== b.fin) - (a.fecha !== a.fin) || a.fecha.localeCompare(b.fecha));
     const sinClase = diaSemana(f) <= 5 && noLectivo(d, clave);
     const tri = trimestreDe(clave);
     const clases = [f.getMonth() !== mes ? "fuera" : "", clave === hoy ? "hoy" : "", diaSemana(f) > 5 ? "finde" : "", sinClase ? "sin-clase" : "", tri ? `tri-${tri}` : ""].join(" ");
     celdas += `<button type="button" class="cal-dia ${clases}" aria-pressed="${clave === sel}" data-dia="${clave}"
       aria-label="${esc(f.toLocaleDateString("es-ES", { day: "numeric", month: "long" }))}${cosas.length ? `, ${cosas.length} cosas` : ""}">
       <span class="num">${f.getDate()}</span>
-      <span class="cal-cosas">${cosas.slice(0, 2).map((c) => `<span class="cal-cosa ${c.fecha !== c.fin ? "rango" : ""}" style="--color:${esc(colorItem(d, c))}">${esc(c.titulo)}</span>`).join("")}${cosas.length > 2 ? `<span class="cal-mas">+${cosas.length - 2}</span>` : ""}</span>
+      <span class="cal-cosas">${cosas.slice(0, 2).map((c) => {
+        const rango = c.fecha !== c.fin;
+        // En un rango, el nombre sale el primer día y cada lunes; el resto es una barra seguida
+        const empieza = !rango || clave === c.fecha || diaSemana(f) === 1 || i === 0;
+        const acaba = !rango || clave === c.fin || diaSemana(f) === 7 || (diaSemana(f) === 5 && !SEGUIDOS.includes(c.clase));
+        return `<span class="cal-cosa ${rango ? "rango" : ""} ${empieza ? "" : "cont"} ${acaba ? "fin" : ""}" style="--color:${esc(colorItem(d, c))}" ${empieza ? "" : `aria-hidden="true"`} title="${esc(c.titulo)}">${esc(c.titulo)}</span>`;
+      }).join("")}${cosas.length > 2 ? `<span class="cal-mas">+${cosas.length - 2}</span>` : ""}</span>
       <span class="puntos">${cosas.slice(0, 5).map((c) => `<span class="punto" style="background:${esc(colorItem(d, c))}"></span>`).join("")}</span></button>`;
   }
   const triMes = [...new Set([...Array(new Date(anio, mes + 1, 0).getDate())].map((_, k) => trimestreDe(iso(new Date(anio, mes, k + 1)))).filter(Boolean))];
