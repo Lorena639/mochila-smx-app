@@ -134,7 +134,41 @@ export function calcularRecordatorios(d) {
       lista.push({ id: `faltas-${m.a.id}-${m.estado}`, cuando: cuando.toISOString(), titulo: `Faltas · ${corto(m.a.nombre)}`, texto, url: "./#asistencia" });
     }
   } catch { /* sin datos de asistencia */ }
+  // Novedades de las últimas 3 h (salen en la próxima vuelta del cron, como mucho 15 min)
+  for (const n of d.config?.novedades || []) {
+    if (Date.now() - n.t < 3 * 3600 * 1000) lista.push({ id: `nov-${n.id}`, cuando: new Date(n.t).toISOString(), titulo: n.titulo, texto: n.texto, url: n.url });
+  }
   return lista;
+}
+
+// ---------- Novedades: cuando añades algo nuevo, aviso a ti y a Familia ----------
+const COLECCIONES = [
+  ["posts", "Nuevo en Día a día", "./#diario"],
+  ["apuntes", "Nuevos apuntes", "./#materias"],
+  ["trabajos", "Nuevo trabajo", "./#trabajos"],
+  ["formacion", "Nueva formación", "./#formacion"],
+  ["eventos", "Nueva fecha en el calendario", "./#calendario"],
+];
+export const idsDe = (d) => new Set(COLECCIONES.flatMap(([col]) => (d[col] || []).map((x) => `${col}:${x.id}`)));
+// Apunta en d.config.novedades lo que no estaba en "conocidos". Devuelve cuántas.
+export function apuntarNovedades(d, conocidos) {
+  if (d.config.avisarNovedades === false) return 0;
+  const lista = (d.config.novedades ||= []).filter((n) => Date.now() - n.t < 24 * 3600 * 1000);
+  let n = 0;
+  for (const [col, titulo, url] of COLECCIONES) {
+    for (const x of d[col] || []) {
+      const k = `${col}:${x.id}`;
+      if (conocidos.has(k)) continue;
+      conocidos.add(k);
+      if (String(x.id).startsWith("of-") || !visibleFamilia(x)) continue;
+      const nombre = x.titulo || x.nombre || "";
+      if (!nombre) continue;
+      lista.push({ id: k.replace(":", "-"), t: Date.now(), titulo, texto: String(nombre).slice(0, 120), url });
+      n++;
+    }
+  }
+  d.config.novedades = lista.slice(-40);
+  return n;
 }
 
 let ultimaHuella = "";

@@ -1,7 +1,7 @@
 // =============================================================
 //  extras.js — Avisos, Google Calendar y copia de seguridad
 // =============================================================
-import { esc, hoyIso, diasHasta, completarDatos } from "./comun.js";
+import { esc, hoyIso, diasHasta, completarDatos, notificar } from "./comun.js";
 import { icono } from "./iconos.js";
 import { clasesDeFecha, aMin, iso } from "./curso.js";
 import { calcularFaltas, propuestas } from "./faltas.js";
@@ -74,7 +74,7 @@ export function notificarAlAbrir(avisos) {
     if (localStorage.getItem(k) === hoyIso()) return;
     const imp = avisos.filter((a) => a.nivel !== "info");
     if (!imp.length) return;
-    new Notification("Mochila SMX", { body: imp.slice(0, 3).map((a) => a.texto).join("\n"), icon: "img/icono-192.png", tag: "mochila-dia" });
+    notificar("Mochila SMX", { body: imp.slice(0, 3).map((a) => a.texto).join("\n"), tag: "mochila-dia" });
     localStorage.setItem(k, hoyIso());
   } catch {}
 }
@@ -183,7 +183,8 @@ function htmlPush(c) {
         <button class="boton principal" type="button" data-accion="push-activar">Activar en este dispositivo</button>
         <button class="boton" type="button" data-accion="push-probar">Enviar prueba</button>
         <button class="boton" type="button" data-accion="push-desactivar">Desactivar aquí</button></div>
-      <p class="nota-pie">Familia las activa desde la campana de avisos. En iPhone, primero hay que añadir la app a la pantalla de inicio.</p></section>`;
+      <label class="check" style="margin-top:12px"><input type="checkbox" data-cambio="avisar-novedades" ${c.avisarNovedades === false ? "" : "checked"}> Avisar cuando añado algo nuevo (día a día, apuntes, trabajos, formación, fechas)</label>
+      <p class="nota-pie">Los fichajes avisan solos al momento. Lo nuevo que añades llega en unos minutos (máx. 15). Lo marcado «Solo yo» no avisa. Familia las activa desde la campana de avisos. En iPhone, primero hay que añadir la app a la pantalla de inicio.</p></section>`;
 }
 
 const pushAcciones = {
@@ -236,5 +237,6 @@ export const acciones = {
 };
 export const cambios = {
   "config"(el, api) { api.datos().config[el.dataset.k] = el.value.trim(); api.cambiar(false); },
+  "avisar-novedades"(el, api) { api.datos().config.avisarNovedades = el.checked; api.cambiar(false); },
   "fechas-curso"(el, api) { const c = api.datos().config; c.fechasCurso ||= {}; c.fechasCurso[el.dataset.k] = el.value; api.cambiar(); },
 };

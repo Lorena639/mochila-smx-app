@@ -316,3 +316,14 @@ export const sesion = {
   set(k, v) { try { sessionStorage.setItem(k, v); } catch {} },
   del(k) { try { sessionStorage.removeItem(k); } catch {} },
 };
+
+// Notificación del sistema con el icono de la app (en Android hay que usar el service worker)
+export async function notificar(titulo, opciones = {}) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const o = { icon: "img/icono-192.png", badge: "img/badge-96.png", ...opciones };
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if (reg) return await reg.showNotification(titulo, o);
+  } catch { /* sin service worker */ }
+  try { new Notification(titulo, o); } catch { /* móvil sin soporte directo */ }
+}

@@ -6,7 +6,7 @@
 //  - Datos (data/): siempre se piden nuevos; si no hay internet,
 //    se usa la última copia guardada (sigue cifrada).
 // =============================================================
-const VERSION = "mochila-v13";
+const VERSION = "mochila-v15";
 const ARCHIVOS = [
   "./", "index.html", "css/estilos.css", "css/app.css",
   "js/app.js", "js/nucleo.js", "js/comun.js", "js/vistas.js", "js/iconos.js",
@@ -14,7 +14,7 @@ const ARCHIVOS = [
   "fichar.html", "js/fichar.js", "js/curso.js", "js/notas.js", "js/faltas.js", "js/comunidad.js", "js/estudio.js",
   "js/herramientas.js", "js/python.js", "js/estada.js", "js/extras.js", "js/editor.js", "js/formularios.js", "js/push.js", "js/herr-redes.js", "js/herr-sistemas.js", "js/herr-seguridad.js", "js/herr-hardware.js", "js/biblioteca.js",
   "manifest.webmanifest", "img/icono-192.png", "img/icono-512.png", "img/favicon.png",
-  "img/logo-digitech.png", "img/logo-digitech-blanco.png",
+  "img/logo-digitech.png", "img/logo-digitech-blanco.png", "img/badge-96.png",
 ];
 
 self.addEventListener("install", (e) => {
@@ -58,8 +58,10 @@ self.addEventListener("push", (e) => {
   try { d = e.data ? e.data.json() : {}; } catch { d = { texto: e.data?.text() }; }
   e.waitUntil(self.registration.showNotification(d.titulo || "Mochila SMX", {
     body: d.texto || "",
-    icon: "img/icono-192.png",
-    badge: "img/icono-192.png",
+    // Icono grande (el de la app) y el pequeño de la barra de estado (Android: blanco sobre transparente)
+    icon: new URL("img/icono-192.png", self.registration.scope).href,
+    badge: new URL("img/badge-96.png", self.registration.scope).href,
+    vibrate: [120, 60, 120],
     tag: d.tag || undefined,
     data: { url: d.url || "./" },
   }));

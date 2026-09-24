@@ -33,6 +33,7 @@ let password = null;    // contraseña de la web
 let datos = null;       // datos descifrados
 let web = null;         // la web ya arrancada (nucleo)
 let sinGuardar = false;
+let idsConocidos = null; // lo que ya existía, para avisar solo de lo nuevo
 
 const guardado = {
   get(k) { try { return sessionStorage.getItem(k) || localStorage.getItem(k); } catch { return null; } },
@@ -224,6 +225,7 @@ async function prepararClaves() {
 //  PASO 3 — Arrancar la web en modo edición
 // =============================================================
 function arrancar() {
+  idsConocidos = Push.idsDe(datos);
   shasGrupos = cargarShasGrupos();
   mostrarPaso("app");
   web = iniciar($("#app"), {
@@ -236,7 +238,7 @@ function arrancar() {
     cambiarPassword,
     vincular,
     accesoRemoto,
-    reemplazarDatos(nuevos) { datos = nuevos; marcarCambios(); },
+    reemplazarDatos(nuevos) { datos = nuevos; idsConocidos = Push.idsDe(nuevos); marcarCambios(); },
     abrirGrupos: async () => {
       const nuevo = await abrirGrupos(datos, password);
       if (!nuevo) return false;
@@ -281,6 +283,8 @@ async function guardar() {
   web?.ponerEstado("guardando", "Guardando…");
   try {
     await migrarArchivosDeGrupos();
+    if (!idsConocidos) idsConocidos = Push.idsDe(datos);
+    else if (datos.config.avisosListos) Push.apuntarNovedades(datos, idsConocidos);
     const archivo = await cifrar(datos, password);
     try { localStorage.setItem(CLAVE_COPIA, JSON.stringify({ sha, archivo })); } catch {}
     sha = await gh.escribir(RUTA_DATOS, JSON.stringify(archivo), sha, "Actualizar Mochila SMX");

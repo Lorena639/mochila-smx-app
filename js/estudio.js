@@ -5,7 +5,7 @@
 //   · Modo examen: cuenta atrás, temas, lista de repaso y lo que necesitas
 //   · Asistente: responde preguntas con tus propios datos (sin IA)
 // =============================================================
-import { esc, nuevoId, hoyIso, normalizar, diasHasta } from "./comun.js";
+import { esc, nuevoId, hoyIso, normalizar, diasHasta, notificar } from "./comun.js";
 import { icono } from "./iconos.js";
 import { clasesDeFecha, iso } from "./curso.js";
 import { calcularFaltas } from "./faltas.js";
@@ -102,7 +102,7 @@ function terminarBloque() {
   }
 }
 function avisarSistema(titulo, cuerpo) {
-  try { if ("Notification" in window && Notification.permission === "granted") new Notification(titulo, { body: cuerpo, icon: "img/icono-192.png" }); } catch {}
+  notificar(titulo, { body: cuerpo });
   T.api?.aviso(`${titulo}. ${cuerpo}`, 5000);
 }
 
