@@ -1,8 +1,9 @@
 {
   "name": "mochila-smx-app",
   "private": true,
+  "type": "module",
   "description": "Mochila SMX · App del ciclo 2º SMX (Digitech Barcelona)",
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test test/comun.test.js"
   }
 }
