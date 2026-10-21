@@ -75,21 +75,47 @@ export function eventosApuntes(raiz) {
 
   if (!buscar) return;
 
+  let timeoutBuscar = null;
   buscar.addEventListener('input', (e) => {
-    const texto = e.target.value.toLowerCase();
-    const items = resultados.querySelectorAll('.apunte-item');
+    clearTimeout(timeoutBuscar);
+    timeoutBuscar = setTimeout(() => {
+      const texto = e.target.value.toLowerCase().trim();
+      const items = resultados.querySelectorAll('.apunte-item');
+      let itemsVisibles = 0;
 
-    items.forEach(item => {
-      const titulo = item.dataset.titulo;
-      const visible = !texto || titulo.includes(texto);
-      item.style.display = visible ? 'block' : 'none';
-    });
+      items.forEach(item => {
+        const titulo = item.dataset.titulo;
+        const contenido = item.textContent.toLowerCase();
+        const visible = !texto || titulo.includes(texto) || contenido.includes(texto);
+        item.style.display = visible ? 'block' : 'none';
+        if (visible) itemsVisibles++;
+      });
 
-    // Ocultar secciones vacías
-    const secciones = resultados.querySelectorAll('.apuntes-materia');
-    secciones.forEach(seccion => {
-      const itemsVisibles = seccion.querySelectorAll('.apunte-item[style=""]');
-      seccion.style.display = itemsVisibles.length > 0 ? 'block' : 'none';
-    });
+      // Ocultar secciones vacías
+      const secciones = resultados.querySelectorAll('.apuntes-materia');
+      secciones.forEach(seccion => {
+        const itemsVisibles = seccion.querySelectorAll('.apunte-item[style=""]').length;
+        seccion.style.display = itemsVisibles > 0 ? 'block' : 'none';
+      });
+
+      // Mostrar mensaje si no hay resultados
+      if (texto && itemsVisibles === 0) {
+        const noResultados = resultados.querySelector('.sin-resultados') || document.createElement('div');
+        noResultados.className = 'sin-resultados panel';
+        noResultados.innerHTML = '<p>No se encontraron apuntes. Intenta con otra búsqueda.</p>';
+        if (!resultados.querySelector('.sin-resultados')) {
+          resultados.appendChild(noResultados);
+        }
+      } else {
+        const noResultados = resultados.querySelector('.sin-resultados');
+        if (noResultados) noResultados.remove();
+      }
+    }, 300);
   });
+
+  // Prevenir submit accidental
+  const form = buscar.closest('form');
+  if (form) {
+    form.addEventListener('submit', (e) => e.preventDefault());
+  }
 }
