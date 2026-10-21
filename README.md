@@ -100,6 +100,7 @@ mochila-smx-app/
 │   ├── archivos.js · github.js · comun.js · iconos.js
 │   └── config.js              → datos de Supabase (solo la clave publishable)
 ├── data/                      → contenido CIFRADO (datos, grupos, archivos)
+├── test/                      → pruebas automáticas (npm test)
 └── img/
 ```
 
@@ -119,6 +120,27 @@ alter table comentarios enable row level security;
 create policy "leer" on comentarios for select to anon using (true);
 create policy "escribir" on comentarios for insert to anon with check (true);
 ```
+
+## Probar en local
+
+La app son archivos estáticos (HTML, CSS y JavaScript de módulos). No hace falta instalar nada para verla, pero los módulos ES **no funcionan abriendo el `index.html` con doble clic**: hay que servirla desde un servidor local. Por ejemplo, con Python:
+
+```
+cd mochila-smx-app
+python -m http.server 8000
+```
+
+Después abre http://localhost:8000 en el navegador.
+
+## Pruebas
+
+Las utilidades puras (escapado de HTML, formato del texto, normalización) tienen pruebas con el test runner integrado de Node.js, sin dependencias:
+
+```
+npm test
+```
+
+Requiere Node.js 18 o superior. Las pruebas están en `test/`.
 
 ## Actualizar
 
