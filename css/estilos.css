@@ -68,7 +68,9 @@
 * { box-sizing: border-box; }
 html { scroll-padding-top: 90px; }
 html, body { margin: 0; background: var(--fondo); }
-body { color: var(--tinta); font: 15px/1.55 var(--f-texto); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+body { color: var(--tinta); font: 15px/1.6 var(--f-texto); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; min-height: 100vh; }
+p { margin: 0 0 16px; }
+p:last-child { margin-bottom: 0; }
 [hidden] { display: none !important; }
 button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
@@ -99,7 +101,9 @@ svg.ico { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: non
 .boton.peligro { color: var(--mal); }
 .boton.peque { padding: 5px 10px; font-size: 13px; border-radius: 8px; }
 .boton.icono { padding: 7px; border-radius: 9px; }
-.boton:disabled { opacity: .5; cursor: default; }
+.boton:disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
+.boton.cargando { position: relative; color: transparent; }
+.boton.cargando::after { content: ""; position: absolute; width: 14px; height: 14px; border: 2px solid currentColor; border-radius: 50%; border-right-color: transparent; animation: spin .6s linear infinite; }
 .enlace-ver { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 700; border: 0; background: none; color: var(--acento); cursor: pointer; padding: 0; text-decoration: none; }
 .enlace-ver svg { width: 15px; height: 15px; }
 .pildora {
@@ -121,7 +125,9 @@ svg.ico { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: non
 .acceso-caja p { color: var(--tinta); opacity: .75; margin: 0 0 20px; font-size: 14.5px; }
 .acceso-caja form { display: flex; flex-direction: column; gap: 14px; }
 .acceso-caja .boton.principal { padding-block: 12px; border-radius: 999px; }
-.error { color: var(--mal); font-size: 14px; margin: 0; min-height: 1.2em; }
+.error { color: var(--mal); font-size: 14px; margin: 0; min-height: 1.2em; font-weight: 600; }
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--mal) !important; background: color-mix(in srgb, var(--mal) 5%, var(--superficie-2)); }
+input[aria-invalid="true"]:focus, select[aria-invalid="true"]:focus, textarea[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--mal) 15%, var(--fondo)), 0 2px 8px rgba(196, 56, 56, .2) !important; }
 .logo-oscuro { display: none !important; }
 @media (prefers-color-scheme: dark) {
   .acceso-caja .logo { filter: brightness(0) invert(1); }
@@ -187,7 +193,8 @@ svg.ico { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: non
 @media (max-width: 640px) { .contenido { padding: 16px 16px 56px; } }
 @media (prefers-reduced-motion: no-preference) {
   .vista { animation: aparecer .2s ease-out; }
-  @keyframes aparecer { from { transform: translateY(6px); } to { transform: none; } }
+  @keyframes aparecer { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
 }
 
 /* 5. Portada ---------------------------------------------------- */
