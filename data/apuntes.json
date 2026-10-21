@@ -1,0 +1,573 @@
+{
+  "lastUpdate": "2026-10-21T11:35:46.872Z",
+  "total": 79,
+  "materias": {
+    "Aplicacions web": [
+      {
+        "title": "Aplicacions web",
+        "path": "Aplicacions web/Aplicacions web",
+        "file": "Aplicacions web.md",
+        "preview": "Aplicacions web\r\n\r\n← Clases (Clases/Clases)\r\n\r\nPrácticas\r\n\r\n- A1 RA1 - Landing page (enunciado) (Clases/Aplicacions web/Practicas/A1 RA1 - Landing page (enunciado))\r\n- Actividades extra HTML 1 (Clases/Aplicacions web/Practicas/Actividades extra HTML 1)\r\n- Actividades extra HTML 2 (Clases/Aplicacions web/Practicas/Actividades extra HTML 2)\r\n\r\nTeoría\r\n\r\n- 1. Introducción al Desarrollo Web (Clases/Aplicacions web/Teoria/1. Introducción al Desarrollo Web)\r\n- 2. CSS (Clases/Aplicacions web/Teoria/2.",
+        "folder": "Aplicacions web"
+      },
+      {
+        "title": "A1-RA1",
+        "path": "Aplicacions web/Practicas/A1 RA1 - Landing page (enunciado)",
+        "file": "A1 RA1 - Landing page (enunciado).md",
+        "preview": "---\r\nmateria: \"Aplicacions web\"\r\norigen: \"Aplicacions web/Practicas/A1-RA1.pdf\"\r\n---\r\n\r\nA1-RA1\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\nA1-RA1\r\n0228 Aplicaciones Web\r\n\r\nLanding Page Corporativa y Portfolio\r\n\r\nDescripción:\r\n\r\nCrearás la web para una empresa ficticia del sector tecnológico o de servicios\r\ndigitales. El objetivo principal es construir una página de aterrizaje (Landing\r\nPage) atractiva y bien estructurada, junto con una página secundaria donde te\r\np",
+        "folder": "Aplicacions web"
+      },
+      {
+        "title": "Actividades Extra HTML 1",
+        "path": "Aplicacions web/Practicas/Actividades extra HTML 1",
+        "file": "Actividades extra HTML 1.md",
+        "preview": "---\r\nmateria: \"Aplicacions web\"\r\nseccion: \"Practicas\"\r\norigen: \"AppWeb/1 Actividades Extra HTML.pdf\"\r\n---\r\n\r\nActividades Extra HTML 1\r\n\r\n> Texto extraÃ­do del PDF; el original estÃ¡ en Originales.\r\n\r\nEjercicio 1: Mi primera estructura básica\r\n\r\nEnunciado: Crea una página llamada ejercicio1.html que sirva como\r\n\r\npresentación de un videoclub de barrio. Debe incluir el título de la página en la\r\npestaña, un encabezado de nivel 1 con el nombre del videoclub y dos párrafos\r\nexplicando qué es y qué h",
+        "folder": "Aplicacions web"
+      },
+      {
+        "title": "Actividades Extra HTML 2",
+        "path": "Aplicacions web/Practicas/Actividades extra HTML 2",
+        "file": "Actividades extra HTML 2.md",
+        "preview": "---\r\nmateria: \"Aplicacions web\"\r\nseccion: \"Practicas\"\r\norigen: \"AppWeb/2 Actividades Extra HTML.pdf\"\r\n---\r\n\r\nActividades Extra HTML 2\r\n\r\n> Texto extraÃ­do del PDF; el original estÃ¡ en Originales.\r\n\r\nEjercicio 1: Portal de Noticias Global\r\n\r\nEnunciado: Maquetación de un diario digital de múltiples secciones, columnas\r\n\r\nde opinión, bloques de citas editoriales y galerías de imágenes asociadas.\r\n\r\nEjemplo:\r\n\fEjercicio 2: Guía de Referencia y Especificación de\r\nProtocolos de Red\r\n\r\nEnunciado: Docu",
+        "folder": "Aplicacions web"
+      },
+      {
+        "title": "1. Introducción al Desarrollo Web",
+        "path": "Aplicacions web/Teoria/1. Introducción al Desarrollo Web",
+        "file": "1. Introducción al Desarrollo Web.md",
+        "preview": "---\r\nmateria: \"Aplicacions web\"\r\nseccion: \"Teoria\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Aplicacions web\\Teoria\\1. Introducción al Desarrollo Web.pdf\"\r\n---\r\n\r\n1. Introducción al Desarrollo Web\r\n\r\nSMX_0228_Aplicaciones Web\r\n\r\nIntroducción al\r\nDesarrollo Web\r\n\r\nDocente: Adrian Cañas\r\n\r\n---\r\n\r\nConcepto Previo\r\n\r\n---\r\n\r\nArquitectura Cliente-Servidor\r\n\r\n---\r\n\r\nOrganización de Archivos\r\nen un Servidor Web\r\n\r\n---\r\n\r\nEstructura Fundamental\r\nde un Documento HTML5\r\n\r\nHTML (HyperText Markup Language) es el len",
+        "folder": "Aplicacions web"
+      },
+      {
+        "title": "2. CSS",
+        "path": "Aplicacions web/Teoria/2. CSS",
+        "file": "2. CSS.md",
+        "preview": "---\r\nmateria: \"Aplicacions web\"\r\nseccion: \"Teoria\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Aplicacions web\\Teoria\\2. CSS (1).pdf\"\r\n---\r\n\r\n2. CSS\r\nSMX_0228_Aplicaciones Web\r\n\r\nHojas de estilo (CSS)\r\n\r\nDocente: Adrian Cañas\r\n\r\n---\r\n\r\nHojas de estilos\r\n\r\n                          Las hojas de estilo en cascada\r\n                          (Cascading Style Sheets) hacen\r\n                          referencia a un lenguaje de hojas de\r\n                          estilo utilizado para describir la",
+        "folder": "Aplicacions web"
+      },
+      {
+        "title": "HTML desde cero ampliada",
+        "path": "Aplicacions web/Teoria/HTML desde cero ampliada",
+        "file": "HTML desde cero ampliada.md",
+        "preview": "---\r\nmateria: \"Aplicacions web\"\r\nseccion: \"Teoria\"\r\norigen: \"AppWeb/HTML_desde_cero_ampliada.pdf\"\r\n---\r\n\r\nHTML desde cero ampliada\r\n\r\n> Texto extraÃ­do del PDF; el original estÃ¡ en Originales.\r\n\r\nHTML desde cero\r\n\r\nGuía práctica de consulta · Aplicaciones Web · SMX\r\nAmpliada con nivel avanzado para Actividades Extra 2\r\n\r\nCómo usar esta guía: busca abajo lo que quieres hacer y ve a esa sección (puedes hacer clic). Cada sección\r\ntiene una frase de explicación, el código listo para copiar y un rec",
+        "folder": "Aplicacions web"
+      }
+    ],
+    ".": [
+      {
+        "title": "Clases",
+        "path": "Clases",
+        "file": "Clases.md",
+        "preview": "Clases\r\n\r\n← Inicio (Inicio)\r\n\r\n- Aplicacions web (Clases/Aplicacions web/Aplicacions web)\r\n- Itinerari personal per a l'ocupabilitat II (Clases/Itinerari personal per a l'ocupabilitat II/Itinerari personal per a l'ocupabilitat II)\r\n- Seguretat informàtica (Clases/Seguretat informàtica/Seguretat informàtica)\r\n- Serveis de xarxa (Clases/Serveis de xarxa/Serveis de xarxa)\r\n- Sistemes operatius en xarxa (Clases/Sistemes operatius en xarxa/Sistemes operatius en xarxa)\r\n- Tutoria 2n SMX (Clases/Tutori",
+        "folder": "."
+      }
+    ],
+    "Itinerari personal per a l'ocupabilitat II": [
+      {
+        "title": "Itinerari personal per a l'ocupabilitat II",
+        "path": "Itinerari personal per a l'ocupabilitat II/Itinerari personal per a l'ocupabilitat II",
+        "file": "Itinerari personal per a l'ocupabilitat II.md",
+        "preview": "Itinerari personal per a l'ocupabilitat II\r\n\r\n← Clases (Clases/Clases)\r\n\r\nPrácticas\r\n\r\n- Documento protección datos y compromisos (Clases/Itinerari personal per a l'ocupabilitat II/Practicas/Documento protección datos y compromisos)\r\n- Manual estancia en empresa (Clases/Itinerari personal per a l'ocupabilitat II/Practicas/Manual estancia en empresa)\r\n\r\nTeoría\r\n\r\n- Guia presentación trabajos informática (Clases/Itinerari personal per a l'ocupabilitat II/Teoria/Guia presentación trabajos informáti",
+        "folder": "Itinerari personal per a l'ocupabilitat II"
+      },
+      {
+        "title": "Documento de protecciÃ³n- cesiÃ³n de datos y compomisos 2026-2027",
+        "path": "Itinerari personal per a l'ocupabilitat II/Practicas/Documento protección datos y compromisos",
+        "file": "Documento protección datos y compromisos.md",
+        "preview": "---\r\nmateria: \"Itinerari personal per a l'ocupabilitat II\"\r\norigen: \"Itinerari personal per a l'ocupabilitat II/Practicas/Documento de protecciÃ³n- cesiÃ³n de datos y compomisos 2026-2027.pdf\"\r\n---\r\n\r\nDocumento de protecciÃ³n- cesiÃ³n de datos y compomisos 2026-2027\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\n Documento de protección- cesión de datos y\r\n compromisos estancia en empresa\r\n\r\nRESPONSIBLE\r\nGM QUALITY TECHNOLOGY, S.L. - DIGITECH FP, con CIF B83590844",
+        "folder": "Itinerari personal per a l'ocupabilitat II"
+      },
+      {
+        "title": "Manual Estancia en Empresa 26-27",
+        "path": "Itinerari personal per a l'ocupabilitat II/Practicas/Manual estancia en empresa",
+        "file": "Manual estancia en empresa.md",
+        "preview": "---\r\nmateria: \"Itinerari personal per a l'ocupabilitat II\"\r\norigen: \"Itinerari personal per a l'ocupabilitat II/Practicas/Manual Estancia en Empresa 26-27.pdf\"\r\n---\r\n\r\nManual Estancia en Empresa 26-27\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\nManual Estancia en Emresa u Organismo Equiparado\r\n\r\nDigitech FP\r\n\r\nMANUAL PARA EL ALUMNADO\r\n\r\n FASE ESTANCIA EN EMPRESA U ORGANISMO\r\n EQUIPARADO.\r\n\r\n CONVOCATORIA 2026/2027\r\n\r\n 1 de 15\r\n\r\nwww.digitechfp.com\r\n\fManual Estancia",
+        "folder": "Itinerari personal per a l'ocupabilitat II"
+      },
+      {
+        "title": "Guia_presentacio_treballs_informatica",
+        "path": "Itinerari personal per a l'ocupabilitat II/Teoria/Guia presentación trabajos informática",
+        "file": "Guia presentación trabajos informática.md",
+        "preview": "---\r\nmateria: \"Itinerari personal per a l'ocupabilitat II\"\r\norigen: \"Itinerari personal per a l'ocupabilitat II/Teoria/Guia_presentacio_treballs_informatica.pdf\"\r\n---\r\n\r\nGuia_presentacio_treballs_informatica\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\nCOM PRESENTAR ELS TREBALLS?\r\n\r\nGuia ràpida per als treballs i activitats del mòdul\r\n\r\nQUÈ HA D'INCLOURE? COM L'HE DE PRESENTAR?\r\n\r\n Portada Títol de l'activitat, nom i cognoms, grup de Font Calibri, mida 11.\r\nclasse,",
+        "folder": "Itinerari personal per a l'ocupabilitat II"
+      }
+    ],
+    "Seguretat informàtica": [
+      {
+        "title": "Sin título",
+        "path": "Seguretat informàtica/Practicas/Entregas/Manual Gmail (completo)",
+        "file": "Manual Gmail (completo).md",
+        "preview": "---\r\nmateria: \"Seguretat informàtica\"\r\nseccion: \"Practicas\"\r\norigen: \"C:\\Obsidian-boveda\\Seguretat informàtica\\Practicas\\manual_proteccion_gmail_practica_completo.docx\"\r\n---\r\n\r\n> Texto extraído del DOCX. El PDF y el DOCX originales están en esta misma carpeta.\r\n\r\nMANUAL DE USUARIO Y GUÍA PRÁCTICA (2H)\r\nPROTECCIÓN DE LA INFORMACIÓN Y PREVENCIÓN DE CORREOS NO DESEADOS EN GMAIL\r\n| Módulo Profesional: 0378 / 0226 - Seguridad Informática | Docente: Sandra Patricia Cundumi Copete |\r\n| Centro Educativo",
+        "folder": "Seguretat informàtica"
+      },
+      {
+        "title": "Práctica Gmail — Protección del correo y filtro ALERTA_SEGURIDAD",
+        "path": "Seguretat informàtica/Practicas/Entregas/Práctica Gmail - Protección y filtro",
+        "file": "Práctica Gmail - Protección y filtro.md",
+        "preview": "---\r\nmateria: \"Seguretat informàtica\"\r\nseccion: \"Practicas\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Seguretat informàtica\\Practicas\\Practica Gmail - Proteccion y Filtro ALERTA_SEGURIDAD.md\"\r\n---\r\n\r\nPráctica Gmail — Protección del correo y filtro ALERTA_SEGURIDAD\r\n\r\nManual de usuario (2h) + práctica guiada sobre protección de la información y prevención de correos no deseados en Gmail.\r\n\r\n> Entregable final: manual_proteccion_gmail_practica_completo.pdf (Archivos/Originales/Seguretat informàtica/Practi",
+        "folder": "Seguretat informàtica"
+      },
+      {
+        "title": "A1- RA1_0226_SMR 2do",
+        "path": "Seguretat informàtica/Practicas/Enunciados/A1 RA1 (0226)",
+        "file": "A1 RA1 (0226).md",
+        "preview": "---\r\nmateria: \"Seguretat informàtica\"\r\norigen: \"Seguretat informàtica/Practicas/A1- RA1_0226_SMR 2do.docx\"\r\n---\r\n\r\nA1- RA1_0226_SMR 2do\r\n\r\n> Texto extraído automáticamente; el original está en Originales.\r\n\r\nALUMNO/A: ________________________________\r\nCURSO/GRUPO: SMR 2º | FECHA: ____________\r\n\r\nDESAFÍO PRÁCTICO: PLAN DE PROTECCION FISICA.\r\nCaso de Estudio e Inmersión Operativa: Empresa Didáctica S.L.\r\nINSTRUCCIONES DE LA ACTIVIDAD (TRABAJO EN EQUIPO / INDIVIDUAL):\r\nComo miembros del departament",
+        "folder": "Seguretat informàtica"
+      },
+      {
+        "title": "AC1_RA1_auditoria_seguridad",
+        "path": "Seguretat informàtica/Practicas/Enunciados/AC1 RA1 - Auditoría",
+        "file": "AC1 RA1 - Auditoría.md",
+        "preview": "---\r\nmateria: \"Seguretat informÃ tica\"\r\norigen: \"Seguretat informÃ tica/Practicas/AC1_RA1_auditoria_seguridad.pdf\"\r\n---\r\n\r\nAC1_RA1_auditoria_seguridad\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\nDesafío práctico: Auditoría de seguridad y arquitectura de la\r\nprotección\r\n\r\nCaso de estudio: Empresa Didáctica S.L. -- Actividad 1 (AC1), Resultado de Aprendizaje 1 (RA1)\r\n\r\nFase 1 -- Los pilares del castillo digital y la ilusión del \"solo software\"\r\n\r\n1.1. Diagnóstico de",
+        "folder": "Seguretat informàtica"
+      },
+      {
+        "title": "actividad-practica-ra1-smr0226",
+        "path": "Seguretat informàtica/Practicas/Enunciados/Actividad práctica RA1 (0226)",
+        "file": "Actividad práctica RA1 (0226).md",
+        "preview": "---\r\nmateria: \"Seguretat informÃ tica\"\r\norigen: \"Seguretat informÃ tica/Practicas/actividad-practica-ra1-smr0226.pdf\"\r\n---\r\n\r\nactividad-practica-ra1-smr0226\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\n Modulo Seguridad Informatica\r\n 0226 SMX 2do\r\n\r\nACTIVIDAD PRÁCTICA DE ENSEÑANZA - APRENDIZAJE (A1 - RA1)\r\n\r\nDiseño e Implantación de un Plan de Protección Física y Respaldo para\r\nuna PYME\r\n\r\nMódulo Profesional: 0226 - Seguridad Código Actividad: A1 - RA 1\r\n Informátic",
+        "folder": "Seguretat informàtica"
+      },
+      {
+        "title": "Desafio_Practico_Auditoria_Seguridad_2SMX",
+        "path": "Seguretat informàtica/Practicas/Enunciados/Desafío práctico auditoría 2SMX",
+        "file": "Desafío práctico auditoría 2SMX.md",
+        "preview": "---\r\nmateria: \"Seguretat informàtica\"\r\norigen: \"Seguretat informàtica/Practicas/Desafio_Practico_Auditoria_Seguridad_2SMX.docx\"\r\n---\r\n\r\nDesafio_Practico_Auditoria_Seguridad_2SMX\r\n\r\n> Texto extraído automáticamente; el original está en Originales.\r\n\r\nDESAFÍO PRÁCTICOAUDITORÍA DE SEGURIDAD Y ARQUITECTURA DE LA PROTECCIÓN\r\nCaso de estudio: Empresa Didáctica S.L.Módulo: Ciberseguridad e InfraestructuraCurso: 2.º de SMXTrabajo práctico\r\n\r\nIntroducción\r\nEn esta actividad voy a analizar la seguridad de",
+        "folder": "Seguretat informàtica"
+      },
+      {
+        "title": "Seguretat informàtica",
+        "path": "Seguretat informàtica/Seguretat informàtica",
+        "file": "Seguretat informàtica.md",
+        "preview": "Seguretat informàtica\r\n\r\n← Clases (Clases/Clases)\r\n\r\nPrácticas\r\n\r\n- Manual Gmail (completo) (Clases/Seguretat informàtica/Practicas/Entregas/Manual Gmail (completo))\r\n- Práctica Gmail - Protección y filtro (Clases/Seguretat informàtica/Practicas/Entregas/Práctica Gmail - Protección y filtro)\r\n- A1 RA1 (0226) (Clases/Seguretat informàtica/Practicas/Enunciados/A1 RA1 (0226))\r\n- AC1 RA1 - Auditoría (Clases/Seguretat informàtica/Practicas/Enunciados/AC1 RA1 - Auditoría)\r\n- Actividad práctica RA1 (02",
+        "folder": "Seguretat informàtica"
+      },
+      {
+        "title": "Guía técnica de ciberseguridad para empresas",
+        "path": "Seguretat informàtica/Teoria/Guia técnica ciberseguridad para empresas",
+        "file": "Guia técnica ciberseguridad para empresas.md",
+        "preview": "---\r\nmateria: \"Seguretat informàtica\"\r\nseccion: \"Teoria\"\r\norigen: \"C:\\Obsidian-boveda\\Seguretat informàtica\\Teoria\\GUIA TECNICA CYBERSEGURIDAD PARA EMPRESAS (1).pdf\"\r\n---\r\n\r\nGuía técnica de ciberseguridad para empresas\r\n\r\n> Texto extraído automáticamente del PDF (pdftotext). Puede haber saltos de línea y tablas mal alineadas; el PDF original es la referencia.\r\n\r\nCiberamenazas contra entornos empresariales\r\nUna guía de aproximación para el empresario\r\n\r\nÍndice\r\n\r\nINCIBE_PTE_AproxEmpresario_016_Am",
+        "folder": "Seguretat informàtica"
+      },
+      {
+        "title": "Mapa - Guía técnica de ciberseguridad",
+        "path": "Seguretat informàtica/Teoria/Mapa - Guía ciberseguridad",
+        "file": "Mapa - Guía ciberseguridad.md",
+        "preview": "Mapa - Guía técnica de ciberseguridad\r\n\r\nNota de consulta rápida. El texto completo está en  (Guia técnica ciberseguridad para empresas). Los enlaces van directos a cada apartado.\r\n\r\nDecálogo (sección 4)\r\n\r\n1. Ante correos de remitentes desconocidos, extremar precauciones: puede ser fraude.\r\n2. Los remitentes pueden estar falseados. Saber identificarlo.\r\n3. Un solo carácter cambiado en un dominio puede causar un incidente (typosquatting).\r\n4. Enlaces o adjuntos sospechosos: analizarlos con herra",
+        "folder": "Seguretat informàtica"
+      },
+      {
+        "title": "material-apoyo-ra1-smr0226 2",
+        "path": "Seguretat informàtica/Teoria/Material de apoyo RA1 (0226)",
+        "file": "Material de apoyo RA1 (0226).md",
+        "preview": "---\r\nmateria: \"Seguretat informÃ tica\"\r\norigen: \"Seguretat informÃ tica/Teoria/material-apoyo-ra1-smr0226 2.pdf\"\r\n---\r\n\r\nmaterial-apoyo-ra1-smr0226 2\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\nMATERIAL DE APOYO PRÁCTICO Y RECURSOS OFICIALES\r\n\r\nGuía de Referencia Técnica y Enlaces Oficiales para la Actividad A1 ­ RA 1\r\n(Seguridad Pasiva, Diseño de CPD, SAIs y Control de Accesos)\r\n\r\n Propósito de este Documento:\r\n Esta guía ha sido elaborada como material didáctico",
+        "folder": "Seguretat informàtica"
+      },
+      {
+        "title": "Arquitectura de la Protección: Introducción a la Seguridad Informática",
+        "path": "Seguretat informàtica/Teoria/Presentació introducció seguretat (riscos F i L)",
+        "file": "Presentació introducció seguretat (riscos F i L).md",
+        "preview": "---\r\nmateria: \"Seguretat informàtica\"\r\nseccion: \"Teoria\"\r\norigen: \"C:\\Obsidian-boveda\\Seguretat informàtica\\Teoria\\Presentacion. Introduccion a la Seguridad informatica Riesgos F y L.pptx\"\r\n---\r\n\r\nArquitectura de la Protección: Introducción a la Seguridad Informática\r\n\r\n> Módulo 0226 · Análisis y clasificación de riesgos físicos y lógicos en entornos corporativos.\r\n> Transcripción manual de las 14 diapositivas (son imágenes, no texto). El PPTX original es la referencia.\r\n\r\n1. Los tres pilares de",
+        "folder": "Seguretat informàtica"
+      }
+    ],
+    "Serveis de xarxa": [
+      {
+        "title": "Serveis de xarxa",
+        "path": "Serveis de xarxa/Serveis de xarxa",
+        "file": "Serveis de xarxa.md",
+        "preview": "Serveis de xarxa\r\n\r\n← Clases (Clases/Clases)\r\n\r\nPrácticas\r\n\r\nSin archivos.\r\n\r\nTeoría\r\n\r\n- RA2 - DNS (Clases/Serveis de xarxa/Teoria/RA2 - DNS)\r\n- Setmana 2 (Clases/Serveis de xarxa/Teoria/Setmana 2)\r\n- Setmana 3 (Clases/Serveis de xarxa/Teoria/Setmana 3)",
+        "folder": "Serveis de xarxa"
+      },
+      {
+        "title": "RA2 - DNS (.pdf)",
+        "path": "Serveis de xarxa/Teoria/RA2 - DNS",
+        "file": "RA2 - DNS.md",
+        "preview": "---\r\nmateria: \"Serveis de xarxa\"\r\norigen: \"Serveis de xarxa/Teoria/RA2 - DNS (.pdf).pdf\"\r\n---\r\n\r\nRA2 - DNS (.pdf)\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\nSMX_0227_Serveis de Xarxa\r\n\r\nServeis de Xarxa\r\n\r\nDocent: Erica López Romero\r\n\fT.1.(B). Instal·lació de serveis de\r\nresolució de noms (DNS)\r\n\fSETMANA 4\r\n\r\n2.1-2.2\r\n\f2. Resolució de noms (DNS)\r\n\r\nInstal·lació de serveis de resolució de noms\r\n\r\nwww.digitech.cat resolució directa 213.73.40.230\r\n resolució inversa",
+        "folder": "Serveis de xarxa"
+      },
+      {
+        "title": "Setmana 2",
+        "path": "Serveis de xarxa/Teoria/Setmana 2",
+        "file": "Setmana 2.md",
+        "preview": "---\r\nmateria: \"Serveis de xarxa\"\r\nseccion: \"Teoria\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Serveis de xarxa\\Teoria\\Setmana 2.pdf\"\r\n---\r\n\r\nSetmana 2\r\n\r\n1.1 El servei DHCP\r\n\r\nUna solució centralitzada per evitar configurar equip per equip.\r\n\r\n    CONFIGURACIÓ ESTÀTICA\r\n\r\n                                                                  DHCP\r\n\r\nPC  PC  PC\r\n\r\nCanvis → repetir-los a cada equip\r\n\r\n                                   CLIENT  CLIENT                 CLIENT\r\n\r\n        Assignació centralitzada ·",
+        "folder": "Serveis de xarxa"
+      },
+      {
+        "title": "Setmana 3",
+        "path": "Serveis de xarxa/Teoria/Setmana 3",
+        "file": "Setmana 3.md",
+        "preview": "---\r\nmateria: \"Serveis de xarxa\"\r\nseccion: \"Teoria\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Serveis de xarxa\\Teoria\\Setmana 3.pdf\"\r\n---\r\n\r\nSetmana 3\r\n\r\nDHCP: instal·lació,\r\ncomprovació i configuració\r\n\r\nCLIENT  SERVIDOR            CLIENT\r\nCLIENT      DHCP            CLIENT\r\n\r\n        IP · DNS · GATEWAY\r\n\r\n---\r\n\r\n1.3 Instal·lació d’un servei DHCP\r\n\r\nEl client sol venir integrat en el sistema operatiu; instal·lar DHCP vol dir sobretot instal·lar i configurar el servidor.\r\n\r\n1 Triar aplicació",
+        "folder": "Serveis de xarxa"
+      }
+    ],
+    "Sistemes operatius en xarxa": [
+      {
+        "title": "Cadena de prácticas: SRVWIN30",
+        "path": "Sistemes operatius en xarxa/Cadena SRVWIN30",
+        "file": "Cadena SRVWIN30.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"cadena\"\r\n---\r\n\r\nCadena de prácticas: SRVWIN30\r\n\r\n> Conceptos: Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU) · DNS (DNS) · LDIF y LDAP (LDIF y LDAP) · Instantáneas (Instantáneas)\r\n\r\nLas prácticas de Windows Server se encadenan sobre la **misma máquina** (SRVWIN30, red 192.168.30.0/24). Esta nota dice qué hereda cada práctica de la anterior, para no tener que volver atrás.\r\n\r\nFlujo\r\n\r\n1. **RA1 P1**, RA1 P1 - E",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Active Directory",
+        "path": "Sistemes operatius en xarxa/Conceptes/Active Directory",
+        "file": "Active Directory.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nActive Directory\r\n\r\nServicio de directorio de Microsoft: una base de datos central con usuarios, equipos, grupos y permisos de toda una red. Se instala con el rol AD DS.\r\n\r\n\r\nDónde aparece\r\n\r\n- Cadena SRVWIN30 (Clases/Sistemes operatius en xarxa/Cadena SRVWIN30)\r\n- RA2 P1 - Entrega (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA2 P1 - Entrega)\r\n- RA2 P2 - Entrega (Clases/Sistemes operatius en xarxa/Practicas/Entrega",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "DHCP",
+        "path": "Sistemes operatius en xarxa/Conceptes/DHCP",
+        "file": "DHCP.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nDHCP\r\n\r\nServicio que da automáticamente una IP, máscara, puerta de enlace y DNS a los equipos de la red.\r\n\r\n\r\nDónde aparece\r\n\r\n- RA2 - DNS (Clases/Serveis de xarxa/Teoria/RA2 - DNS)\r\n- Setmana 2 (Clases/Serveis de xarxa/Teoria/Setmana 2)\r\n- Setmana 3 (Clases/Serveis de xarxa/Teoria/Setmana 3)\r\n- Cadena SRVWIN30 (Clases/Sistemes operatius en xarxa/Cadena SRVWIN30)\r\n- Sistemes operatius en xarxa (Clases/Sistemes operatius en xa",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "DNS",
+        "path": "Sistemes operatius en xarxa/Conceptes/DNS",
+        "file": "DNS.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nDNS\r\n\r\nTraduce nombres (ej.: srvwin30.novacode.local) a direcciones IP. En un dominio de AD es imprescindible: los equipos localizan el controlador de dominio a través de DNS.\r\n\r\n\r\nDónde aparece\r\n\r\n- Serveis de xarxa (Clases/Serveis de xarxa/Serveis de xarxa)\r\n- RA2 - DNS (Clases/Serveis de xarxa/Teoria/RA2 - DNS)\r\n- Setmana 2 (Clases/Serveis de xarxa/Teoria/Setmana 2)\r\n- Setmana 3 (Clases/Serveis de xarxa/Teoria/Setmana 3)",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Dominio, bosque y OU",
+        "path": "Sistemes operatius en xarxa/Conceptes/Dominio, bosque y OU",
+        "file": "Dominio, bosque y OU.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nDominio, bosque y OU\r\n\r\n- **Dominio:** un grupo de equipos y usuarios que comparten la misma base de Active Directory (ej.: NovaCode.local).\r\n- **Bosque:** un conjunto de dominios que comparten el mismo esquema y la misma confianza. El primer dominio crea el bosque.\r\n- **OU (Unidad organizativa):** una carpeta dentro del dominio para agrupar objetos (usuarios, equipos) y aplicarles políticas.\r\n\r\n\r\nDónde aparece\r\n\r\n- Cadena SR",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Escritorio remoto",
+        "path": "Sistemes operatius en xarxa/Conceptes/Escritorio remoto",
+        "file": "Escritorio remoto.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nEscritorio remoto\r\n\r\nPermite conectarse al escritorio de otro equipo. Con NLA (autenticación a nivel de red) el usuario se autentica antes de que se cree la sesión.\r\n\r\n\r\nDónde aparece\r\n\r\n- Guia técnica ciberseguridad para empresas (Clases/Seguretat informàtica/Teoria/Guia técnica ciberseguridad para empresas)\r\n- Cadena SRVWIN30 (Clases/Sistemes operatius en xarxa/Cadena SRVWIN30)\r\n- RA1 P1 - Entrega Lorena (Clases/Sistemes op",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Firewall y ping (ICMP)",
+        "path": "Sistemes operatius en xarxa/Conceptes/Firewall y ping (ICMP)",
+        "file": "Firewall y ping (ICMP).md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nFirewall y ping (ICMP)\r\n\r\nEl firewall de Windows bloquea por defecto las peticiones de ping (ICMP echo). Para que dos equipos se 'vean' hay que permitir esa regla, no desactivar todo el firewall.\r\n\r\n\r\nDónde aparece\r\n\r\n- RA1 P1 - Entrega Lorena (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega Lorena)\r\n- RA1 P1 - Revisión (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Revisión)\r\n- PRÀCTIC",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Instantáneas",
+        "path": "Sistemes operatius en xarxa/Conceptes/Instantáneas",
+        "file": "Instantáneas.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nInstantáneas\r\n\r\nCopia del estado de una máquina virtual en un momento dado. Sirve para volver atrás si algo sale mal. No sustituye a una copia de seguridad de los datos.\r\n\r\n\r\nDónde aparece\r\n\r\n- Cadena SRVWIN30 (Clases/Sistemes operatius en xarxa/Cadena SRVWIN30)\r\n- RA1 P1 - Entrega Lorena (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega Lorena)\r\n- RA1 - Guía RAID1 Ubuntu 24.04 (Clases/Sistemes operatius",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "LDIF y LDAP",
+        "path": "Sistemes operatius en xarxa/Conceptes/LDIF y LDAP",
+        "file": "LDIF y LDAP.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nLDIF y LDAP\r\n\r\n- **LDAP:** protocolo para consultar y gestionar directorios.\r\n- **LDIF:** formato de texto para guardar o importar objetos LDAP. Cada objeto se separa con una línea en blanco.\r\n- En Windows, `ldifde` exporta objetos de AD a LDIF.\r\n\r\n\r\nDónde aparece\r\n\r\n- Cadena SRVWIN30 (Clases/Sistemes operatius en xarxa/Cadena SRVWIN30)\r\n- RA2 P2 - Entrega (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA2 P2 - Entreg",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Política de contraseñas",
+        "path": "Sistemes operatius en xarxa/Conceptes/Política de contraseñas",
+        "file": "Política de contraseñas.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nPolítica de contraseñas\r\n\r\nReglas de secpol.msc o de AD: historial, longitud mínima, complejidad y vigencia. Una opción de la cuenta ('La contraseña nunca expira') tiene prioridad sobre la política.\r\n\r\n\r\nDónde aparece\r\n\r\n- RA1 P1 - Entrega Lorena (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega Lorena)\r\n- RA1 P1 - Revisión (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Revisión)\r\n- RA1",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "RAID1",
+        "path": "Sistemes operatius en xarxa/Conceptes/RAID1",
+        "file": "RAID1.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nRAID1\r\n\r\nDos discos con una copia idéntica de los mismos datos. Si uno falla, el otro sigue funcionando. En Windows se llama **volumen reflejado**.\r\n\r\n\r\nDónde aparece\r\n\r\n- Cadena SRVWIN30 (Clases/Sistemes operatius en xarxa/Cadena SRVWIN30)\r\n- Sistemes operatius en xarxa (Clases/Sistemes operatius en xarxa/Sistemes operatius en xarxa)\r\n- RA1 P1 - Entrega Lorena (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - E",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Red NAT y red interna",
+        "path": "Sistemes operatius en xarxa/Conceptes/Red NAT y red interna",
+        "file": "Red NAT y red interna.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"concepte\"\r\n---\r\n\r\nRed NAT y red interna\r\n\r\n- **Red interna:** solo conecta máquinas virtuales entre sí, sin salida a Internet.\r\n- **NAT:** la máquina sale a Internet a través del equipo anfitrión. Cada máquina recibe IP del DHCP de la red NAT.\r\nUn adaptador puede tener la IP fija (red interna) y otro por DHCP (NAT).\r\n\r\n\r\nDónde aparece\r\n\r\n- RA1 P1 - Entrega Lorena (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega Lorena)",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "CLIWIN30",
+        "path": "Sistemes operatius en xarxa/Maquines/CLIWIN30",
+        "file": "CLIWIN30.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"maquina\"\r\n---\r\n\r\nCLIWIN30\r\n\r\nCliente Windows 10 de la red interna, en 192.168.30.10. Se crea en RA1 P1 (A11) y conecta con SRVWIN30 por escritorio remoto.\r\n\r\nPrácticas que la usan\r\n\r\n- RA1 P1 - Entrega Lorena (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega Lorena) (A11)",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "SRVLINM430",
+        "path": "Sistemes operatius en xarxa/Maquines/SRVLINM430",
+        "file": "SRVLINM430.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"maquina\"\r\n---\r\n\r\nSRVLINM430\r\n\r\nServidor Linux de RA1 P2, en otra cadena independiente de la de Windows.\r\n\r\nPrácticas que la usan\r\n\r\n- RA1 P2 - Ubuntu RAID1 (Clases/Sistemes operatius en xarxa/Practicas/Enunciados/RA1 P2 - Ubuntu RAID1) (enunciado RA1 P2)\r\n- RA1 P2 - Entrega Ubuntu (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P2 - Entrega Ubuntu) (entrega RA1 P2)",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "SRVWIN30",
+        "path": "Sistemes operatius en xarxa/Maquines/SRVWIN30",
+        "file": "SRVWIN30.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\ntipus: \"maquina\"\r\n---\r\n\r\nSRVWIN30\r\n\r\nServidor Windows Server 2022 de la práctica (red 192.168.30.0/24). Nace en RA1 y se usa en RA2. Su historia completa está en Cadena SRVWIN30 (Cadena SRVWIN30).\r\n\r\nPrácticas que la usan\r\n\r\n- PRÀCTICA1 (Clases/Sistemes operatius en xarxa/Practicas/Sin clasificar/PRÀCTICA1) (enunciado RA1 P1)\r\n- RA1 P1 - Entrega Lorena (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega Lorena) (entrega RA1 P1)\r\n-",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Practica1_RA1_DHCP_Lorena",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - DHCP Lorena",
+        "file": "RA1 P1 - DHCP Lorena.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA1/Practica1_RA1_DHCP_Lorena.docx\"\r\n---\r\n\r\nPractica1_RA1_DHCP_Lorena\r\n\r\n> Texto extraído automáticamente; el original está en Originales.\r\n\r\nPràctica 1 – RA1\r\nServidor DHCP con Windows Server 2012\r\nCliente Windows 7 en red interna\r\nNombre: Lorena Cracana Cracana\r\nMódulo: M7 Serveis de xarxa i Internet · UF1/NF1/A6\r\nCurso: 2º CFGM SMX · Digitech Barcelona\r\nFecha: 30/09/2026\r\nPlan de direcciones\r\nAntes de",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PR1_RA1_LorenaCracana",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega (docx)",
+        "file": "RA1 P1 - Entrega (docx).md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA1/PR1_RA1_LorenaCracana.docx\"\r\n---\r\n\r\nPR1_RA1_LorenaCracana\r\n\r\n> Texto extraído automáticamente; el original está en Originales.\r\n\r\nPràctica 1 – RA1\r\nServidor DHCP con Windows Server 2012\r\nCliente Windows 7 en red interna\r\nNombre: Lorena Cracana Cracana\r\nMódulo: M7 Serveis de xarxa i Internet · UF1/NF1/A6\r\nCurso: 2º CFGM SMX · Digitech Barcelona\r\nFecha: 30/09/2026\r\nÍndice\r\nPlan de direcciones\r\nPaso 5 –",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PR1-RA1_LorenaCracana",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega (pdf)",
+        "file": "RA1 P1 - Entrega (pdf).md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA1/PR1-RA1_LorenaCracana.pdf\"\r\n---\r\n\r\nPR1-RA1_LorenaCracana\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\n Pràctica 1 ­ RA1\r\n\r\nServidor DHCP con Windows Server 2012\r\n\r\n Cliente Windows 7 en red interna\r\n\r\n Nombre: Antonia Lorena Cracana\r\n Módulo: M7 Serveis de xarxa i Internet\r\n Curso: 2º CFGM SMX · Digitech Barcelona\r\n\r\n Fecha: 30/09/2026\r\n\r\n 1\r\n\fÍndice\r\n\r\nPlan de direccione",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRÀCTICA1_LORENA",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega Lorena",
+        "file": "RA1 P1 - Entrega Lorena.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Practicas\\RA1\\PRÀCTICA1_LORENA.pdf\"\r\n---\r\n\r\nPRÀCTICA1_LORENA\r\n\r\n> Máquinas: SRVWIN30 (SRVWIN30) · CLIWIN30 (CLIWIN30)\r\n\r\n> Conceptos: RAID1 (RAID1) · DHCP (DHCP) · Red NAT y red interna (Red NAT y red interna) · DNS (DNS) · Firewall y ping (ICMP) (Firewall y ping (ICMP)) · Escritorio remoto (Escritorio remoto) · Política de contraseñas (Política de contraseñas) · Instan",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PreguntasDHCPLorena",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Preguntas DHCP",
+        "file": "RA1 P1 - Preguntas DHCP.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA1/PreguntasDHCPLorena.pdf\"\r\n---\r\n\r\nPreguntasDHCPLorena\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\nSubnet 192.168.10.0 netmask 255.255.255.0 {\r\nOption routers 192.168.10.1;\r\nOption subnet-mask 255.255.255.0\r\nOption domain-name-servers 192.168.101.10\r\n\r\nRange 192.168.10.100 192.168.10.10\r\n\r\nDefault-lease-time 3600;\r\nMax-lease-time 14400;\r\n}\r\n\r\nHost srv01 {\r\nHardware etherne",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Revisió: PRÀCTICA1_LORENA (RA1)",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Revisión",
+        "file": "RA1 P1 - Revisión.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\ntipus: \"revisio\"\r\n---\r\n\r\nRevisió: PRÀCTICA1_LORENA (RA1)\r\n\r\n> Entrega: RA1 P1 - Entrega Lorena (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega Lorena) · Máquinas: SRVWIN30 (SRVWIN30) · CLIWIN30 (CLIWIN30)\r\n\r\n> Conceptos: RAID1 (RAID1) · DHCP (DHCP) · Red NAT y red interna (Red NAT y red interna) · Firewall y ping (ICMP) (Firewall y ping (ICMP)) · Escritorio remoto (Escritorio remoto) · Política de contrase",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRACTICA2_SRVLINM430_Antonia_Lorena_Cracana",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA1 P2 - Entrega Ubuntu",
+        "file": "RA1 P2 - Entrega Ubuntu.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Practicas\\RA1\\PRACTICA2_SRVLINM430_Antonia_Lorena_Cracana.pdf\"\r\n---\r\n\r\nPRACTICA2_SRVLINM430_Antonia_Lorena_Cracana\r\n\r\n> Conceptos: RAID1 (RAID1) · DHCP (DHCP) · Red NAT y red interna (Red NAT y red interna) · Política de contraseñas (Política de contraseñas)\r\n\r\n> Máquina: SRVLINM430 (SRVLINM430)\r\n\r\nInstalación Ubuntu Server",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PROCESO_SRVLINM430(PASO A PASO)",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA1 P2 - Proceso paso a paso (2)",
+        "file": "RA1 P2 - Proceso paso a paso (2).md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA1/PROCESO_SRVLINM430(PASO A PASO).docx\"\r\n---\r\n\r\nPROCESO_SRVLINM430(PASO A PASO)\r\n\r\n> Texto extraído automáticamente; el original está en Originales.\r\n\r\nPráctica 2: Ubuntu Server 24.04 con RAID1\r\nProceso paso a paso (capturas)Antonia Lorena Cracana · M0224 Sistemes operatius en xarxa\r\n1. Preparar la máquina virtual en VirtualBox\r\n\r\nMemoria: en Sistema dejo la memoria base en 2048 MB y UEFI desmarcado (ar",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PROCESO_SRVLINM430",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA1 P2 - Proceso paso a paso",
+        "file": "RA1 P2 - Proceso paso a paso.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA1/PROCESO_SRVLINM430.docx\"\r\n---\r\n\r\nPROCESO_SRVLINM430\r\n\r\n> Texto extraído automáticamente; el original está en Originales.\r\n\r\nPráctica 2: Ubuntu Server 24.04 con RAID1\r\nProceso paso a paso (capturas)Antonia Lorena Cracana · M0224 Sistemes operatius en xarxa\r\n1. Preparar la máquina virtual en VirtualBox\r\n\r\nMemoria: en Sistema dejo la memoria base en 2048 MB y UEFI desmarcado (arranque BIOS).\r\n\r\nProcesado",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRACTICA1_RA2_Antonia_Lorena_Cracana",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA2 P1 - Entrega",
+        "file": "RA2 P1 - Entrega.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Practicas\\RA2\\PRACTICA1_RA2_Antonia_Lorena_Cracana.pdf\"\r\n---\r\n\r\nPRACTICA1_RA2_Antonia_Lorena_Cracana\r\n\r\n> Máquina: SRVWIN30 (SRVWIN30)\r\n\r\n> Conceptos: Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU) · Política de contraseñas (Política de contraseñas)\r\n\r\n> Cadena de la máquina: Cadena SRVWIN30 (Cadena SRVWIN30) · Hereda de: RA1 P1 - Entr",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRACTICA2_RA2_SRVWIN30_Antonia_Lorena_Cracana",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA2 P2 - Entrega",
+        "file": "RA2 P2 - Entrega.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Practicas\\RA2\\PRACTICA2_RA2_SRVWIN30_Antonia_Lorena_Cracana.pdf\"\r\n---\r\n\r\nPRACTICA2_RA2_SRVWIN30_Antonia_Lorena_Cracana\r\n\r\n> Máquina: SRVWIN30 (SRVWIN30)\r\n\r\n> Conceptos: LDIF y LDAP (LDIF y LDAP) · Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU)\r\n\r\n> Cadena de la máquina: Cadena SRVWIN30 (Cadena SRVWIN30) · Hereda de: RA2 P1 - Entrega (C",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRACTICA1_RA3_Antonia_Lorena_Cracana",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/RA3 P1 - Entrega",
+        "file": "RA3 P1 - Entrega.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"/c/Users/lorena/Desktop/Sistemes operatius en xarxa/Practicas/RA3/PRACTICA1_RA3_Antonia_Lorena_Cracana.docx\"\r\n---\r\n\r\nPRACTICA1_RA3_Antonia_Lorena_Cracana\r\n\r\n> Conceptos: Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU)\r\n\r\nEscenario empresa NovaCode\r\nP3.1 - AEA3 - RA3\r\nAlumna: Antonia Lorena Cracana\r\nProfesora: Gema Santos\r\nMódulo: M0224\r\nParte 1. Preliminares\r\nEscenario de trabajo\r\nNovaCo",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Resumen - RA1 P1 (Windows Server 2022)",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/Resumen - RA1 P1 Entrega Lorena",
+        "file": "Resumen - RA1 P1 Entrega Lorena.md",
+        "preview": "Resumen - RA1 P1 (Windows Server 2022)\r\n\r\nResumen de  (RA1 P1 - Entrega Lorena). Para el detalle, pulsa en cada fita.\r\n\r\nFitas\r\n\r\n- A1 (RA1 P1 - Entrega Lorena#2.1. Fita A1. Instal·lació Windows Server 2022) Instalar Windows Server 2022 Standard (Desktop Experience).\r\n- A2 (RA1 P1 - Entrega Lorena#2.2. Fita A2. Administració de processos i serveis) Herramientas para monitorizar y vigilar el servidor.\r\n- A3 (RA1 P1 - Entrega Lorena#2.3. Fita A3. Configuració identificació del servidor) Cambiar el",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Resumen - RA1 P2 (Ubuntu Server 24.04 con RAID1)",
+        "path": "Sistemes operatius en xarxa/Practicas/Entregas/Resumen - RA1 P2 Entrega Ubuntu",
+        "file": "Resumen - RA1 P2 Entrega Ubuntu.md",
+        "preview": "Resumen - RA1 P2 (Ubuntu Server 24.04 con RAID1)\r\n\r\nResumen de  (RA1 P2 - Entrega Ubuntu). Para el detalle, pulsa en cada ejercicio.\r\n\r\nEjercicios\r\n\r\n- Ejercicio 1 (RA1 P2 - Entrega Ubuntu#2.1. Ejercicio 1. Consideraciones previas a la) Qué es LTS, versión actual y criterios para elegir distribución de servidor. Requisitos mínimos de Ubuntu Server 24.04.\r\n- Ejercicio 2 (RA1 P2 - Entrega Ubuntu#2.2. Ejercicio 2. Configuración de VirtualBox) Crear la máquina virtual SRVLINM4XX con dos discos de 30",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PR1-RA1_ DHCP_Windows server 2012 + Windows 7 client.pptx",
+        "path": "Sistemes operatius en xarxa/Practicas/Enunciados/RA1 P1 - DHCP",
+        "file": "RA1 P1 - DHCP.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA1/PR1-RA1_ DHCP_Windows server 2012 + Windows 7 client.pptx.pdf\"\r\n---\r\n\r\nPR1-RA1_ DHCP_Windows server 2012 + Windows 7 client.pptx\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\nPràctica: Servidor DHCP amb Windows Server\r\n2012\r\n\r\nGuió pas a pas des del punt 5 (instal·lar el servei DHCP)\r\nM7 Serveis de xarxa i Internet · UF1/NF1/A6 · CFGM SMX\r\n\r\nTemps: 2 hores · Entrega: memòr",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRACTICA2",
+        "path": "Sistemes operatius en xarxa/Practicas/Enunciados/RA1 P2 - Ubuntu RAID1",
+        "file": "RA1 P2 - Ubuntu RAID1.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Practicas\\RA1\\PRACTICA2.pdf\"\r\n---\r\n\r\nPRACTICA2\r\n\r\n> Conceptos: RAID1 (RAID1) · DHCP (DHCP) · Red NAT y red interna (Red NAT y red interna) · Política de contraseñas (Política de contraseñas)\r\n\r\n> Máquina: SRVLINM430 (SRVLINM430)\r\n\r\nInstal·lació Ubuntu Server\r\n\r\n                                                               Alumne: xxxxxxxxxxxxxxxxx",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRACTICA1 RA2",
+        "path": "Sistemes operatius en xarxa/Practicas/Enunciados/RA2 P1",
+        "file": "RA2 P1.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Practicas\\RA2\\PRACTICA1 RA2.docx\"\r\n---\r\n\r\nPRACTICA1 RA2\r\n\r\n> Máquina: SRVWIN30 (SRVWIN30)\r\n\r\n> Conceptos: Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU) · Política de contraseñas (Política de contraseñas)\r\n\r\n> Cadena de la máquina: Cadena SRVWIN30 (Cadena SRVWIN30) · Hereda de: RA1 P1 - Entrega Lorena (Clases/Sistemes operatius en xarx",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRACTICA2 RA2",
+        "path": "Sistemes operatius en xarxa/Practicas/Enunciados/RA2 P2",
+        "file": "RA2 P2.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Practicas\\RA2\\PRACTICA2 RA2.docx\"\r\n---\r\n\r\nPRACTICA2 RA2\r\n\r\n> Máquina: SRVWIN30 (SRVWIN30)\r\n\r\n> Conceptos: LDIF y LDAP (LDIF y LDAP) · Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU)\r\n\r\n> Cadena de la máquina: Cadena SRVWIN30 (Cadena SRVWIN30) · Hereda de: RA2 P1 (Clases/Sistemes operatius en xarxa/Practicas/Enunciados/RA2 P1)\r\n\r\nL’objec",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRACTICA3 RA2 SE NECESITA LINUX",
+        "path": "Sistemes operatius en xarxa/Practicas/Enunciados/RA2 P3 (Linux)",
+        "file": "RA2 P3 (Linux).md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA2/PRACTICA3 RA2 SE NECESITA LINUX.docx\"\r\n---\r\n\r\nPRACTICA3 RA2 SE NECESITA LINUX\r\n\r\n> Texto extraído automáticamente; el original está en Originales.\r\n\r\nOU, usuaris i grups (Scripting en bash)\r\nP2.3 - AEA2 - RA2\r\n\r\nAlumne: xxxxxxxxxxxxxxxxx\r\nProfessor: GEMA SANTOS\r\nMòdul: M0224\r\n\r\nPart 1. Preliminars\r\n\r\nL’objectiu d’aquesta pràctica és crear la resta d’objectes del nostre AD NovaCode.local però utilitzan",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRACTICA1 RA3",
+        "path": "Sistemes operatius en xarxa/Practicas/Enunciados/RA3 P1",
+        "file": "RA3 P1.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"/c/Users/lorena/Desktop/Sistemes operatius en xarxa/Practicas/RA3/PRACTICA1 RA3.docx\"\r\n---\r\n\r\nPRACTICA1 RA3\r\n\r\n> Conceptos: Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU)\r\n\r\nEscenari empresa NovaCode\r\nP3.1 - AEA3 - RA3\r\nAlumne: xxxxxxxxxxxxxxxxx\r\nProfessor: Gema Santos\r\nMòdul: M0224\r\nPart 1. Preliminars\r\nEscenari de treball\r\nNovaCode és una empresa de disseny i desenvolupament de videoj",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRACTICA2 RA3",
+        "path": "Sistemes operatius en xarxa/Practicas/Enunciados/RA3 P2",
+        "file": "RA3 P2.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"/c/Users/lorena/Desktop/Sistemes operatius en xarxa/Practicas/RA3/PRACTICA2 RA3.docx\"\r\n---\r\n\r\nPRACTICA2 RA3\r\n\r\n> Máquina: SRVWIN30 (SRVWIN30)\r\n\r\n> Conceptos: Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU) · DNS (DNS)\r\n\r\n> ⚠ Pide servidor nuevo, ver la decisión pendiente en Cadena SRVWIN30 (Cadena SRVWIN30)\r\n\r\nInstal·lació del rol AD i promoció a domain controller \r\nP3.2 - AEA3 - RA3\r\nAl",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRÁCTICA1",
+        "path": "Sistemes operatius en xarxa/Practicas/Sin clasificar/PRÁCTICA1",
+        "file": "PRÁCTICA1.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA1/PRÁCTICA1.docx\"\r\n---\r\n\r\nPRÁCTICA1\r\n\r\n> Texto extraído automáticamente; el original está en Originales.\r\n\r\nInstal·lació i configuració Windows Server 2022\r\n\r\nAlumne: xxxxxxxxxxxxxxxxx\r\nProfessor: GEMA SANTOS\r\nMòdul: M0224\r\n\r\nPart 1. Preliminars\r\n\r\nPer aquesta pràctica cal que creem una màquina virtual amb windows server 2022.\r\nRecorda modificar el directori d’emmagatzematge de les màquines virtuals a",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRÀCTICA1",
+        "path": "Sistemes operatius en xarxa/Practicas/Sin clasificar/PRÀCTICA1",
+        "file": "PRÀCTICA1.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Practicas\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Practicas\\RA1\\PRÀCTICA1.docx\"\r\n---\r\n\r\nPRÀCTICA1\r\n\r\n> Conceptos: RAID1 (RAID1) · DHCP (DHCP) · Red NAT y red interna (Red NAT y red interna) · Firewall y ping (ICMP) (Firewall y ping (ICMP)) · Política de contraseñas (Política de contraseñas)\r\n\r\n> Máquina: SRVWIN30 (SRVWIN30) · CLIWIN30 (CLIWIN30)\r\n\r\nInstal·lació i configuració Windows Server 2022\r\n\r\nAlumne: xxxxxxxxxxxx",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Sistemes operatius en xarxa",
+        "path": "Sistemes operatius en xarxa/Sistemes operatius en xarxa",
+        "file": "Sistemes operatius en xarxa.md",
+        "preview": "Sistemes operatius en xarxa\r\n\r\n← Clases (Clases/Clases)\r\n\r\nPrácticas\r\n\r\n- RA1 P1 - DHCP Lorena (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - DHCP Lorena)\r\n- RA1 P1 - Entrega (docx) (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega (docx))\r\n- RA1 P1 - Entrega (pdf) (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega (pdf))\r\n- RA1 P1 - Entrega Lorena (Clases/Sistemes operatius en xarxa/Practicas/Entregas/RA1 P1 - Entrega Lorena)\r\n- RA1 P1",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "programacio-didactica-MP0224-sistemes-operatius-xarxa definitiva",
+        "path": "Sistemes operatius en xarxa/Teoria/Programació didàctica MP0224",
+        "file": "Programació didàctica MP0224.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Teoria/programacio-didactica-MP0224-sistemes-operatius-xarxa definitiva.pdf\"\r\n---\r\n\r\nprogramacio-didactica-MP0224-sistemes-operatius-xarxa definitiva\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\nMòdul professional 0224: Sistemes Operatius en Xarxa\r\n\r\n DIGITECH FP OFICIAL DIGITAL & TECH\r\n Departament d'Informàtica i Comunicacions | Campus Virtual Digitech\r\n\r\n Programació didàctica i sis",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "guia paso a paso raid1 UBUNTU",
+        "path": "Sistemes operatius en xarxa/Teoria/RA1 - Guía paso a paso RAID1 Ubuntu",
+        "file": "RA1 - Guía paso a paso RAID1 Ubuntu.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA1/guia paso a paso raid1 UBUNTU.docx\"\r\n---\r\n\r\nguia paso a paso raid1 UBUNTU\r\n\r\n> Texto extraído automáticamente; el original está en Originales.\r\n\r\nPaso a paso\r\nArranca desde el ISO y avanza por idioma, teclado, tipo de instalación (Ubuntu Server) y red hasta llegar a la pantalla de almacenamiento.\r\nElige el diseño personalizado. En Guided storage configuration marca Custom storage layout y pulsa Done.",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "RAID1_sistema_Ubuntu_24.04_guia_didactica",
+        "path": "Sistemes operatius en xarxa/Teoria/RA1 - Guía RAID1 Ubuntu 24.04",
+        "file": "RA1 - Guía RAID1 Ubuntu 24.04.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Teoria\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Teoria\\RAID1_sistema_Ubuntu_24.04_guia_didactica.pdf\"\r\n---\r\n\r\nRAID1_sistema_Ubuntu_24.04_guia_didactica\r\n\r\n> Conceptos: RAID1 (RAID1) · Instantáneas (Instantáneas)\r\n\r\nGuía didáctica\r\n\r\nRAID 1 del sistema en Ubuntu Server\r\n24.04 LTS\r\n\r\nImplementación paso a paso una vez instalado el servidor\r\n\r\nNivel            CFGM Sistemas Microinformáticos y Redes\r\n\r\nEntorno          Máq",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "Practica1_WindowsServer2022",
+        "path": "Sistemes operatius en xarxa/Teoria/RA1 - Guía Windows Server 2022",
+        "file": "RA1 - Guía Windows Server 2022.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA1/Practica1_WindowsServer2022.docx\"\r\n---\r\n\r\nPractica1_WindowsServer2022\r\n\r\n> Texto extraído automáticamente; el original está en Originales.\r\n\r\nPràctica 1\r\nInstal·lació i configuració\r\nWindows Server 2022\r\nAlumne: __________________________\r\nProfessora: Gema Santos\r\nMòdul: M0224 Sistemes Operatius en Xarxa\r\nServidor: SRVWIN30 · Xarxa 192.168.30.0/24\r\n\r\nÍndex\r\nPart 1. Preliminars\r\nPart 2. Exercicis\r\n A1.",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "MATERIAL- Com instal·lar W2022 en RAID1",
+        "path": "Sistemes operatius en xarxa/Teoria/RA1 - Material W2022 en RAID1",
+        "file": "RA1 - Material W2022 en RAID1.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Teoria\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Teoria\\MATERIAL- Com instal·lar W2022 en RAID1 (1).pdf\"\r\n---\r\n\r\nMATERIAL- Com instal·lar W2022 en RAID1\r\n\r\n> Conceptos: RAID1 (RAID1)\r\nInstal·lació Windows Server 2016/2019/2022 sobre un RAID1 (volum mirror)\r\nNOTA: ENCARA QUE LES CAPTURES SÓN FETES AMB UN SERVER 2016, EL PROCÉS ÉS\r\nIDÈNTIC EN UN 2019 I EN UN 2022 (COMPROVAT!!!)\r\nCrea una màquina virtual per instal·lar Wind",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRESENTACIÓN1",
+        "path": "Sistemes operatius en xarxa/Teoria/RA1 - Presentació 1",
+        "file": "RA1 - Presentació 1.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Teoria\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Teoria\\PRESENTACIÓN1 (1).pdf\"\r\n---\r\n\r\nPRESENTACIÓN1\r\n\r\n> Conceptos: Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU) · DNS (DNS) · LDIF y LDAP (LDIF y LDAP) · Política de contraseñas (Política de contraseñas)\r\nInstal·lació de\r\nserveis de\r\ndirectori en                                                                     1\r\nsistemes\r\noperatius",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRÁCTICA1 (1)",
+        "path": "Sistemes operatius en xarxa/Teoria/RA1 - Práctica 1 (teoría)",
+        "file": "RA1 - Práctica 1 (teoría).md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Teoria\"\r\norigen: \"C:\\Users\\lorena\\Desktop\\Sistemes operatius en xarxa\\Teoria\\PRÁCTICA1 (1).docx\"\r\n---\r\n\r\nPRÁCTICA1 (1)\r\n\r\n> Conceptos: RAID1 (RAID1) · DHCP (DHCP) · Red NAT y red interna (Red NAT y red interna) · DNS (DNS) · Escritorio remoto (Escritorio remoto) · Política de contraseñas (Política de contraseñas)\r\n\r\nInstal·lació i configuració Windows Server 2022\r\n\r\nAlumne: xxxxxxxxxxxxxxxxx\r\n\r\nProfessor: GEMA SANTOS\r\n\r\nMòdul: M0224\r\n\r\nPar",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "22_b - Material DidÃ ctic - Manual sobre OU, usuaris, grups i ordinadors",
+        "path": "Sistemes operatius en xarxa/Teoria/RA2 - Manual OU, usuarios, grupos y equipos",
+        "file": "RA2 - Manual OU, usuarios, grupos y equipos.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Practicas/RA2/22_b - Material DidÃ ctic - Manual sobre OU, usuaris, grups i ordinadors.pdf\"\r\n---\r\n\r\n22_b - Material DidÃ ctic - Manual sobre OU, usuaris, grups i ordinadors\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\nManual de consulta:\r\nOU, usuaris, grups i\r\nordinadors\r\n\f M0224:\r\n\r\nSistemes operatius en xarxa\r\n\r\nUnitats organitzatives\r\n\r\n Les unitats organitzatives (UO) són objectes",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRESENTACIÃ“N1 RA2",
+        "path": "Sistemes operatius en xarxa/Teoria/RA2 - Presentació 1",
+        "file": "RA2 - Presentació 1.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\norigen: \"Sistemes operatius en xarxa/Teoria/RA2/PRESENTACIÃ“N1 RA2.pdf\"\r\n---\r\n\r\nPRESENTACIÃ“N1 RA2\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\n MMO0242S4istemes operatius en xarxa\r\n\r\nSistemes operatius propietaris en xarxa\r\n\r\nPowerShell\r\n\r\n 1\r\n\f MMO0242S4istemes operatius en xarxa\r\n\r\nEl funcionament de la majoria dels shells, inclosos Cmd.exe\r\ni els shells SH, KSH, CSH i BASH UNIX, consisteix a executar\r\nuna ordre o una",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRESENTACION1 RA3",
+        "path": "Sistemes operatius en xarxa/Teoria/RA3 - Presentació 1",
+        "file": "RA3 - Presentació 1.md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Teoria\"\r\norigen: \"/c/Users/lorena/Desktop/Sistemes operatius en xarxa/Teoria/RA3/PRESENTACION1 RA3.pdf\"\r\n---\r\n\r\nPRESENTACION1 RA3\r\n\r\n> Conceptos: Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU) · DNS (DNS) · LDIF y LDAP (LDIF y LDAP)\r\n\r\nLDAP\r\nM04 Sistemes operatius en xarxa\r\n1\r\n\fDirectori\r\nEl Servei de Directori o simplement el Directori és un terme ambigu, que s'utilitza per a referir-se tant a la informaci",
+        "folder": "Sistemes operatius en xarxa"
+      },
+      {
+        "title": "PRESENTACION2 RA3 SE NECESITA DOMINIO LINUX",
+        "path": "Sistemes operatius en xarxa/Teoria/RA3 - Presentació 2 (Linux)",
+        "file": "RA3 - Presentació 2 (Linux).md",
+        "preview": "---\r\nmateria: \"Sistemes operatius en xarxa\"\r\nseccion: \"Teoria\"\r\norigen: \"/c/Users/lorena/Desktop/Sistemes operatius en xarxa/Teoria/RA3/PRESENTACION2 RA3 SE NECESITA DOMINIO LINUX.pdf\"\r\n---\r\n\r\nPRESENTACION2 RA3 SE NECESITA DOMINIO LINUX\r\n\r\n> Conceptos: Active Directory (Active Directory) · Dominio, bosque y OU (Dominio, bosque y OU) · LDIF y LDAP (LDIF y LDAP)\r\n\r\nM04 Sistemes operatius en xarxa\r\nServeis de directori en Linux OpenLDAP i Samba\r\n\fM04 Sistemes operatius en xarxa\r\nLDAP\r\n● Protocol qu",
+        "folder": "Sistemes operatius en xarxa"
+      }
+    ],
+    "Tutoria 2n SMX": [
+      {
+        "title": "Horari_1T_2N_SMX_Curs_2627",
+        "path": "Tutoria 2n SMX/Teoria/Horario 1T 2n SMX",
+        "file": "Horario 1T 2n SMX.md",
+        "preview": "---\r\nmateria: \"Tutoria 2n SMX\"\r\norigen: \"Tutoria 2n SMX/Teoria/Horari_1T_2N_SMX_Curs_2627.pdf\"\r\n---\r\n\r\nHorari_1T_2N_SMX_Curs_2627\r\n\r\n> Texto extraÃ­do automÃ¡ticamente; el original estÃ¡ en Originales.\r\n\r\n CURS 2026/2027\r\n SEGON CURS: IC10_Sistemes Microinformàtics i Xarxes (SMX) - AULA 4 (2a planta)\r\n\r\n Dilluns Dimarts PRIMER TRIMESTRE Dijous Divendres\r\n G. Santos: 0224. Sistemes Dimecres\r\n S. Patricia: 1713. Projecte G. Santos: 0224. Sistemes\r\n 8:00 - 9:00 operatius A. Cañas: 0228. Aplicacions",
+        "folder": "Tutoria 2n SMX"
+      },
+      {
+        "title": "Tutoria 2n SMX",
+        "path": "Tutoria 2n SMX/Tutoria 2n SMX",
+        "file": "Tutoria 2n SMX.md",
+        "preview": "Tutoria 2n SMX\r\n\r\n← Clases (Clases/Clases)\r\n\r\nPrácticas\r\n\r\nSin archivos.\r\n\r\nTeoría\r\n\r\n- Horario 1T 2n SMX (Clases/Tutoria 2n SMX/Teoria/Horario 1T 2n SMX)",
+        "folder": "Tutoria 2n SMX"
+      }
+    ]
+  }
+}

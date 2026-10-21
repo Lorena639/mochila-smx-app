@@ -21,6 +21,7 @@ import * as Sandbox from "./sandbox.js";
 import * as Py from "./python.js";
 import * as Estada from "./estada.js";
 import * as Extras from "./extras.js";
+import * as Apuntes from "./apuntes.js";
 import { exportarWord, exportarPDF } from "./editor.js";
 import { contenido } from "./editor.js";
 
@@ -34,6 +35,7 @@ const SECCIONES = [
   { id: "trabajos", t: "Trabajos", ic: "trabajos", parte: "trabajos", grupo: "Estudios" },
   { id: "formacion", t: "Formación", ic: "formacion", parte: "formacion", grupo: "Estudios" },
   { id: "estudio", t: "Estudiar", ic: "estudiar", parte: "estudio", grupo: "Aprender" },
+  { id: "apuntes", t: "Apuntes", ic: "libros", parte: "apuntes", grupo: "Aprender" },
   { id: "herramientas", t: "Herramientas", ic: "herramienta", parte: "herramientas", grupo: "Aprender" },
   { id: "sandbox", t: "Sandbox", ic: "cubo", parte: "herramientas", grupo: "Aprender" },
   { id: "calendario", t: "Calendario", ic: "calendario", parte: "calendario", grupo: "Agenda" },
@@ -204,7 +206,7 @@ export function iniciar(raiz, ctx) {
   }
 
   // ---------- Pintar la sección actual ----------
-  function pintar(mantenerScroll = false) {
+  async function pintar(mantenerScroll = false) {
     const y = window.scrollY;
     let [sec, a, b] = ruta;
     sec ||= "inicio";
@@ -224,6 +226,7 @@ export function iniciar(raiz, ctx) {
       case "trabajos": html = V.vistaTrabajos(v); break;
       case "formacion": html = V.vistaFormacion(v); break;
       case "estudio": html = a === "examen" ? Estudio.vistaExamen(v, b) : Estudio.vistaEstudio(v, a || "tarjetas"); break;
+      case "apuntes": html = await Apuntes.htmlApuntes(v); break;
       case "python": html = Py.vistaPython(v); break;
       case "herramientas": html = Herr.vistaHerramientas(v, a || ""); break;
       case "sandbox": html = Sandbox.vistaSandbox(v, a || ""); break;
@@ -245,6 +248,7 @@ export function iniciar(raiz, ctx) {
     cargarImagenes();
     Sandbox.montar(api);
     prepararCarruseles();
+    if (sec === "apuntes") Apuntes.eventosApuntes(raiz);
     const reloj = $("#pildoraReloj");
     if (reloj) reloj.hidden = !Estudio.temporizadorActivo();
     if (mantenerScroll) window.scrollTo(0, y);
