@@ -4,7 +4,7 @@
 //   · Búsqueda en apuntes
 //   · Link a Obsidian para editar
 // =============================================================
-import { esc, icono } from "./comun.js";
+import { esc } from "./comun.js";
 
 let apuntesData = null;
 
