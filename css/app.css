@@ -78,10 +78,11 @@ html[data-tema="claro"] .chip[aria-pressed="true"] { background: var(--tinta); c
 .app-barra-inf, .fab { display: none; }
 
 /* 3. Piezas ------------------------------------------------------ */
-.app .panel { border-radius: 18px; box-shadow: var(--sombra); }
+.app .panel { border-radius: 18px; box-shadow: var(--sombra); transition: var(--transicion); }
+.app .panel:hover { box-shadow: var(--sombra-hover); }
 .app .panel + .panel { margin-top: 0; }
-.columna { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-.rejilla-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 18px; align-items: start; }
+.columna { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.rejilla-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-bottom: 24px; align-items: start; }
 .kpis { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
 .kpis:not([style]) { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 .kpi { display: flex; align-items: center; gap: 14px; }
@@ -95,8 +96,8 @@ html[data-tema="claro"] .chip[aria-pressed="true"] { background: var(--tinta); c
 .anillo circle { fill: none; stroke-width: 6; }
 .anillo .fondo { stroke: var(--superficie-2); }
 .anillo .valor { stroke: var(--ok); stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; }
-span.chip { cursor: default; padding: 3px 10px; font-size: 12px; font-weight: 700; background: var(--superficie-2); color: var(--suave); border-color: transparent; white-space: nowrap; gap: 6px; }
-span.chip:hover { border-color: transparent; }
+span.chip { cursor: default; padding: 4px 12px; font-size: 12px; font-weight: 700; background: var(--superficie-2); color: var(--tinta); opacity: .8; border-color: transparent; white-space: nowrap; gap: 6px; border-radius: 999px; transition: var(--transicion-rapida); }
+span.chip:hover { opacity: 1; }
 .chip svg { width: 14px; height: 14px; }
 .chip.ok { background: var(--ok-suave); color: var(--ok); }
 .chip.aviso { background: var(--aviso-suave); color: var(--aviso); }
@@ -116,15 +117,15 @@ span.chip:hover { border-color: transparent; }
 .subt { font-size: 14px; margin: 18px 0 10px; }
 .progreso { height: 10px; border-radius: 99px; background: var(--superficie-2); overflow: hidden; margin: -4px 0 18px; }
 .progreso i { display: block; height: 100%; background: var(--acento); border-radius: 99px; }
-.lista-simple { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.lista-simple li { display: flex; align-items: center; gap: 8px; }
+.lista-simple { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.lista-simple li { display: flex; align-items: center; gap: 10px; padding: 2px 0; }
 .form-inline { display: flex; gap: 8px; margin-top: 10px; }
 .form-inline input { flex: 1; min-width: 0; }
 .app input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]), .app select, .app textarea, .modal input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]), .modal select, .modal textarea {
   background: var(--superficie-2); border: 1.5px solid var(--linea); border-radius: 10px; padding: 10px 12px; color: var(--tinta); max-width: 100%; font-size: 15px;
 }
 .app textarea { width: 100%; resize: vertical; }
-.app input:focus, .app select:focus, .app textarea:focus { outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px var(--acento-suave); }
+.app input:focus, .app select:focus, .app textarea:focus { outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px var(--acento-suave), 0 2px 8px rgba(10, 132, 198, .2); background: var(--superficie); }
 .corto { width: 90px; }
 .tabla { width: 100%; border-collapse: collapse; font-size: 14px; }
 .tabla th, .tabla td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--linea); }

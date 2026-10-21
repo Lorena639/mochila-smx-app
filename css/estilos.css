@@ -31,6 +31,9 @@
   --mal: #C43838; --mal-suave: #FBE4E4;
   --pronto: #FFD66B; --pronto-tinta: #4A3700;
   --sombra: 0 1px 2px rgba(17,29,51,.05), 0 10px 30px -14px rgba(17,29,51,.2);
+  --sombra-hover: 0 4px 12px rgba(17,29,51,.1), 0 14px 36px -10px rgba(17,29,51,.15);
+  --transicion: all .2s cubic-bezier(.4, 0, .2, 1);
+  --transicion-rapida: all .15s ease;
 
   --radio: 16px;
   --ancho: 1240px;
@@ -45,18 +48,19 @@
     --superficie: #131E33;
     --superficie-2: #1A2740;
     --tinta: #E7ECF5;
-    --suave: #9AA6BD;
-    --linea: #24324D;
-    --acento: #38B8EC;
+    --suave: #A3AEC5;
+    --linea: #293349;
+    --acento: #3DB5FF;
     --acento-tinta: #06101F;
-    --acento-suave: #0F2B42;
+    --acento-suave: #0F2A42;
     --heroe-a: #13233F;
     --heroe-b: #1D4E8F;
-    --ok: #5ACB97; --ok-suave: #12302A;
-    --aviso: #E6A94C; --aviso-suave: #33270F;
-    --mal: #F07E7E; --mal-suave: #3A1C21;
-    --pronto: #E6BF45; --pronto-tinta: #221900;
+    --ok: #60E8A0; --ok-suave: #12302A;
+    --aviso: #FFC870; --aviso-suave: #33270F;
+    --mal: #FF9090; --mal-suave: #3A1C21;
+    --pronto: #FFD97A; --pronto-tinta: #221900;
     --sombra: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.6);
+    --sombra-hover: 0 4px 12px rgba(0,0,0,.5), 0 14px 36px -10px rgba(61, 181, 255, .15);
   }
 }
 
@@ -68,18 +72,25 @@ body { color: var(--tinta); font: 15px/1.55 var(--f-texto); -webkit-font-smoothi
 [hidden] { display: none !important; }
 button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
-a { color: var(--acento); }
-h1, h2, h3 { text-wrap: balance; letter-spacing: -.015em; }
+a { color: var(--acento); text-decoration: none; transition: var(--transicion-rapida); }
+a:hover { opacity: .8; text-decoration: underline; }
+a:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+h1 { font-size: clamp(28px, 6vw, 48px); font-weight: 800; line-height: 1.1; letter-spacing: -.02em; margin: 0 0 24px; }
+h2 { font-size: clamp(20px, 4vw, 32px); font-weight: 700; line-height: 1.2; letter-spacing: -.015em; margin: 0 0 16px; }
+h3 { font-size: clamp(16px, 2.5vw, 20px); font-weight: 700; line-height: 1.3; letter-spacing: -.01em; margin: 0 0 12px; }
+h1, h2, h3 { text-wrap: balance; }
 svg.ico { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
 .boton {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   border: 1.5px solid var(--linea); background: var(--superficie); color: var(--tinta);
   border-radius: 10px; padding: 10px 18px; cursor: pointer; font-weight: 600; text-decoration: none; white-space: nowrap; min-height: 40px;
+  transition: var(--transicion); position: relative;
 }
-.boton:hover { border-color: var(--acento); }
-.boton.principal { background: var(--acento); border-color: var(--acento); color: var(--acento-tinta); }
-.boton.principal:hover { filter: brightness(1.08); }
+.boton:hover { border-color: var(--acento); box-shadow: 0 2px 6px rgba(10, 132, 198, .15); transform: translateY(-1px); }
+.boton:active { transform: translateY(0); }
+.boton.principal { background: var(--acento); border-color: var(--acento); color: var(--acento-tinta); box-shadow: 0 4px 12px rgba(10, 132, 198, .3); }
+.boton.principal:hover { filter: brightness(1.08); box-shadow: 0 6px 16px rgba(10, 132, 198, .4); }
 @media (max-width: 640px) { .boton { padding: 11px 20px; font-size: 15px; min-height: 44px; } }
 .boton.oscuro { background: var(--navy); border-color: var(--navy); color: #fff; padding: 12px 22px; }
 .boton.blanco { background: #fff; border-color: #fff; color: var(--navy); padding: 12px 22px; }
@@ -460,7 +471,8 @@ button.bloque:hover { box-shadow: 0 0 0 2px var(--color); }
 .modal-pie .hueco { flex: 1; }
 .campo { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .campo label { font-size: 13px; font-weight: 700; color: var(--tinta); letter-spacing: .3px; }
-.campo input, .campo select, .campo textarea { border: 1.5px solid var(--linea); background: var(--superficie-2); border-radius: 10px; padding: 11px 13px; width: 100%; min-width: 0; font-size: 15px; }
+.campo input, .campo select, .campo textarea { border: 1.5px solid var(--linea); background: var(--superficie-2); border-radius: 10px; padding: 11px 13px; width: 100%; min-width: 0; font-size: 15px; transition: var(--transicion-rapida); }
+.campo input:hover, .campo select:hover, .campo textarea:hover { border-color: var(--linea); background: var(--superficie); }
 .campo input[type="color"] { padding: 3px; height: 42px; cursor: pointer; }
 .campo input[type="file"] { padding: 8px; cursor: pointer; }
 .campo input:focus, .campo select:focus, .campo textarea:focus { outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px var(--acento-suave); }
