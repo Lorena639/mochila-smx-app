@@ -14,7 +14,7 @@ const azar = (n) => { const a = new Uint32Array(1); const lim = Math.floor(0x100
 export function generarPassword({ largo = 16, min = true, may = true, num = true, sim = true, parecidos = false } = {}) {
   const fuente = parecidos ? CONJ_TODOS : CONJ;
   const grupos = [min && fuente.min, may && fuente.may, num && fuente.num, sim && fuente.sim].filter(Boolean);
-  if (!grupos.length) return "";
+  if (!grupos.length) grupos.push(fuente.min); // sin ningún tipo marcado, al menos minúsculas
   const todo = grupos.join("");
   const r = grupos.map((g) => g[azar(g.length)]);
   while (r.length < largo) r.push(todo[azar(todo.length)]);
@@ -39,9 +39,19 @@ export function fortaleza(p) {
   const tiempo = seg < 1 ? "al instante" : seg < 3600 ? `${Math.round(seg / 60) || 1} min` : seg < 86400 * 365 ? `${Math.round(seg / 86400) || 1} días` : seg < 1e6 * 86400 * 365 ? `${Math.round(seg / 86400 / 365).toLocaleString("es-ES")} años` : "millones de años";
   return { bits: Math.round(bits), nivel, tiempo, avisos, pct: Math.min(100, Math.round(bits)) };
 }
+const opcionesPw = (t) => ({ largo: Number(t.pwLargo) || 16, min: t.pwMin !== false, may: t.pwMay !== false, num: t.pwNum !== false, sim: t.pwSim !== false, parecidos: Boolean(t.pwParecidos) });
+
+// Al cambiar cualquier opción del generador, la contraseña se vuelve a generar con las nuevas reglas
+export function alEscribir(t, k, v) {
+  if (!k.startsWith("pw") || k === "pwProbar") return false;
+  t[k] = v;
+  t.pwGen = generarPassword(opcionesPw(t));
+  return true;
+}
+
 function htmlPassword(e) {
   const t = e.herr || {};
-  const o = { largo: Number(t.pwLargo) || 16, min: t.pwMin !== false, may: t.pwMay !== false, num: t.pwNum !== false, sim: t.pwSim !== false, parecidos: Boolean(t.pwParecidos) };
+  const o = opcionesPw(t);
   if (!t.pwGen) t.pwGen = generarPassword(o);
   const f = fortaleza(t.pwProbar || "");
   const chk = (k, l, v) => `<label class="check"><input type="checkbox" data-herr="${k}" ${v ? "checked" : ""}> ${l}</label>`;
@@ -164,7 +174,7 @@ function htmlCodificar(e) {
 export function probarRegex(patron, flags, texto) {
   const f = [...new Set((flags || "") + "g")].filter((c) => "gimsuy".includes(c)).join("");
   const re = new RegExp(patron, f);
-  const m = [...String(texto).matchAll(re)].filter((x) => x[0] !== "" || true).slice(0, 500);
+  const m = [...String(texto).matchAll(re)].slice(0, 500);
   return { re, m };
 }
 function htmlRegex(e) {
@@ -203,7 +213,7 @@ export const HERRAMIENTAS = [
 export const acciones = {
   "herr-pw-nueva"(b, api) {
     const t = api.estado().herr;
-    t.pwGen = generarPassword({ largo: Number(t.pwLargo) || 16, min: t.pwMin !== false, may: t.pwMay !== false, num: t.pwNum !== false, sim: t.pwSim !== false, parecidos: Boolean(t.pwParecidos) });
+    t.pwGen = generarPassword(opcionesPw(t));
     api.pintar();
   },
   "herr-pw-frase"(b, api) { api.estado().herr.pwGen = generarFrase(4); api.pintar(); },

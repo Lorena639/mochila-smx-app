@@ -474,6 +474,6 @@ export const formularios = { ...Redes.formularios, ...Extra.formularios };
 
 // Campos con nombre especial (tablas, config Cisco…). Devuelve true si lo ha guardado.
 export function alEscribir(t, k, v) {
-  return Sis.alEscribir(t, k, v) || Hw.alEscribir(t, k, v) || Extra.alEscribir(t, k, v);
+  return Sis.alEscribir(t, k, v) || Hw.alEscribir(t, k, v) || Extra.alEscribir(t, k, v) || Seg.alEscribir(t, k, v);
 }
 export const alArchivo = (input, api) => Seg.alArchivo(input, api);
